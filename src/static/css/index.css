@@ -1,3 +1,87 @@
 h1 {
   font-size: 4em;
 }
+
+.container {
+  width: 970px;
+}
+
+.navbar, .footer, .jumbotron, .steps, .options {
+  padding-left: 15%;
+  padding-right: 15%;
+}
+
+.navbar, .footer {
+  background-color: #1d1d1d;
+  color: #fff;
+  margin: 0px;
+}
+
+.footer {
+  padding: 25px;
+}
+
+.jumbotron {
+  background-image: url('/static/img/bg.png');
+  width: 100%;
+  height: 360px;
+  background-size: 100%;
+  margin: 0px;
+}
+
+.jumbotron .container {
+  padding-top: 35px;
+  padding-right: 50%;
+}
+
+.jumbotron .btn {
+  background-color: #1e00fe;
+  padding: 10px 20px;
+  border-radius: 4px;
+}
+
+h2 {
+  font-weight: bold;
+  color: #1e00fe;
+}
+
+.steps img {
+  height: 45px;
+}
+
+.steps .row {
+  margin-top: 50px;
+  margin-bottom: 50px;
+}
+
+.col-md-5ths {
+  width: 20%;
+  float: left;
+  position: relative;
+  min-height: 1px;
+  padding-right: 15px;
+  padding-left: 1px;
+}
+
+.options {
+    background-color: #f7f8fa;
+    padding-top: 50px;
+    padding-bottom: 50px;
+}
+
+.options .panel {
+    min-height: 320px;
+}
+
+.options .panel-heading {
+  padding: 25px;
+  background-color: #1d1d1d;
+  color: #fff;
+  border: none;
+  border-bottom: 5px solid #0743dd;
+}
+
+.options p {
+  font-size: 16px;
+  margin: 25px 30px;
+}

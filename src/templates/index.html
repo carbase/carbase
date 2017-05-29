@@ -9,7 +9,73 @@
 
 {% block content %}
 {% include 'includes/header.html' %}
-<div class="container">
-<h1>Index</h1>
+<div class="jumbotron">
+  <div class="container">
+    <h2>Онлайн регистрация автомобилей в Казахстане</h2>
+    <p>Все занимает менее часа и без всяких очередей</p>
+    {% if request.user.id %}
+      <a href="https://carbase.kz/cars" class="btn btn-lg btn-primary">Зарегистрировать</a>
+    {% else %}
+      <a href="https://egovidp.carbase.kz" class="btn btn-lg btn-primary">Зарегистрировать</a>
+    {% endif %}
+  </div>
 </div>
+
+<div class="steps">
+  <h2 class="text-center">Как мы работаем</h2>
+  <p class="text-center">Пошаговое руководство</p>
+  <div class="row">
+    <div class="col-md-5ths text-center">
+      <img src="/static/img/step1.png">
+        <h6><b>РЕГИСТРАЦИЯ</b></h6>
+    </div>
+    <div class="col-md-5ths text-center">
+      <img src="/static/img/step2.png">
+      <h6><b data-v-3e142eb6="">ВЫБОР ОПЦИЙ</b></h6>
+    </div>
+    <div class="col-md-5ths text-center">
+      <img src="/static/img/step3.png">
+      <h6><b>ПОДПИСАНИЕ С ЭЦП</b></h6>
+    </div>
+    <div class="col-md-5ths text-center">
+      <img src="/static/img/step4.png">
+      <h6><b>ЗАПИСЬ НА АКТ СВЕРКИ</b></h6>
+    </div>
+    <div class="col-md-5ths text-center">
+      <img src="/static/img/step5.png">
+      <h6><b>ПОЛУЧЕНИЕ НОМЕРА</b></h6>
+    </div>
+  </div>
+</div>
+
+<div class="options">
+  <div class="row">
+    <div class="col-md-6">
+      <div class="panel panel-default">
+        <div class="panel-heading text-center">Нужна помощь?</div>
+        <div class="panel-body">
+          <p>
+            Если у вас есть ЭЦП, но вы затрудняетесь пользоваться нашим сервисом,
+            вы можете приехать в любой наш офис и наши сотрудники быстро помогут вам.
+            Если у вас есть вопросы, вы можете позвонить или написать нам.
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="panel panel-default">
+        <div class="panel-heading text-center">Почему мы?</div>
+        <div class="panel-body">
+          <p>
+            С помощью нашей услуги, вы сможете подать все документы и пройти
+            все необходимые процедуры для переоформления/регистрации вашего
+            автотранспорта менее чем за 15 минут! После чего, вы можете записаться
+            на акт сверки и получить номера.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% include 'includes/footer.html' %}
 {% endblock %}
