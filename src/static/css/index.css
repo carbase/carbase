@@ -34,8 +34,11 @@ h1 {
   padding-right: 50%;
 }
 
-.jumbotron .btn {
+.btn.btn-primary {
   background-color: #1e00fe;
+}
+
+.jumbotron .btn {
   padding: 10px 20px;
   border-radius: 4px;
 }
@@ -84,4 +87,12 @@ h2 {
 .options p {
   font-size: 16px;
   margin: 25px 30px;
+}
+
+#certSignAndLoginButton, #certPassword{
+  display: none;
+}
+
+#loginModal .error-title {
+  color: red;
 }
