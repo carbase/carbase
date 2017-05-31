@@ -45,9 +45,25 @@ function pkiLogin() {
         "args": ['PKCS12', pki_storagePath, pki_alias, pki_password, xmlToSign]
       }))
     } else if (resp.result && resp.result.startsWith && resp.result.startsWith('<?xml')) {
-      document.getElementById('loginFormSignedXml').value = resp.result;
-      document.getElementById('loginForm').submit();
+      var csrfmiddlewaretoken = $('[name="csrfmiddlewaretoken"]').val();
+      $.post("/pki/login/", {'signedXml': resp.result, 'csrfmiddlewaretoken': csrfmiddlewaretoken}, function(data) {
+        if (data.status === 'success') {
+          window.location.reload();
+        } else {
+          $('#certInfo').html('<p class="error-title">' + data.error_text + '</p>')
+          $("#certLocationButton").show();
+          $("#certPassword").hide();
+        }
+      });
 
     }
   }
+}
+
+function pkiLogout() {
+  $.post("/pki/logout/", function(data) {
+    if (data.status === 'success') {
+      window.location.reload();
+    }
+  });
 }
