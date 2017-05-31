@@ -5,17 +5,18 @@
       <a href="#"><img class="navbar-brand" src="{% static 'img/logo.png' %}"></a>
     </div>
     <ul class="nav navbar-nav navbar-right">
-      {% if request.user.id %}
+      {% if request.session.user_commonName %}
         <li class="dropdown">
           <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-            {{ request.user.first_name }} {{ request.user.last_name }} <span class="caret"></span>
+            {{ request.session.user_commonName }} <span class="caret"></span>
           </a>
           <ul class="dropdown-menu">
-            <li><a href="#">Выход</a></li>
+            <li><a href="/cars">Личный кабинет</a></li>
+            <li><a href="#" onclick="pkiLogout()">Выход</a></li>
           </ul>
         </li>
       {% else %}
-        <li><a href="https://egovidp.carbase.kz">Вход с помощью ЭЦП</a></li>
+        <li><a href="#" data-toggle="modal" data-target="#loginModal">Вход с помощью ЭЦП</a></li>
       {% endif %}
     </ul>
   </div>
