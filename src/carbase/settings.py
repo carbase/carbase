@@ -141,3 +141,11 @@ DEBUG_TOOLBAR_PANELS = [
     'debug_toolbar.panels.redirects.RedirectsPanel',
 ]
 INTERNAL_IPS = get_secret('INTERNAL_IPS').split()
+
+
+MCI = get_secret('MCI')
+
+
+PAYMENT_GATEWAYS = {
+    "FONDY": get_secret('FONDY'),
+}
