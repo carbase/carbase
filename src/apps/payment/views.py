@@ -1,6 +1,6 @@
 from django.views.decorators.csrf import csrf_exempt
 
-from .helpers import http_code
+from carbase.helpers import http_code
 from .api import set_callback
 
 
