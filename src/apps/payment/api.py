@@ -2,15 +2,15 @@ from django.conf import settings
 
 from urllib.request import HTTPError, URLError
 
-from .helpers import create_signature, create_guid, post_data, request_to_json, http_code
-
+from .helpers import create_signature, create_guid, post_data, request_to_json
+from cars.api import pay_by_id
 
 def get_exception(code, reason):
     return {
         'response': {
             'response_status': 'failure',
             'error_code': str(code),
-            'error_message': str(reason)
+            'error_message': str(reason),
         }
     }
 
@@ -69,13 +69,15 @@ def get_order_status(order_id):
     return data
 
 
-def get_callback(request):
+def set_callback(request):
 
     data = request_to_json(request)
     status = data['order_status']
     product_id = data['product_id']
 
     if status == 'approved':
-        pass
+        pay_by_id(product_id)
+    else:
+        return 1
 
-    return http_code('OK', 200)
+    return 0

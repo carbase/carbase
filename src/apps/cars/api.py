@@ -17,15 +17,15 @@ def get_taxes_by_iin(iin):
 def pay_by_id(product_id):
     if product_id.startswith('tax'):
         tax = Tax.objects.get(id=product_id[3:])
-        tax.is_paid = True;
+        tax.is_paid = True
         tax.save()
     elif product_id.startswith('fine'):
         fine = Fine.objects.get(id=product_id[4:])
-        fine.is_paid = True;
+        fine.is_paid = True
         fine.save()
     elif product_id.startswith('reg'):
         reg = Reregestration.objects.get(id=product_id[3:])
-        reg.is_paid = True;
+        reg.is_paid = True
         reg.save()
 
 
