@@ -141,3 +141,5 @@ DEBUG_TOOLBAR_PANELS = [
     'debug_toolbar.panels.redirects.RedirectsPanel',
 ]
 INTERNAL_IPS = get_secret('INTERNAL_IPS').split()
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

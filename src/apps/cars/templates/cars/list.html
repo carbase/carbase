@@ -1,1 +1,91 @@
-CARS
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Мои машины{% endblock %}
+{% block styles %}
+  <link href="{% static 'css/cars.css' %}" rel="stylesheet">
+{% endblock %}
+{% block scripts %}
+  <script src="{% static 'js/pki.js' %}"></script>
+{% endblock %}
+
+
+{% block content %}
+  {% include 'includes/header.html' %}
+  <div class="container cars">
+    {% for car in cars %}
+      <div class="car col-xs-6">
+        <div class="panel panel-default">
+          <div class="panel-heading">{{ car.manufacturer }} {{car.model}}</div>
+          <div class="panel-body"><i>Инфо о машине</i></div>
+          <div class='panel-footer'>
+            <ul class="list-group">
+              <li class="list-group-item car-action">
+                <div class="panel panel-default">
+                  <div class="collapsed panel-heading" data-target="#carFine{{car.number}}" data-toggle="collapse" aria-expanded="false">
+                    <div class="car-action-text">Штрафы</div>
+                  </div>
+                  <div id="carFine{{car.number}}" class="panel-body panel-collapse collapse">
+                    <table class="table car-fines">
+                      <tbody class="table-striped table-hover">
+                        {% for fine in car.fine_set.all %}
+                        <tr class="{% if fine.is_paid %}text-success{% else %}text-danger{% endif %}">
+                          <td class='col-xs-3 col-sm-3 col-md-3 col-lg-3'>{{fine.amount}} ₸</td>
+                          <td class='col-xs-7 col-sm-7 col-md-7 col-lg-7'>{{fine.info}}</td>
+                          <td class='col-xs-2 col-sm-2 col-md-2 col-lg-2'>
+                            {% if fine.is_paid %}
+                              <span v-if=''>Оплачено</span>
+                            {% else %}
+                              <button v-else class='btn btn-default'>
+                                Оплатить
+                              </button>
+                            {% endif %}
+                          </td>
+                        </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </li>
+              <li class="list-group-item car-action">
+                <div class="panel panel-default">
+                  <div class="collapsed panel-heading" data-target="#carTax{{car.number}}" data-toggle="collapse" aria-expanded="false">
+                    <div class="car-action-text">Налоги</div>
+                  </div>
+                  <div id="carTax{{car.number}}" class="panel-body panel-collapse collapse">
+                    <table class="table car-taxes">
+                      <tbody class="table-striped table-hover">
+                        {% for tax in car.tax_set.all %}
+                        <tr class="{% if tax.is_paid %}text-success{% else %}text-danger{% endif %}">
+                          <td class='col-xs-3 col-sm-3 col-md-3 col-lg-3'>{{tax.amount}} ₸</td>
+                          <td class='col-xs-7 col-sm-7 col-md-7 col-lg-7'>{{tax.info}}</td>
+                          <td class='col-xs-2 col-sm-2 col-md-2 col-lg-2'>
+                            {% if tax.is_paid%}
+                              <span v-if=''>Оплачено</span>
+                            {% else %}
+                              <button v-else class='btn btn-default'>
+                                Оплатить
+                              </button>
+                            {% endif %}
+                          </td>
+                        </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </li>
+              <li class="list-group-item car-action">
+                <label type="button" v-bind:class="{'disabled': !car.inspections.every((inspection) => inspection.is_pass) || !car.taxes.every((tax) => tax.is_paid) || !car.fines.every((fine) => fine.is_paid) || (car.agreements.length && car.agreements[0].buyer.username === user.iin && !car.agreements[0].is_inspection_success) || (user.messages.some((message) => (message.car.vin_code === car.vin_code || message.seller.username === user.iin)))}" class="btn btn-default btn-block reregistration-button" data-toggle="modal" :data-target="!car.inspections.every((inspection) => inspection.is_pass) || !car.taxes.every((tax) => tax.is_paid) || !car.fines.every((fine) => fine.is_paid) || (car.agreements.length && car.agreements[0].buyer.username === user.iin && !car.agreements[0].is_inspection_success) || (user.messages.some((message) => (message.car.vin_code === car.vin_code || message.seller.username === user.iin))) ? '' : '#reregistrationModal' + car.number">
+                  Перерегистрация авто
+                </label>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+  {% include 'includes/footer.html' %}
+{% endblock %}

@@ -1,0 +1,53 @@
+h1 {
+  font-size: 4em;
+}
+
+.container {
+  width: 970px;
+}
+
+.navbar, .footer{
+  border-radius: 0;
+  padding-left: 15%;
+  padding-right: 15%;
+}
+
+.navbar, .footer {
+  background-color: #1d1d1d;
+  color: #fff;
+  margin: 0px;
+}
+
+.footer {
+  padding: 25px;
+}
+
+.btn.btn-primary {
+  background-color: #1e00fe;
+}
+
+h2 {
+  font-weight: bold;
+  color: #1e00fe;
+}
+
+.content {
+  height: 80%;
+}
+.cars {
+  margin-top: 25px;
+  min-height: 100%;
+}
+
+.car > .panel .panel-footer, .car > .panel .list-group, .car > .panel .panel, .car > .panel .car-action {
+  padding: 0;
+  margin: 0;
+  border-width: 0;
+  border-radius: 0;
+}
+.car-action .panel-body {
+  padding: 0;
+}
+.car-action {
+  text-align: center;
+}

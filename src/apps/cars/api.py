@@ -29,12 +29,7 @@ def pay_by_id(product_id):
         reg.save()
 
 
-def car_image_dir_path(instance, filename):
-    return 'cars/{0}/{1}'.format(instance.user.id, filename)
-
-
 class Car(models.Model):
-    image = models.ImageField(upload_to=car_image_dir_path)
     manufacturer = models.CharField(max_length=256, default='')
     model = models.CharField(max_length=256, default='')
     user = models.CharField(max_length=20, default='')
