@@ -142,6 +142,7 @@ DEBUG_TOOLBAR_PANELS = [
 ]
 INTERNAL_IPS = get_secret('INTERNAL_IPS').split()
 
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 MCI = get_secret('MCI')
 

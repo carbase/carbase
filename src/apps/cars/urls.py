@@ -1,6 +1,7 @@
 from django.conf.urls import url
-from django.views.generic import TemplateView
+
+from .views import CarsView
 
 urlpatterns = [
-    url(r'^$', TemplateView.as_view(template_name="cars/list.html"))
+    url(r'^$', CarsView.as_view())
 ]
