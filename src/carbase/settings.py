@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'cars.apps.CarsConfig',
     'pki.apps.PkiConfig',
     'payment.apps.PaymentConfig',
+    'numberplates.apps.NumberPlatesConfig',
 ]
 
 
@@ -143,7 +144,9 @@ DEBUG_TOOLBAR_PANELS = [
 ]
 INTERNAL_IPS = get_secret('INTERNAL_IPS').split()
 
+
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
 
 MCI = get_secret('MCI')
 
@@ -151,3 +154,18 @@ MCI = get_secret('MCI')
 PAYMENT_GATEWAYS = {
     "FONDY": get_secret('FONDY'),
 }
+
+
+FIXTURE_DIRS = (
+   os.path.join(BASE_DIR, 'fixtures'),
+)
+
+
+VIP1 = get_secret('VIP1').split()
+VIP2 = get_secret('VIP2').split()
+
+VIP1_TAX = get_secret('VIP1_TAX')
+VIP2_TAX = get_secret('VIP2_TAX')
+
+SRTS_TAX = get_secret('SRTS_TAX')
+GRNZ_TAX = get_secret('GRNZ_TAX')

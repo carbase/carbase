@@ -49,7 +49,7 @@ formula: "СРТС"<125% of MCI> + "ГРНЗ"<280% of MCI> + "комиссия"<
 
 
 def re_regestration_fee():
-    return (1.25 * settings.MCI) + (2.80 * settings.MCI) + settings.MCI
+    return (settings.SRTS_TAX * settings.MCI) + (settings.GRNZ_TAX * settings.MCI) + settings.MCI
 
 
 '''
