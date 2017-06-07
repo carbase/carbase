@@ -5,7 +5,10 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse, QueryDict
 
-from .models import Reregestration, Car
+from .models import Reregestration, Car, Tax, Fine
+
+from payment.api import get_checkout_url, get_order_status
+
 
 class CarsView(View):
     def get(self, request):
@@ -46,3 +49,44 @@ class AgreementView(View):
             reregistration.inspection_time = request.PUT.get('inspection_time')
         reregistration.save()
         return JsonResponse({'reregistration_id': reregistration.id})
+
+def checkout(request):
+    product_id = request.GET.get('product_id')
+    if product_id.startswith('tax'):
+        Model = Tax
+        entity_id = product_id[3:]
+    elif product_id.startswith('fine'):
+        Model = Fine
+        entity_id = product_id[4:]
+    else:
+        Model = Reregestration
+        entity_id = product_id[3:]
+
+    entity = Model.objects.get(id=entity_id)
+
+    parameters = {
+        'product_id': product_id,
+        'amount': int(entity.amount * 100),
+        'order_desc': entity.info
+    }
+    checkout = get_checkout_url(parameters)
+    return JsonResponse(checkout)
+
+def payment_status(request):
+    order_id = request.GET.get('order_id')
+    order_info = get_order_status(order_id)
+    product_id = order_info['response']['order_id'].split('_')[0]
+    if product_id.startswith('tax'):
+        Model = Tax
+        entity_id = product_id[3:]
+    elif product_id.startswith('fine'):
+        Model = Fine
+        entity_id = product_id[4:]
+    else:
+        Model = Reregestration
+        entity_id = product_id[3:]
+    entity = Model.objects.get(id=entity_id)
+    entity.is_paid = True
+    entity.is_tax_paid = True
+    entity.save()
+    return JsonResponse(order_info)

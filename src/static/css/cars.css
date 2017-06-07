@@ -98,3 +98,7 @@ h2 {
 .navbar .modal {
   color: #333;
 }
+
+.pay-modal .modal-dialog {
+  width: 660px;
+}

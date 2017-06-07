@@ -7,6 +7,7 @@
   <link href="{% static 'css/flatpickr/datepicker.min.css' %}" rel="stylesheet">
 {% endblock %}
 {% block scripts %}
+  <script src="https://api.fondy.eu/static_common/v1/checkout/ipsp.js"></script>
   <script src="{% static 'js/flatpickr/datepicker.min.js' %}"></script>
   <script src="{% static 'js/flatpickr/ru.js' %}"></script>
   <script src="{% static 'js/pki.js' %}"></script>
@@ -18,6 +19,28 @@
   {% include 'includes/header.html' with reregistrations=reregistrations %}
   <div class="container cars">
     {% for car in cars %}
+      {% for tax in car.tax_set.all %}
+        {% if not tax.is_paid %}
+          <div class="modal pay-modal fade" id="tax{{tax.id}}PayModal">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-body" id="tax{{tax.id}}PayFrameModal"></div>
+              </div>
+            </div>
+          </div>
+        {% endif %}
+      {% endfor %}
+      {% for fine in car.fine_set.all %}
+        {% if not fine.is_paid %}
+          <div class="modal pay-modal fade" id="fine{{fine.id}}PayModal">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-body" id="fine{{fine.id}}PayFrameModal"></div>
+              </div>
+            </div>
+          </div>
+        {% endif %}
+      {% endfor %}
       <div class="car col-xs-6" id="carPanel{{car.id}}">
         <div class="panel panel-default">
           <div class="panel-heading">{{ car.manufacturer }} {{car.model}}</div>
@@ -33,14 +56,14 @@
                     <table class="table car-fines">
                       <tbody class="table-striped table-hover">
                         {% for fine in car.fine_set.all %}
-                        <tr class="{% if fine.is_paid %}text-success{% else %}text-danger{% endif %}">
+                        <tr id="fine{{fine.id}}Row" class="{% if fine.is_paid %}text-success{% else %}text-danger{% endif %}">
                           <td class='col-xs-3 col-sm-3 col-md-3 col-lg-3'>{{fine.amount}} ₸</td>
                           <td class='col-xs-7 col-sm-7 col-md-7 col-lg-7'>{{fine.info}}</td>
-                          <td class='col-xs-2 col-sm-2 col-md-2 col-lg-2'>
+                          <td class='col-xs-2 col-sm-2 col-md-2 col-lg-2' id="fine{{fine.id}}PaidResult">
                             {% if fine.is_paid %}
                               <span>Оплачено</span>
                             {% else %}
-                              <button class='btn btn-default' onclick="openPaymentModal(this)" data-productId="fine{{fine.id}}">
+                              <button class='btn btn-default' onclick="openPaymentModal(this)" data-productId="fine{{fine.id}}" data-toggle="modal" data-target="#fine{{fine.id}}PayModal">
                                 Оплатить
                               </button>
                             {% endif %}
@@ -61,14 +84,14 @@
                     <table class="table car-taxes">
                       <tbody class="table-striped table-hover">
                         {% for tax in car.tax_set.all %}
-                        <tr class="{% if tax.is_paid %}text-success{% else %}text-danger{% endif %}">
+                        <tr id="tax{{tax.id}}Row" class="{% if tax.is_paid %}text-success{% else %}text-danger{% endif %}">
                           <td class='col-xs-3 col-sm-3 col-md-3 col-lg-3'>{{tax.amount}} ₸</td>
                           <td class='col-xs-7 col-sm-7 col-md-7 col-lg-7'>{{tax.info}}</td>
-                          <td class='col-xs-2 col-sm-2 col-md-2 col-lg-2'>
+                          <td class='col-xs-2 col-sm-2 col-md-2 col-lg-2' id="tax{{tax.id}}PaidResult">
                             {% if tax.is_paid%}
                               <span>Оплачено</span>
                             {% else %}
-                              <button class='btn btn-default' onclick="openPaymentModal(this)" data-productId="tax{{tax.id}}">
+                              <button class='btn btn-default' onclick="openPaymentModal(this)" data-productId="tax{{tax.id}}" data-toggle="modal" data-target="#tax{{tax.id}}PayModal">
                                 Оплатить
                               </button>
                             {% endif %}

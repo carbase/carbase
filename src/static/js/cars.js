@@ -19,7 +19,39 @@ $.put = function(url, data, callback, type){
 }
 
 function openPaymentModal(target) {
-  console.log(target.dataset.productid)
+  $.get('/cars/checkout?product_id='+target.dataset.productid, function(resp) {
+    var orderId = resp.response.order_id
+    var checkoutUrl = resp.response.checkout_url
+    $ipsp.get('checkout').config({
+      'wrapper': '#' + target.dataset.productid + 'PayFrameModal',
+      'styles': {
+        'body': {'overflow': 'hidden'},
+        '.page-section-shopinfo': {display: 'none'},
+        '.page-section-footer': {display: 'none'}
+      }
+    }).scope(function () {
+      this.setModal(false)
+      this.width(625)
+      this.height(460)
+      this.addCallback(function (data, type) {
+        if (data.action === 'redirect') {
+          var frameModal = document.getElementById(target.dataset.productid + 'PayFrameModal')
+          frameModal.innerHTML = '<p style="text-align:center">Проверка оплаты</p>'
+          var checkStatusInterval = setInterval(function () {
+            $.get('/cars/payment_status?order_id=' + orderId, function(resp) {
+              clearInterval(checkStatusInterval)
+              $('#' + target.dataset.productid + 'PayModal').modal('hide')
+              $('#' + target.dataset.productid + 'PaidResult').html('<span>Оплачено</span>')
+              $('#' + target.dataset.productid + 'Row').removeClass('text-danger')
+              $('#' + target.dataset.productid + 'Row').addClass('text-success')
+            });
+          }, 1000)
+        }
+        return false
+      })
+      this.loadUrl(checkoutUrl)
+    })
+  })
 }
 
 function createAgreement(target) {
@@ -37,9 +69,6 @@ function createAgreement(target) {
           var step_2_elem = $('#carPanel' + car_id + ' .reregistrationModal .step_2');
           step_2_elem.removeClass('disabled');
           $('#reregistration' + car_id + 'reregistrationId').val(resp.reregistration_id)
-          $('#carPanel' + car_id + ' [id^=sellerSign] button').attr('data-reregistrationid', resp.reregistration_id)
-          $('#carPanel' + car_id + ' [id^=sellerSign]').attr('id', 'sellerSign' + resp.reregistration_id)
-          $('#carPanel' + car_id + ' .reregistration-agreement-amount').attr('id', 'reregistrationAgreement' + resp.reregistration_id + 'amount')
           $('#carPanel' + car_id + ' .reregistrationModal .step_1_body').addClass('hidden')
           $('#carPanel' + car_id + ' .reregistrationModal .step_2_body').removeClass('hidden')
         });
