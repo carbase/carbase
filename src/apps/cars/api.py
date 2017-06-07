@@ -17,15 +17,15 @@ def get_taxes_by_iin(iin):
 def pay_by_id(product_id):
     if product_id.startswith('tax'):
         tax = Tax.objects.get(id=product_id[3:])
-        tax.is_paid = True;
+        tax.is_paid = True
         tax.save()
     elif product_id.startswith('fine'):
         fine = Fine.objects.get(id=product_id[4:])
-        fine.is_paid = True;
+        fine.is_paid = True
         fine.save()
     elif product_id.startswith('reg'):
         reg = Reregestration.objects.get(id=product_id[3:])
-        reg.is_paid = True;
+        reg.is_paid = True
         reg.save()
 
 
@@ -73,6 +73,6 @@ class Reregestration(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     is_tax_paid = models.BooleanField(default=False)
-    inspection_time = models.CharField(max_length=20, default='', blank=True)
+    inspection_time = models.CharField(max_length=100, default='', blank=True)
     is_inspection_success = models.BooleanField(default=False)
     is_number_received = models.BooleanField(default=False)

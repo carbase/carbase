@@ -5,6 +5,9 @@
       <a href="/"><img class="navbar-brand" src="{% static 'img/logo.png' %}"></a>
     </div>
     <ul class="nav navbar-nav navbar-right">
+      {% for reregistration in reregistrations %}
+        <li><a href="#" data-target="#reregistrationModalBuyer{{reregistration.id}}" data-toggle="modal" aria-expanded="false"> Перерегистрация {{ reregistration.car.manufacturer }} {{ reregistration.car.model }}</a></li>
+      {% endfor %}
       {% if request.session.user_commonName %}
         <li class="dropdown">
           <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
