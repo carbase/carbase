@@ -73,6 +73,6 @@ class Reregestration(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     is_tax_paid = models.BooleanField(default=False)
-    inspection_time = models.CharField(max_length=20, default='', blank=True)
+    inspection_time = models.CharField(max_length=100, default='', blank=True)
     is_inspection_success = models.BooleanField(default=False)
     is_number_received = models.BooleanField(default=False)

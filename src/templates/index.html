@@ -34,7 +34,7 @@
     <h2>Онлайн регистрация автомобилей в Казахстане</h2>
     <p>Все занимает менее часа и без всяких очередей</p>
     {% if request.session.user_commonName %}
-      <a href="https://carbase.kz/cars" class="btn btn-lg btn-primary">Личный кабинет</a>
+      <a href="/cars" class="btn btn-lg btn-primary">Личный кабинет</a>
     {% else %}
       <a class="btn btn-lg btn-primary" data-toggle="modal" data-target="#loginModal">Зарегистрировать авто</a>
     {% endif %}
