@@ -37,6 +37,9 @@ function createAgreement(target) {
           var step_2_elem = $('#carPanel' + car_id + ' .reregistrationModal .step_2');
           step_2_elem.removeClass('disabled');
           $('#reregistration' + car_id + 'reregistrationId').val(resp.reregistration_id)
+          $('#carPanel' + car_id + ' [id^=sellerSign] button').attr('data-reregistrationid', resp.reregistration_id)
+          $('#carPanel' + car_id + ' [id^=sellerSign]').attr('id', 'sellerSign' + resp.reregistration_id)
+          $('#carPanel' + car_id + ' .reregistration-agreement-amount').attr('id', 'reregistrationAgreement' + resp.reregistration_id + 'amount')
           $('#carPanel' + car_id + ' .reregistrationModal .step_1_body').addClass('hidden')
           $('#carPanel' + car_id + ' .reregistrationModal .step_2_body').removeClass('hidden')
         });
@@ -58,7 +61,6 @@ function signAgreement(target) {
     data['buyer_sign'] = 'bUYerSign'
   }
   $.put('/cars/agreement', data, function(resp) {
-    console.log(side, data.reregistrationId);
     if (side == 'seller') {
       $('#sellerSign' + data.reregistrationId).html(data.seller_sign)
     }

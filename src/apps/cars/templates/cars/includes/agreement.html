@@ -68,7 +68,7 @@
     {% if is_buyer or reregistration.seller_sign %}
       {% if reregistration.amount %}{{ reregistration.amount }}{% else %}'________'{% endif %}
     {% else %}
-    <input type="text" value="{% if reregistration.amount %}{{reregistration.amount}}{% endif %}" id="reregistrationAgreement{{reregistration.id}}amount">
+    <input type="text" class="reregistration-agreement-amount" value="{% if reregistration.amount %}{{reregistration.amount}}{% endif %}" id="reregistrationAgreement{{reregistration.id}}amount">
     {% endif %}
      тенге, уплачиваемых Покупателем Продавцу.
   </p>
