@@ -42,5 +42,7 @@ class AgreementView(View):
             reregistration.buyer_sign = request.PUT.get('buyer_sign')
         if request.PUT.get('is_tax_paid'):
             reregistration.is_tax_paid = True
+        if request.PUT.get('inspection_time'):
+            reregistration.inspection_time = request.PUT.get('inspection_time')
         reregistration.save()
         return JsonResponse({'reregistration_id': reregistration.id})

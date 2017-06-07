@@ -4,8 +4,11 @@
 {% block title %}Мои машины{% endblock %}
 {% block styles %}
   <link href="{% static 'css/cars.css' %}" rel="stylesheet">
+  <link href="{% static 'css/flatpickr/datepicker.min.css' %}" rel="stylesheet">
 {% endblock %}
 {% block scripts %}
+  <script src="{% static 'js/flatpickr/datepicker.min.js' %}"></script>
+  <script src="{% static 'js/flatpickr/ru.js' %}"></script>
   <script src="{% static 'js/pki.js' %}"></script>
   <script src="{% static 'js/cars.js' %}"></script>
 {% endblock %}
@@ -163,10 +166,10 @@
                 <button onclick="pay_agreement_tax(this)" data-reregistrationid="{{reregistration.id}}">Оплатить</button>
               </div>
               <div class="step_3_body {% if not reregistration.is_tax_paid %}hidden{% endif %}">
-                <div v-if="message.inspection_time">
-                  <p>Ваша бронь: {{message.inspection_time}}</p>
+                {% if reregistration.inspection_time %}
+                  <p>Ваша бронь: {{reregistration.inspection_time}}</p>
                   <p>Вы можете изменить бронь:
-                    <select :id="'inspectionPlaceInput'+message.id">
+                    <select id="inspectionPlaceInput{{reregistration.id}}">
                       <option>г. Астана, ул. 20-40, 2</option>
                       <option>г. Алматы, ул. Ак кайнар, 1</option>
                       <option>г. Алматы, ул. Майлина, 85</option>
@@ -179,39 +182,39 @@
                       <option>г. Талдыкорган, ул.Центральная</option>
                       <option>г. Тараз, пр.Толе би, 198А</option>
                     </select>
-                    <input type="date" :id="'inspectionDateInput'+message.id" class="datepicker"></input>
-                    <select :id="'inspectionTimeInput'+message.id">
+                    <input type="date" id="inspectionDateInput{{reregistration.id}}" class="datepicker"></input>
+                    <select id="'inspectionTimeInput{{reregistration.id}}">
                       <option>9:00-12:00</option>
                       <option>12:00-15:00</option>
                       <option>15:00-18:00</option>
                     </select>
-                    <button class="btn btn-default" :data-agreementid="message.id" v-on:click="changeInspectionTime">Изменить бронь</button>
+                    <button class="btn btn-default" data-reregistrationid="{{ reregistration.id }}" onclick="change_inspection_time(this)">Изменить бронь</button>
                   </p>
-                </div>
-                <div v-else>
+                {% else %}
                   <p>Забронируйте удобное для вас время осмотра ТС на территории спецЦОНа:</p>
-                  <select :id="'inspectionPlaceInput'+message.id">
-                    <option>г. Астана, ул. 20-40, 2</option>
-                    <option>г. Алматы, ул. Ак кайнар, 1</option>
-                    <option>г. Алматы, ул. Майлина, 85</option>
-                    <option>г. Актау, КОС — 2</option>
-                    <option>г. Караганда, ул. Муканова, 5</option>
-                    <option>г. Костанай, ул. Карбышева, 12/10</option>
-                    <option>г. Кызылорда, ул.Коркыт-ата</option>
-                    <option>г. Павлодар, ул.Космонавтов, 2</option>
-                    <option>г. Петропавловск, ул.Нефтепроводная, 7</option>
-                    <option>г. Талдыкорган, ул.Центральная</option>
-                    <option>г. Тараз, пр.Толе би, 198А</option>
-                  </select>
-                  <input type="date" :id="'inspectionDateInput'+message.id" class="datepicker"></input>
-                  <select :id="'inspectionTimeInput'+message.id">
-                    <option>9:00-12:00</option>
-                    <option>12:00-15:00</option>
-                    <option>15:00-18:00</option>
-                  </select>
-                  <button class="btn btn-default"  :data-agreementid="message.id" v-on:click="changeInspectionTime">Забронировать</button>
-                </div>
-                <p>При себе необходимо иметь ...</p>
+                  <p>
+                    <select id="inspectionPlaceInput{{reregistration.id}}">
+                      <option>г. Астана, ул. 20-40, 2</option>
+                      <option>г. Алматы, ул. Ак кайнар, 1</option>
+                      <option>г. Алматы, ул. Майлина, 85</option>
+                      <option>г. Актау, КОС — 2</option>
+                      <option>г. Караганда, ул. Муканова, 5</option>
+                      <option>г. Костанай, ул. Карбышева, 12/10</option>
+                      <option>г. Кызылорда, ул.Коркыт-ата</option>
+                      <option>г. Павлодар, ул.Космонавтов, 2</option>
+                      <option>г. Петропавловск, ул.Нефтепроводная, 7</option>
+                      <option>г. Талдыкорган, ул.Центральная</option>
+                      <option>г. Тараз, пр.Толе би, 198А</option>
+                    </select>
+                    <input type="date" id="inspectionDateInput{{reregistration.id}}" class="datepicker"></input>
+                    <select id="inspectionTimeInput{{reregistration.id}}">
+                      <option>9:00-12:00</option>
+                      <option>12:00-15:00</option>
+                      <option>15:00-18:00</option>
+                    </select>
+                    <button class="btn btn-default"  data-reregistrationid="{{ reregistration.id }}" onclick="change_inspection_time(this)">Забронировать</button>
+                  </p>
+                {% endif %}
               </div>
             </div>
           </div>

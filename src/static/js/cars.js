@@ -1,3 +1,8 @@
+$(".datepicker").flatpickr({
+  'locale': 'ru',
+  'dateFormat': 'j F Yг.'
+});
+
 $.put = function(url, data, callback, type){
   if ( $.isFunction(data) ){
     type = type || callback,
@@ -100,6 +105,23 @@ function pay_agreement_tax(target) {
       });
       step_2_elem.removeClass('active')
       step_2_elem.addClass('complete')
+    }
+  })
+}
+
+function change_inspection_time(target) {
+  var data = { 'reregistrationId': target.dataset.reregistrationid };
+  var inspection_place = $('#inspectionPlaceInput'+ data.reregistrationId).val()
+  var inspection_date = $('#inspectionDateInput'+ data.reregistrationId).val()
+  var inspection_time = $('#inspectionTimeInput'+ data.reregistrationId).val()
+  data['inspection_time'] = inspection_date + ' ' + inspection_time + ' ' + inspection_place
+  $.put('/cars/agreement', data, function(resp) {
+    if (resp.reregistration_id) {
+      $('#reregistrationModalBuyer' + resp.reregistration_id + ' .step_3_body p:first-child').text('Ваша бронь: ' + inspection_place + ' ' + inspection_date + ' ' + inspection_time )
+      if (!$('#reregistrationModalBuyer' + resp.reregistration_id + ' .step_3_body p:nth-child(2)').text().trim().startsWith('Вы можете изменить бронь: ')) {
+        $('#reregistrationModalBuyer' + resp.reregistration_id + ' .step_3_body p:nth-child(2)').prepend('Вы можете изменить бронь: ')
+      }
+      target.innerText = 'Изменить бронь'
     }
   })
 }
