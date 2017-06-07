@@ -1,0 +1,320 @@
+[{
+  "model": "numberplates.numberplate",
+  "pk": 1,
+  "fields": {
+    "digits": "929",
+    "characters": "YLO",
+    "region": "02",
+    "is_sold": true,
+    "sale_date": "2011-06-26",
+    "owner_id": "920727300044"
+  }
+}, {
+  "model": "numberplates.numberplate",
+  "pk": 2,
+  "fields": {
+    "digits": "777",
+    "characters": "RRR",
+    "region": "01",
+    "is_sold": true,
+    "sale_date": "2017-06-06",
+    "owner_id": "920727300044"
+  }
+}, {
+  "model": "numberplates.numberplate",
+  "pk": 3,
+  "fields": {
+    "digits": "001",
+    "characters": "NNN",
+    "region": "01",
+    "is_sold": true,
+    "sale_date": "2017-06-06",
+    "owner_id": "920727300044"
+  }
+}, {
+  "model": "numberplates.numberplate",
+  "pk": 4,
+  "fields": {
+    "digits": "100",
+    "characters": "ERT",
+    "region": "01",
+    "is_sold": false,
+    "sale_date": null,
+    "owner_id": ""
+  }
+}, {
+  "model": "numberplates.numberplate",
+  "pk": 5,
+  "fields": {
+    "digits": "111",
+    "characters": "TYU",
+    "region": "02",
+    "is_sold": false,
+    "sale_date": null,
+    "owner_id": ""
+  }
+}, {
+  "model": "numberplates.numberplate",
+  "pk": 6,
+  "fields": {
+    "digits": "200",
+    "characters": "OLA",
+    "region": "02",
+    "is_sold": false,
+    "sale_date": null,
+    "owner_id": ""
+  }
+}, {
+  "model": "numberplates.numberplate",
+  "pk": 7,
+  "fields": {
+    "digits": "222",
+    "characters": "AZA",
+    "region": "02",
+    "is_sold": false,
+    "sale_date": null,
+    "owner_id": ""
+  }
+}, {
+  "model": "numberplates.numberplate",
+  "pk": 8,
+  "fields": {
+    "digits": "300",
+    "characters": "AKT",
+    "region": "03",
+    "is_sold": false,
+    "sale_date": null,
+    "owner_id": ""
+  }
+}, {
+  "model": "numberplates.numberplate",
+  "pk": 9,
+  "fields": {
+    "digits": "333",
+    "characters": "ERA",
+    "region": "03",
+    "is_sold": false,
+    "sale_date": null,
+    "owner_id": ""
+  }
+}, {
+  "model": "numberplates.numberplate",
+  "pk": 10,
+  "fields": {
+    "digits": "400",
+    "characters": "VRM",
+    "region": "01",
+    "is_sold": false,
+    "sale_date": null,
+    "owner_id": ""
+  }
+}, {
+  "model": "numberplates.numberplate",
+  "pk": 11,
+  "fields": {
+    "digits": "444",
+    "characters": "BBP",
+    "region": "04",
+    "is_sold": false,
+    "sale_date": null,
+    "owner_id": ""
+  }
+}, {
+  "model": "numberplates.numberplate",
+  "pk": 12,
+  "fields": {
+    "digits": "500",
+    "characters": "RRR",
+    "region": "05",
+    "is_sold": false,
+    "sale_date": null,
+    "owner_id": ""
+  }
+}, {
+  "model": "numberplates.numberplate",
+  "pk": 13,
+  "fields": {
+    "digits": "555",
+    "characters": "OKL",
+    "region": "05",
+    "is_sold": false,
+    "sale_date": null,
+    "owner_id": ""
+  }
+}, {
+  "model": "numberplates.numberplate",
+  "pk": 14,
+  "fields": {
+    "digits": "600",
+    "characters": "ALM",
+    "region": "01",
+    "is_sold": false,
+    "sale_date": null,
+    "owner_id": ""
+  }
+}, {
+  "model": "numberplates.numberplate",
+  "pk": 15,
+  "fields": {
+    "digits": "666",
+    "characters": "RRR",
+    "region": "02",
+    "is_sold": false,
+    "sale_date": null,
+    "owner_id": ""
+  }
+}, {
+  "model": "numberplates.numberplate",
+  "pk": 16,
+  "fields": {
+    "digits": "700",
+    "characters": "BMW",
+    "region": "02",
+    "is_sold": false,
+    "sale_date": null,
+    "owner_id": ""
+  }
+}, {
+  "model": "numberplates.numberplate",
+  "pk": 17,
+  "fields": {
+    "digits": "777",
+    "characters": "DDD",
+    "region": "02",
+    "is_sold": false,
+    "sale_date": null,
+    "owner_id": ""
+  }
+}, {
+  "model": "numberplates.numberplate",
+  "pk": 18,
+  "fields": {
+    "digits": "800",
+    "characters": "LEX",
+    "region": "13",
+    "is_sold": false,
+    "sale_date": null,
+    "owner_id": ""
+  }
+}, {
+  "model": "numberplates.numberplate",
+  "pk": 19,
+  "fields": {
+    "digits": "888",
+    "characters": "OOO",
+    "region": "08",
+    "is_sold": false,
+    "sale_date": null,
+    "owner_id": ""
+  }
+}, {
+  "model": "numberplates.numberplate",
+  "pk": 20,
+  "fields": {
+    "digits": "900",
+    "characters": "TOG",
+    "region": "09",
+    "is_sold": false,
+    "sale_date": null,
+    "owner_id": ""
+  }
+}, {
+  "model": "numberplates.numberplate",
+  "pk": 21,
+  "fields": {
+    "digits": "999",
+    "characters": "YLO",
+    "region": "01",
+    "is_sold": false,
+    "sale_date": null,
+    "owner_id": ""
+  }
+}, {
+  "model": "numberplates.numberplate",
+  "pk": 22,
+  "fields": {
+    "digits": "002",
+    "characters": "RRR",
+    "region": "02",
+    "is_sold": false,
+    "sale_date": null,
+    "owner_id": ""
+  }
+}, {
+  "model": "numberplates.numberplate",
+  "pk": 23,
+  "fields": {
+    "digits": "003",
+    "characters": "AKB",
+    "region": "03",
+    "is_sold": false,
+    "sale_date": null,
+    "owner_id": ""
+  }
+}, {
+  "model": "numberplates.numberplate",
+  "pk": 24,
+  "fields": {
+    "digits": "004",
+    "characters": "AYO",
+    "region": "04",
+    "is_sold": false,
+    "sale_date": null,
+    "owner_id": ""
+  }
+}, {
+  "model": "numberplates.numberplate",
+  "pk": 25,
+  "fields": {
+    "digits": "005",
+    "characters": "NUR",
+    "region": "05",
+    "is_sold": false,
+    "sale_date": null,
+    "owner_id": ""
+  }
+}, {
+  "model": "numberplates.numberplate",
+  "pk": 26,
+  "fields": {
+    "digits": "006",
+    "characters": "SAT",
+    "region": "06",
+    "is_sold": false,
+    "sale_date": null,
+    "owner_id": ""
+  }
+}, {
+  "model": "numberplates.numberplate",
+  "pk": 27,
+  "fields": {
+    "digits": "007",
+    "characters": "BND",
+    "region": "02",
+    "is_sold": false,
+    "sale_date": null,
+    "owner_id": ""
+  }
+}, {
+  "model": "numberplates.numberplate",
+  "pk": 28,
+  "fields": {
+    "digits": "008",
+    "characters": "OHA",
+    "region": "01",
+    "is_sold": false,
+    "sale_date": null,
+    "owner_id": ""
+  }
+}, {
+  "model": "numberplates.numberplate",
+  "pk": 29,
+  "fields": {
+    "digits": "009",
+    "characters": "ASX",
+    "region": "09",
+    "is_sold": false,
+    "sale_date": null,
+    "owner_id": ""
+  }
+}]
