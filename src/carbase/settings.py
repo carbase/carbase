@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'debug_toolbar',
 
     'cars.apps.CarsConfig',
+    'controller.apps.ControllerConfig',
     'pki.apps.PkiConfig',
     'payment.apps.PaymentConfig',
     'numberplates.apps.NumberPlatesConfig',
