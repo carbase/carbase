@@ -185,8 +185,10 @@
                 {% include "cars/includes/agreement.html" with car=car reregistration=reregistration is_buyer=True %}
               </div>
               <div class="step_2_body {% if not reregistration.buyer_sign or not reregistration.seller_sign or reregistration.is_tax_paid %}hidden{% endif %}">
-                <!-- <div class="modal-body agreement-pay-modal" :id="'agreementPayFrameModal'+ message.id"></div> -->
-                <button onclick="pay_agreement_tax(this)" data-reregistrationid="{{reregistration.id}}">Оплатить</button>
+                <div class="modal-body agreement-pay-modal" id="reg{{reregistration.id}}PayFrameModal"></div>
+                {% if reregistration.buyer_sign and reregistration.seller_sign and not reregistration.is_tax_paid %}
+                  <script>window.onload = function() { loadRegPaymentPage({{ reregistration.id }}) }</script>
+                {% endif %}
               </div>
               <div class="step_3_body {% if not reregistration.is_tax_paid %}hidden{% endif %}">
                 {% if reregistration.inspection_time %}

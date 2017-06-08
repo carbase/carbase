@@ -99,6 +99,10 @@ h2 {
   color: #333;
 }
 
+.reregistrationModal iframe {
+  margin: 0 auto;
+}
+
 .pay-modal .modal-dialog {
   width: 660px;
 }

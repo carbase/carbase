@@ -62,13 +62,22 @@ def checkout(request):
         Model = Reregestration
         entity_id = product_id[3:]
 
-    entity = Model.objects.get(id=entity_id)
 
-    parameters = {
-        'product_id': product_id,
-        'amount': int(entity.amount * 100),
-        'order_desc': entity.info
-    }
+
+    if product_id.startswith('reg'):
+        parameters = {
+            'product_id': product_id,
+            'amount': 1145845,
+            'order_desc': 'За выпуск СРТС и ГРНЗ'
+        }
+    else:
+        entity = Model.objects.get(id=entity_id)
+        parameters = {
+            'product_id': product_id,
+            'amount': int(entity.amount * 100),
+            'order_desc': entity.info
+        }
+
     checkout = get_checkout_url(parameters)
     return JsonResponse(checkout)
 
