@@ -4,6 +4,7 @@ from .api import get_cars_by_iin
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse, QueryDict
+import xml.etree.ElementTree as ET
 
 from .models import Reregestration, Car, Tax, Fine
 
@@ -39,16 +40,25 @@ class AgreementView(View):
         reregistration_id = request.PUT.get('reregistrationId')
         reregistration = Reregestration.objects.get(id=reregistration_id)
         if request.PUT.get('seller_sign'):
-            reregistration.seller_sign = request.PUT.get('seller_sign')
+            reregistration.seller_sign = self.get_sign(request.PUT.get('seller_sign'))
             reregistration.amount = request.PUT.get('amount')
         if request.PUT.get('buyer_sign'):
-            reregistration.buyer_sign = request.PUT.get('buyer_sign')
+            reregistration.buyer_sign = self.get_sign(request.PUT.get('buyer_sign'))
         if request.PUT.get('is_tax_paid'):
             reregistration.is_tax_paid = True
         if request.PUT.get('inspection_time'):
             reregistration.inspection_time = request.PUT.get('inspection_time')
-        reregistration.save()
-        return JsonResponse({'reregistration_id': reregistration.id})
+        # reregistration.save()
+        return JsonResponse({
+            'reregistration_id': reregistration.id,
+            'seller_sign': reregistration.seller_sign,
+            'buyer_sign': reregistration.buyer_sign
+        })
+
+    def get_sign(self, xml):
+        xml_root = ET.fromstring(xml)
+        return xml_root[2][1].text.strip()
+
 
 def checkout(request):
     product_id = request.GET.get('product_id')

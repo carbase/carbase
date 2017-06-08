@@ -131,42 +131,121 @@ function createAgreement(target) {
   })
 }
 
+function pkiSign(agreementid) {
+  var storagePath = ''
+  var password = ''
+  var keyAlias = ''
+  var webSocket = new WebSocket('wss://127.0.0.1:13579/')
+  var xmlToSign = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+  xmlToSign += document.getElementById('agreementXml' + agreementid).innerHTML
+  webSocket.onopen = function () {
+    webSocket.send('{"method":"browseKeyStore","args":["PKCS12","P12",""]}')
+  }
+
+  webSocket.onmessage = function (event) {
+    var eventData = JSON.parse(event.data)
+    if (eventData.result.endsWith && eventData.result.endsWith('.p12')) {
+      storagePath = eventData.result
+      password = prompt('Введите пароль')
+      webSocket.send(JSON.stringify({
+        'method': 'getKeys', 'args': ['PKCS12', storagePath, password, 'SIGN']
+      }))
+    }
+    if (eventData.result.startsWith && eventData.result.startsWith('RSA|')) {
+      keyAlias = eventData.result.split('|')[3]
+      webSocket.send(JSON.stringify({
+        'method': 'signXml',
+        'args': [
+          'PKCS12',
+          storagePath,
+          keyAlias,
+          password,
+          xmlToSign
+        ]
+      }))
+    }
+    if (eventData.result.startsWith && eventData.result.startsWith('<?xml version="1.0"')) {
+      data.append('side', side)
+      data.append('signed_xml', eventData.result)
+      xhr.send(data)
+    }
+  }
+}
+
 function signAgreement(target) {
   var side = target.dataset.side;
   var data = { 'reregistrationId': target.dataset.reregistrationid };
-  if (side == 'seller') {
-    data['seller_sign'] = 'seLLerSign'
-    data['amount'] = $('#reregistrationAgreement' + data.reregistrationId + 'amount').val()
+  var storagePath = ''
+  var password = ''
+  var keyAlias = ''
+  var webSocket = new WebSocket('wss://127.0.0.1:13579/')
+  var xmlToSign = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+  xmlToSign += document.getElementById('agreementXml' + target.dataset.reregistrationid).innerHTML
+
+  webSocket.onopen = function () {
+    webSocket.send('{"method":"browseKeyStore","args":["PKCS12","P12",""]}')
   }
-  if (side == 'buyer') {
-    data['buyer_sign'] = 'bUYerSign'
-  }
-  $.put('/cars/agreement', data, function(resp) {
-    if (side == 'seller') {
-      $('#sellerSign' + data.reregistrationId).html(data.seller_sign)
+
+  webSocket.onmessage = function (event) {
+    var eventData = JSON.parse(event.data)
+    if (eventData.result.endsWith && eventData.result.endsWith('.p12')) {
+      storagePath = eventData.result
+      password = prompt('Введите пароль')
+      webSocket.send(JSON.stringify({
+        'method': 'getKeys', 'args': ['PKCS12', storagePath, password, 'SIGN']
+      }))
     }
-    if (side == 'buyer') {
-      $('#buyerSign' + data.reregistrationId).html(data.buyer_sign)
-      if (resp.reregistration_id) {
-        var step_1_elem = $('#reregistrationModalBuyer' + resp.reregistration_id + ' .step_1')
-        var step_1_progress = $('#reregistrationModalBuyer' + resp.reregistration_id + ' .step_1 .progress-bar')
-        step_1_progress.one('transitionend', function() {
-          var step_2_elem = $('#reregistrationModalBuyer' + resp.reregistration_id + ' .step_2')
-          var step_2_progress = $('#reregistrationModalBuyer' + resp.reregistration_id + ' .step_2 .progress-bar')
-          step_2_elem.addClass('active');
-          step_2_progress.one('transitionend', function() {
-            var step_2_elem = $('#reregistrationModalBuyer' + resp.reregistration_id + ' .step_2');
-            step_2_elem.removeClass('disabled');
-            $('#reregistrationModalBuyer' + resp.reregistration_id + ' .step_1_body').addClass('hidden')
-            $('#reregistrationModalBuyer' + resp.reregistration_id + ' .step_2_body').removeClass('hidden')
-          });
-        });
-        loadRegPaymentPage(resp.reregistration_id);
-        step_1_elem.removeClass('active')
-        step_1_elem.addClass('complete')
+    if (eventData.result.startsWith && eventData.result.startsWith('RSA|')) {
+      keyAlias = eventData.result.split('|')[3]
+      webSocket.send(JSON.stringify({
+        'method': 'signXml',
+        'args': [
+          'PKCS12',
+          storagePath,
+          keyAlias,
+          password,
+          xmlToSign
+        ]
+      }))
+    }
+    if (eventData.result.startsWith && eventData.result.startsWith('<?xml version="1.0"')) {
+      if (side == 'seller') {
+        data['seller_sign'] = eventData.result
+        data['amount'] = $('#reregistrationAgreement' + data.reregistrationId + 'amount').val()
       }
+      if (side == 'buyer') {
+        data['buyer_sign'] = eventData.result
+      }
+      $.put('/cars/agreement', data, function(resp) {
+        if (side == 'seller') {
+          $('#sellerSign' + data.reregistrationId).html(resp.seller_sign)
+        }
+        if (side == 'buyer') {
+          $('#buyerSign' + data.reregistrationId).html(resp.buyer_sign)
+          if (resp.reregistration_id) {
+            var step_1_elem = $('#reregistrationModalBuyer' + resp.reregistration_id + ' .step_1')
+            var step_1_progress = $('#reregistrationModalBuyer' + resp.reregistration_id + ' .step_1 .progress-bar')
+            step_1_progress.one('transitionend', function() {
+              var step_2_elem = $('#reregistrationModalBuyer' + resp.reregistration_id + ' .step_2')
+              var step_2_progress = $('#reregistrationModalBuyer' + resp.reregistration_id + ' .step_2 .progress-bar')
+              step_2_elem.addClass('active');
+              step_2_progress.one('transitionend', function() {
+                var step_2_elem = $('#reregistrationModalBuyer' + resp.reregistration_id + ' .step_2');
+                step_2_elem.removeClass('disabled');
+                $('#reregistrationModalBuyer' + resp.reregistration_id + ' .step_1_body').addClass('hidden')
+                $('#reregistrationModalBuyer' + resp.reregistration_id + ' .step_2_body').removeClass('hidden')
+              });
+            });
+            loadRegPaymentPage(resp.reregistration_id);
+            step_1_elem.removeClass('active')
+            step_1_elem.addClass('complete')
+          }
+        }
+      })
     }
-  })
+  }
+
+
 }
 
 function change_inspection_time(target) {
