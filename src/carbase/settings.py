@@ -170,3 +170,5 @@ VIP2_TAX = get_secret('VIP2_TAX')
 
 SRTS_TAX = get_secret('SRTS_TAX')
 GRNZ_TAX = get_secret('GRNZ_TAX')
+
+LANGUAGE_CODE = 'ru-RU'

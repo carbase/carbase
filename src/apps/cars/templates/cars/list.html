@@ -107,7 +107,7 @@
                 <label type="button" class="btn btn-default btn-block reregistration-button" data-toggle="modal" data-target="#reregistrationModal{{car.number}}">
                   Перерегистрация авто
                 </label>
-                {% with reregestration=car.reregestration_set.all|first %}
+                {% with reregestration=car.reregestration %}
                   <div class="modal fade reregistrationModal" id="reregistrationModal{{car.number}}" tabindex="-1" role="dialog">
                     <div class="modal-dialog modal-lg" role="document">
                       <div class="modal-content">
@@ -191,24 +191,20 @@
                 {% endif %}
               </div>
               <div class="step_3_body {% if not reregistration.is_tax_paid %}hidden{% endif %}">
-                {% if reregistration.inspection_time %}
-                  <p>Ваша бронь: {{reregistration.inspection_time}}</p>
+                {% if reregistration.inspection %}
+                  <p>
+                    Ваша бронь: г. {{reregistration.inspection.center.city}} {{reregistration.inspection.center.address}},
+                    {{reregistration.inspection.date}},
+                    {{reregistration.inspection.time_range}}
+                  </p>
                   <p>Вы можете изменить бронь:
                     <select id="inspectionPlaceInput{{reregistration.id}}">
-                      <option>г. Астана, ул. 20-40, 2</option>
-                      <option>г. Алматы, ул. Ак кайнар, 1</option>
-                      <option>г. Алматы, ул. Майлина, 85</option>
-                      <option>г. Актау, КОС — 2</option>
-                      <option>г. Караганда, ул. Муканова, 5</option>
-                      <option>г. Костанай, ул. Карбышева, 12/10</option>
-                      <option>г. Кызылорда, ул.Коркыт-ата</option>
-                      <option>г. Павлодар, ул.Космонавтов, 2</option>
-                      <option>г. Петропавловск, ул.Нефтепроводная, 7</option>
-                      <option>г. Талдыкорган, ул.Центральная</option>
-                      <option>г. Тараз, пр.Толе би, 198А</option>
+                    {% for center in centers %}
+                      <option value="{{ center.pk }}">г. {{ center.city }}, {{ center.address }}</option>
+                    {% endfor %}
                     </select>
                     <input type="date" id="inspectionDateInput{{reregistration.id}}" class="datepicker"></input>
-                    <select id="'inspectionTimeInput{{reregistration.id}}">
+                    <select id="inspectionTimeInput{{reregistration.id}}">
                       <option>9:00-12:00</option>
                       <option>12:00-15:00</option>
                       <option>15:00-18:00</option>
@@ -219,17 +215,9 @@
                   <p>Забронируйте удобное для вас время осмотра ТС на территории спецЦОНа:</p>
                   <p>
                     <select id="inspectionPlaceInput{{reregistration.id}}">
-                      <option>г. Астана, ул. 20-40, 2</option>
-                      <option>г. Алматы, ул. Ак кайнар, 1</option>
-                      <option>г. Алматы, ул. Майлина, 85</option>
-                      <option>г. Актау, КОС — 2</option>
-                      <option>г. Караганда, ул. Муканова, 5</option>
-                      <option>г. Костанай, ул. Карбышева, 12/10</option>
-                      <option>г. Кызылорда, ул.Коркыт-ата</option>
-                      <option>г. Павлодар, ул.Космонавтов, 2</option>
-                      <option>г. Петропавловск, ул.Нефтепроводная, 7</option>
-                      <option>г. Талдыкорган, ул.Центральная</option>
-                      <option>г. Тараз, пр.Толе би, 198А</option>
+                      {% for center in centers %}
+                        <option value="{{ center.pk }}">г. {{ center.city }}, {{ center.address }}</option>
+                      {% endfor %}
                     </select>
                     <input type="date" id="inspectionDateInput{{reregistration.id}}" class="datepicker"></input>
                     <select id="inspectionTimeInput{{reregistration.id}}">

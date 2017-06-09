@@ -106,3 +106,8 @@ h2 {
 .pay-modal .modal-dialog {
   width: 660px;
 }
+
+.flatpickr-input.form-control {
+  display: inline;
+  width: auto;
+}

@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}carbase.kz - АвтоЦОН онлайн{% endblock %}
+{% block styles %}
+  <link href="{% static 'css/controller.css' %}" rel="stylesheet">
+{% endblock %}
+{% block scripts %}
+  <script src="{% static 'js/controller.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+  {% if request.user.is_authenticated %}
+    <form action="" method="GET">
+      <div class="input-group">
+        <span class="input-group-addon">Введите ИИН</span>
+        <input type="text" class="form-control" name="iin" value="{{request.GET.iin}}" maxlength="12" placeholder="000000000000">
+        <span class="input-group-btn">
+          <input class="btn btn-default" type="submit" value="Поиск">
+        </span>
+      </div>
+    </form>
+  {% else %}
+    <form action="/controller/login/" method="POST">
+      {% csrf_token %}
+      <input type="text" name="username" placeholder="Логин">
+      <input type="password" name="password" placeholder="Пароль">
+      <input type="submit" class="btn btn-default" value="Войти">
+    </form>
+  {% endif %}
+  {% for inspection in inspections %}
+    <div v-if="cars.length" v-for='car in cars' class='car col-xs-12 col-md-6'>
+      <form action="" method="POST">
+        {% csrf_token %}
+        <div class='panel panel-default'>
+          <div class='panel-body'>
+            <div class='panel-body'>
+              <h2>Производитель: <b>{{inspection.car.manufacturer}}</b></h2>
+              <h2>Модель: <b>{{inspection.car.model}}</b></h2>
+              <h2>Номер: <b>{{inspection.car.number}}</b></h2>
+              <h2>VIN-код: <b>{{inspection.car.vin_code}}</b></h2>
+            </div>
+          </div>
+          <div class='panel-footer'>
+            <input type="hidden" name="id" value="{{inspection.inspection.id}}">
+            <input type="hidden" name="status" value="success">
+            <input class="btn btn-default" type="submit" value="Подтвердить">
+          </div>
+        </div>
+      </form>
+    </div>
+  {% endfor %}
+{% endblock %}

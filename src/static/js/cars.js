@@ -1,6 +1,9 @@
 $(".datepicker").flatpickr({
   'locale': 'ru',
-  'dateFormat': 'j F Yг.'
+  'altFormat': 'j F Y',
+  'minDate': 'today',
+  'altInput': true,
+  'dateFormat': 'Y-m-j'
 });
 
 $.put = function(url, data, callback, type){
@@ -249,15 +252,20 @@ function signAgreement(target) {
 }
 
 function change_inspection_time(target) {
-  var data = { 'reregistrationId': target.dataset.reregistrationid };
-  var inspection_place = $('#inspectionPlaceInput'+ data.reregistrationId).val()
-  var inspection_date = $('#inspectionDateInput'+ data.reregistrationId).val()
-  var inspection_time = $('#inspectionTimeInput'+ data.reregistrationId).val()
-  data['inspection_time'] = inspection_date + ' ' + inspection_time + ' ' + inspection_place
+  var data = {
+    'reregistrationId': target.dataset.reregistrationid,
+    'inspectionCenterId': $('#inspectionPlaceInput'+ target.dataset.reregistrationid).val(),
+    'inspectionDate': $('#inspectionDateInput'+ target.dataset.reregistrationid).val(),
+    'inspectionTimeRange': $('#inspectionTimeInput'+ target.dataset.reregistrationid).val(),
+  };
   $.put('/cars/agreement', data, function(resp) {
     if (resp.reregistration_id) {
-      $('#reregistrationModalBuyer' + resp.reregistration_id + ' .step_3_body p:first-child').text('Ваша бронь: ' + inspection_place + ' ' + inspection_date + ' ' + inspection_time )
-      if (!$('#reregistrationModalBuyer' + resp.reregistration_id + ' .step_3_body p:nth-child(2)').text().trim().startsWith('Вы можете изменить бронь: ')) {
+      var inspection_place = $('#inspectionPlaceInput'+ resp.reregistration_id + ' option:selected').text();
+      var inspection_date = $('#reregistrationModalBuyer' + resp.reregistration_id + ' .datepicker.form-control').val()
+      var inspection_time = $('#inspectionTimeInput'+ resp.reregistration_id).val()
+      $('#reregistrationModalBuyer' + resp.reregistration_id + ' .step_3_body p:first-child').text('Ваша бронь: ' + inspection_place + ', ' + inspection_date + ', ' + inspection_time )
+      console.log($('#reregistrationModalBuyer' + resp.reregistration_id + ' .step_3_body p:nth-child(2)').text().trim())
+      if (!$('#reregistrationModalBuyer' + resp.reregistration_id + ' .step_3_body p:nth-child(2)').text().trim().startsWith('Вы можете изменить бронь:')) {
         $('#reregistrationModalBuyer' + resp.reregistration_id + ' .step_3_body p:nth-child(2)').prepend('Вы можете изменить бронь: ')
       }
       target.innerText = 'Изменить бронь'

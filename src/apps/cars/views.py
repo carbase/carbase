@@ -7,6 +7,7 @@ from django.http import JsonResponse, QueryDict
 import xml.etree.ElementTree as ET
 
 from .models import Reregestration, Car, Tax, Fine
+from controller.models import Center, Inspection
 
 from payment.api import get_checkout_url, get_order_status
 
@@ -16,9 +17,12 @@ class CarsView(View):
         print(not request.session.get('user_serialNumber'))
         if not request.session.get('user_serialNumber'):
             return redirect('/')
-        cars = get_cars_by_iin(request.session.get('user_serialNumber'))
-        reregistrations = Reregestration.objects.filter(buyer=request.session.get('user_serialNumber'))
-        return render(request, 'cars/list.html', {'cars': cars, 'reregistrations': reregistrations})
+        template_data = {
+            'cars': get_cars_by_iin(request.session.get('user_serialNumber')),
+            'reregistrations': Reregestration.objects.filter(buyer=request.session.get('user_serialNumber')),
+            'centers': Center.objects.all(),
+        }
+        return render(request, 'cars/list.html', template_data)
 
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -46,9 +50,17 @@ class AgreementView(View):
             reregistration.buyer_sign = self.get_sign(request.PUT.get('buyer_sign'))
         if request.PUT.get('is_tax_paid'):
             reregistration.is_tax_paid = True
-        if request.PUT.get('inspection_time'):
-            reregistration.inspection_time = request.PUT.get('inspection_time')
-        # reregistration.save()
+        if request.PUT.get('inspectionDate'):
+            inspections = Inspection.objects.filter(reregestration=reregistration)
+            if len(inspections):
+                inspection = inspections[0]
+            else:
+                inspection = Inspection.objects.create(reregestration=reregistration)
+            inspection.time_range = request.PUT.get('inspectionTimeRange')
+            inspection.center_id = request.PUT.get('inspectionCenterId')
+            inspection.date = request.PUT.get('inspectionDate')
+            inspection.save()
+        reregistration.save()
         return JsonResponse({
             'reregistration_id': reregistration.id,
             'seller_sign': reregistration.seller_sign,

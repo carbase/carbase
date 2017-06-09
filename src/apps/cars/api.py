@@ -44,6 +44,9 @@ class Car(models.Model):
     def __str__(self):
         return self.manufacturer + ' ' + self.model
 
+    def reregestration(self):
+        reregestrations = self.reregestration_set.filter(is_number_received=False)
+        return (reregestrations[0] if len(reregestrations) else None)
 
 class Tax(models.Model):
     amount = models.DecimalField(max_digits=19, decimal_places=2)
@@ -73,6 +76,4 @@ class Reregestration(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     is_tax_paid = models.BooleanField(default=False)
-    inspection_time = models.CharField(max_length=100, default='', blank=True)
-    is_inspection_success = models.BooleanField(default=False)
     is_number_received = models.BooleanField(default=False)
