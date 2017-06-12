@@ -1,25 +1,41 @@
 from urllib.request import HTTPError, URLError
+from urllib.parse import urlparse, urlsplit
+
+import json
+import hashlib
+import xml.etree.cElementTree as ET
 
 from cars.api import pay_by_id
 from django.conf import settings
 
-from carbase.helpers import create_signature, create_guid, post_data, request_to_json
+from carbase.helpers import create_guid, post_data, request_to_json
+
+
+def pg_sig(script, secret_key, parameters):
+    params = str(script)
+    for key, value in sorted(parameters.items()):
+        params += ';{}'.format(value)
+    params += ';' + secret_key
+    buffer = params.encode('utf-8')
+    return str(hashlib.md5(buffer).hexdigest())
 
 
 def get_exception(code, reason):
     return {
         'response': {
-            'response_status': 'failure',
-            'error_code': str(code),
-            'error_message': str(reason),
+            'pg_status':            'error',
+            'pg_error_code':        str(code),
+            'pg_error_description': str(reason),
         }
     }
 
 
 def do_request(url, params):
     try:
-        data = post_data(url, {'request': params})
-        return data
+        content_type = 'application/json; charset=utf-8'
+        data = post_data(url, json.dumps(params), content_type)
+        root = ET.fromstring(data)
+        return {'response': {x.tag: root.find(x.tag).text for x in root}}
     except HTTPError as ex:
         return get_exception(ex.code, ex.reason)
     except URLError as ex:
@@ -33,21 +49,31 @@ def get_checkout_url(parameters):
     order_desc = parameters['order_desc']
     order_id = '{}_{}'.format(product_id, create_guid())
 
-    params = {
-        'order_id':             order_id,
-        'order_desc':           order_desc,
-        'amount':               amount,
-        'product_id':           product_id,
-        'server_callback_url':  settings.PAYMENT_GATEWAYS['FONDY']['SERVER_CALLBACK_URL'],
-        'currency':             settings.PAYMENT_GATEWAYS['FONDY']['CURRENCY'],
-        'merchant_id':          settings.PAYMENT_GATEWAYS['FONDY']['MERCHANT_ID'],
-        'lifetime':             settings.PAYMENT_GATEWAYS['FONDY']['LIFETIME'],
-        'lang':                 settings.PAYMENT_GATEWAYS['FONDY']['LANG'],
-    }
-    params['signature'] = create_signature(settings.PAYMENT_GATEWAYS['FONDY']['TRANSACTION_PASSWORD'], params)
+    merchant_id = settings.PAYMENT_GATEWAYS['PAYBOX']['MERCHANT_ID']
+    secret_key = settings.PAYMENT_GATEWAYS['PAYBOX']['SECRET_KEY']
+    script_url = settings.PAYMENT_GATEWAYS['PAYBOX']['SCRIPT_URL']
+    lifetime = settings.PAYMENT_GATEWAYS['PAYBOX']['LIFETIME']
+    payment_system = settings.PAYMENT_GATEWAYS['PAYBOX']['PAYMENT_SYSTEM']
+    result_url = settings.PAYMENT_GATEWAYS['PAYBOX']['RESULT_URL']
+    testing_mode = settings.PAYMENT_GATEWAYS['PAYBOX']['TESTING_MODE']
 
-    url = settings.PAYMENT_GATEWAYS['FONDY']['CHECKOUT_URL']
-    data = do_request(url, params)
+    script = urlparse(script_url).path[1:]
+    salt = settings.SECRET_KEY
+
+    params = {
+        'pg_merchant_id':       merchant_id,
+        'pg_amount':            amount,
+        'pg_description':       order_desc,
+        'pg_order_id':          order_id,
+        'pg_salt':              salt,
+        'pg_lifetime':          lifetime,
+        'pg_payment_system':    payment_system,
+        'pg_result_url':        result_url,
+        'pg_testing_mode':      testing_mode,
+    }
+    params['pg_sig'] = pg_sig(script, secret_key, params)
+
+    data = do_request(script_url, params)
     data['response']['order_id'] = order_id
 
     return data
