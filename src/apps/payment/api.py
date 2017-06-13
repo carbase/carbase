@@ -49,10 +49,10 @@ def get_checkout_url(parameters):
     order_id        = '{}:{}'.format(parameters.get('product_id', ''), create_guid())
     merchant_id     = settings.PAYBOX['MERCHANT_ID']
     secret_key      = settings.PAYBOX['SECRET_KEY']
-    script_url      = settings.PAYBOX['SCRIPT_URL']
+    payment_url     = settings.PAYBOX['PAYMENT_URL']
     result_url      = settings.PAYBOX['RESULT_URL']
     testing_mode    = settings.PAYBOX['TESTING_MODE']
-    script          = urlparse(script_url).path[1:]
+    script          = urlparse(payment_url).path[1:]
     salt            = settings.SECRET_KEY
 
     params = {
@@ -66,40 +66,34 @@ def get_checkout_url(parameters):
     }
     params['pg_sig'] = sign(script, secret_key, params)
 
-    data = do_request(script_url, params)
-    data['response']['order_id'] = order_id
+    data = do_request(payment_url, params)
 
     return data
 
 
-'''
 def get_order_status(order_id):
 
-    merchant_id = settings.FONDY']['MERCHANT_ID']
-    transaction_password = settings.FONDY']['TRANSACTION_PASSWORD']
+    merchant_id = settings.PAYBOX['MERCHANT_ID']
+    secret_key  = settings.PAYBOX['SECRET_KEY']
+    status_url  = settings.PAYBOX['STATUS_URL']
+    script      = urlparse(status_url).path[1:]
+    salt        = settings.SECRET_KEY
 
     params = {
-        'order_id':     order_id,
-        'merchant_id':  merchant_id,
+        'pg_merchant_id':   merchant_id,
+        'pg_order_id':      order_id,
+        'pg_salt':          salt,
     }
-    params['signature'] = create_signature(transaction_password, params)
+    params['pg_sig'] = sign(script, secret_key, params)
 
-    url = settings.FONDY']['STATUS_URL']
-    data = do_request(url, params)
+    data = do_request(status_url, params)
 
     return data
 
 
 def set_callback(request):
 
-    data = request_to_json(request)
-    status = data['order_status']
-    product_id = data['product_id']
-
-    if status == 'approved':
-        pay_by_id(product_id)
-    else:
-        return 1
+    print(request.body)
 
     return 0
-'''
+
