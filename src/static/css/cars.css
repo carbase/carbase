@@ -98,3 +98,16 @@ h2 {
 .navbar .modal {
   color: #333;
 }
+
+.reregistrationModal iframe {
+  margin: 0 auto;
+}
+
+.pay-modal .modal-dialog {
+  width: 660px;
+}
+
+.flatpickr-input.form-control {
+  display: inline;
+  width: auto;
+}

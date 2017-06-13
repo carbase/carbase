@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'debug_toolbar',
 
     'cars.apps.CarsConfig',
+    'controller.apps.ControllerConfig',
     'pki.apps.PkiConfig',
     'payment.apps.PaymentConfig',
     'numberplates.apps.NumberPlatesConfig',
@@ -167,3 +168,5 @@ VIP2_TAX = get_secret('VIP2_TAX')
 
 SRTS_TAX = get_secret('SRTS_TAX')
 GRNZ_TAX = get_secret('GRNZ_TAX')
+
+LANGUAGE_CODE = 'ru-RU'
