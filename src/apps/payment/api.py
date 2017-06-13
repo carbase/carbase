@@ -11,7 +11,7 @@ from django.conf import settings
 from carbase.helpers import create_guid, post_data, request_to_json
 
 
-def pg_sig(script, secret_key, parameters):
+def sign(script, secret_key, parameters):
     params = str(script)
     for key, value in sorted(parameters.items()):
         params += ';{}'.format(value)
@@ -44,34 +44,27 @@ def do_request(url, params):
 
 def get_checkout_url(parameters):
 
-    product_id = parameters['product_id']
-    amount = parameters['amount']
-    order_desc = parameters['order_desc']
-    order_id = '{}_{}'.format(product_id, create_guid())
-
-    merchant_id = settings.PAYMENT_GATEWAYS['PAYBOX']['MERCHANT_ID']
-    secret_key = settings.PAYMENT_GATEWAYS['PAYBOX']['SECRET_KEY']
-    script_url = settings.PAYMENT_GATEWAYS['PAYBOX']['SCRIPT_URL']
-    lifetime = settings.PAYMENT_GATEWAYS['PAYBOX']['LIFETIME']
-    payment_system = settings.PAYMENT_GATEWAYS['PAYBOX']['PAYMENT_SYSTEM']
-    result_url = settings.PAYMENT_GATEWAYS['PAYBOX']['RESULT_URL']
-    testing_mode = settings.PAYMENT_GATEWAYS['PAYBOX']['TESTING_MODE']
-
-    script = urlparse(script_url).path[1:]
-    salt = settings.SECRET_KEY
+    amount          = parameters.get('amount', 0)
+    description     = parameters.get('order_desc', '')
+    order_id        = '{}:{}'.format(parameters.get('product_id', ''), create_guid())
+    merchant_id     = settings.PAYBOX['MERCHANT_ID']
+    secret_key      = settings.PAYBOX['SECRET_KEY']
+    script_url      = settings.PAYBOX['SCRIPT_URL']
+    result_url      = settings.PAYBOX['RESULT_URL']
+    testing_mode    = settings.PAYBOX['TESTING_MODE']
+    script          = urlparse(script_url).path[1:]
+    salt            = settings.SECRET_KEY
 
     params = {
         'pg_merchant_id':       merchant_id,
         'pg_amount':            amount,
-        'pg_description':       order_desc,
+        'pg_description':       description,
         'pg_order_id':          order_id,
         'pg_salt':              salt,
-        'pg_lifetime':          lifetime,
-        'pg_payment_system':    payment_system,
         'pg_result_url':        result_url,
         'pg_testing_mode':      testing_mode,
     }
-    params['pg_sig'] = pg_sig(script, secret_key, params)
+    params['pg_sig'] = sign(script, secret_key, params)
 
     data = do_request(script_url, params)
     data['response']['order_id'] = order_id
@@ -79,10 +72,11 @@ def get_checkout_url(parameters):
     return data
 
 
+'''
 def get_order_status(order_id):
 
-    merchant_id = settings.PAYMENT_GATEWAYS['FONDY']['MERCHANT_ID']
-    transaction_password = settings.PAYMENT_GATEWAYS['FONDY']['TRANSACTION_PASSWORD']
+    merchant_id = settings.FONDY']['MERCHANT_ID']
+    transaction_password = settings.FONDY']['TRANSACTION_PASSWORD']
 
     params = {
         'order_id':     order_id,
@@ -90,7 +84,7 @@ def get_order_status(order_id):
     }
     params['signature'] = create_signature(transaction_password, params)
 
-    url = settings.PAYMENT_GATEWAYS['FONDY']['STATUS_URL']
+    url = settings.FONDY']['STATUS_URL']
     data = do_request(url, params)
 
     return data
@@ -108,3 +102,4 @@ def set_callback(request):
         return 1
 
     return 0
+'''
