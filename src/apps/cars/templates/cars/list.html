@@ -107,19 +107,19 @@
                 <label type="button" class="btn btn-default btn-block reregistration-button" data-toggle="modal" data-target="#reregistrationModal{{car.number}}">
                   Перерегистрация авто
                 </label>
-                {% with reregestration=car.reregestration %}
+                {% with reregistration=car.reregistration %}
                   <div class="modal fade reregistrationModal" id="reregistrationModal{{car.number}}" tabindex="-1" role="dialog">
                     <div class="modal-dialog modal-lg" role="document">
                       <div class="modal-content">
                         <div class="modal-header">
                           <div class="row bs-wizard" style="border-bottom:0;">
-                            <div class="col-xs-6 bs-wizard-step step_1 {% if not reregestration %}active{% else %}complete{% endif %}">
+                            <div class="col-xs-6 bs-wizard-step step_1 {% if not reregistration %}active{% else %}complete{% endif %}">
                               <div class="text-center bs-wizard-stepnum">Шаг 1</div>
                               <div class="progress"><div class="progress-bar"></div></div>
                               <label class="bs-wizard-dot"></label>
                               <div class="bs-wizard-info text-center">Данные покупателя</div>
                             </div>
-                            <div class="col-xs-6 bs-wizard-step step_2 {% if not reregestration %}disabled{% else %}active{% endif %}">
+                            <div class="col-xs-6 bs-wizard-step step_2 {% if not reregistration %}disabled{% else %}active{% endif %}">
                               <div class="text-center bs-wizard-stepnum">Шаг 2</div>
                               <div class="progress"><div class="progress-bar"></div></div>
                               <label class="bs-wizard-dot"></label>
@@ -127,9 +127,9 @@
                             </div>
                           </div>
                         </div>
-                        <input type="hidden" id='reregistration{{car.id}}reregistrationId' value="{% if reregestration %}reregistration.id{% endif%}">
+                        <input type="hidden" id='reregistration{{car.id}}reregistrationId' value="{% if reregistration %}reregistration.id{% endif%}">
                         <div class="modal-body">
-                          <div class="step_1_body {% if reregestration %}hidden{% endif%}">
+                          <div class="step_1_body {% if reregistration %}hidden{% endif%}">
                             <div class="input-group input-group-lg">
                               <span class="input-group-addon" id="sizing-addon1">Введите ИИН покупателя</span>
                               <input type="text" maxlength="12" id="reregistration{{car.id}}BuyerIIN" class="form-control" placeholder="000000000000">
@@ -138,8 +138,8 @@
                               </span>
                             </div>
                           </div>
-                          <div class="step_2_body {% if not reregestration %}hidden{% endif%}">
-                            {% include "cars/includes/agreement.html" with car=car reregistration=reregestration%}
+                          <div class="step_2_body {% if not reregistration %}hidden{% endif%}">
+                            {% include "cars/includes/agreement.html" with car=car reregistration=reregistration%}
                           </div>
                         </div>
                       </div>

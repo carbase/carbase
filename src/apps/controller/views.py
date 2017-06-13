@@ -3,7 +3,7 @@ from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.views import View
 
-from cars.models import Reregestration
+from cars.models import Reregistration
 from .models import Inspector, Inspection
 
 class IndexView(View):
@@ -11,10 +11,10 @@ class IndexView(View):
         iin = request.GET.get('iin')
         inspections = []
         if iin:
-            inspections = Reregestration.objects.filter(buyer='IIN' + iin, inspection__is_success=False)
+            inspections = Reregistration.objects.filter(buyer='IIN' + iin, inspection__is_success=False)
         elif request.user.is_authenticated:
             inspector = Inspector.objects.get(user=request.user)
-            inspections = Reregestration.objects.filter(inspection__center=inspector.center, inspection__is_success=False)
+            inspections = Reregistration.objects.filter(inspection__center=inspector.center, inspection__is_success=False)
         return render(request, 'controller/index.html', {'inspections': inspections})
 
     def post(self, request):
@@ -25,11 +25,11 @@ class IndexView(View):
         inspection.inspector = request.user.inspector
         inspection.is_success = True
         inspection.save()
-        inspection.reregestration.car.user = inspection.reregestration.buyer
-        inspection.reregestration.car.save()
-        inspection.reregestration.is_number_received = True
-        inspection.reregestration.save()
-        inspections = Reregestration.objects.filter(inspection__center=inspector.center, inspection__is_success=False)
+        inspection.reregistration.car.user = inspection.reregistration.buyer
+        inspection.reregistration.car.save()
+        inspection.reregistration.is_number_received = True
+        inspection.reregistration.save()
+        inspections = Reregistration.objects.filter(inspection__center=inspector.center, inspection__is_success=False)
         return render(request, 'controller/index.html', {'inspections': inspections})
 
 

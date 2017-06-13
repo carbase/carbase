@@ -6,7 +6,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse, QueryDict
 import xml.etree.ElementTree as ET
 
-from .models import Reregestration, Car, Tax, Fine
+from .models import Reregistration, Car, Tax, Fine
 from controller.models import Center, Inspection
 
 from payment.api import get_checkout_url, get_order_status
@@ -19,7 +19,10 @@ class CarsView(View):
             return redirect('/')
         template_data = {
             'cars': get_cars_by_iin(request.session.get('user_serialNumber')),
-            'reregistrations': Reregestration.objects.filter(buyer=request.session.get('user_serialNumber')),
+            'reregistrations': Reregistration.objects.filter(
+                buyer=request.session.get('user_serialNumber'),
+                is_number_received=False
+            ),
             'centers': Center.objects.all(),
         }
         return render(request, 'cars/list.html', template_data)
@@ -32,17 +35,17 @@ class AgreementView(View):
         car = Car.objects.get(id=car_id)
         seller = request.session.get('user_serialNumber')
         buyer = request.POST.get('buyer')
-        exist_registrations = Reregestration.objects.filter(car=car, buyer=buyer, seller=seller)
+        exist_registrations = Reregistration.objects.filter(car=car, buyer=buyer, seller=seller)
         if (exist_registrations):
-           reregestration = exist_registrations[0]
+           reregistration = exist_registrations[0]
         else:
-           reregestration = Reregestration.objects.create(car=car, buyer=buyer, seller=seller)
-        return JsonResponse({'reregistration_id': reregestration.id})
+           reregistration = Reregistration.objects.create(car=car, buyer=buyer, seller=seller)
+        return JsonResponse({'reregistration_id': reregistration.id})
 
     def put(self, request):
         request.PUT = QueryDict(request.body)
         reregistration_id = request.PUT.get('reregistrationId')
-        reregistration = Reregestration.objects.get(id=reregistration_id)
+        reregistration = Reregistration.objects.get(id=reregistration_id)
         if request.PUT.get('seller_sign'):
             reregistration.seller_sign = self.get_sign(request.PUT.get('seller_sign'))
             reregistration.amount = request.PUT.get('amount')
@@ -51,11 +54,11 @@ class AgreementView(View):
         if request.PUT.get('is_tax_paid'):
             reregistration.is_tax_paid = True
         if request.PUT.get('inspectionDate'):
-            inspections = Inspection.objects.filter(reregestration=reregistration)
+            inspections = Inspection.objects.filter(reregistration=reregistration)
             if len(inspections):
                 inspection = inspections[0]
             else:
-                inspection = Inspection.objects.create(reregestration=reregistration)
+                inspection = Inspection.objects.create(reregistration=reregistration)
             inspection.time_range = request.PUT.get('inspectionTimeRange')
             inspection.center_id = request.PUT.get('inspectionCenterId')
             inspection.date = request.PUT.get('inspectionDate')
@@ -80,11 +83,6 @@ def checkout(request):
     elif product_id.startswith('fine'):
         Model = Fine
         entity_id = product_id[4:]
-    else:
-        Model = Reregestration
-        entity_id = product_id[3:]
-
-
 
     if product_id.startswith('reg'):
         parameters = {
@@ -114,7 +112,7 @@ def payment_status(request):
         Model = Fine
         entity_id = product_id[4:]
     else:
-        Model = Reregestration
+        Model = Reregistration
         entity_id = product_id[3:]
     entity = Model.objects.get(id=entity_id)
     entity.is_paid = True

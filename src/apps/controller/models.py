@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-from cars.models import Reregestration
+from cars.models import Reregistration
 
 class Center(models.Model):
     city = models.CharField(max_length=128)
@@ -17,4 +17,4 @@ class Inspection(models.Model):
     time_range = models.CharField(max_length=11, null=True)
     is_success = models.BooleanField(default=False)
     inspector = models.ForeignKey(Inspector, null=True)
-    reregestration = models.OneToOneField(Reregestration, null=True)
+    reregistration = models.OneToOneField(Reregistration, null=True)

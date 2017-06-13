@@ -18,6 +18,6 @@ class CarAdmin(admin.ModelAdmin):
     list_display = ('__str__', 'user')
 
 
-@admin.register(models.Reregestration)
-class ReregestrationAdmin(admin.ModelAdmin):
+@admin.register(models.Reregistration)
+class ReregistrationAdmin(admin.ModelAdmin):
     list_display = ('car', 'seller', 'buyer')

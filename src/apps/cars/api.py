@@ -24,7 +24,7 @@ def pay_by_id(product_id):
         fine.is_paid = True
         fine.save()
     elif product_id.startswith('reg'):
-        reg = Reregestration.objects.get(id=product_id[3:])
+        reg = Reregistration.objects.get(id=product_id[3:])
         reg.is_paid = True
         reg.save()
 
@@ -44,9 +44,9 @@ class Car(models.Model):
     def __str__(self):
         return self.manufacturer + ' ' + self.model
 
-    def reregestration(self):
-        reregestrations = self.reregestration_set.filter(is_number_received=False)
-        return (reregestrations[0] if len(reregestrations) else None)
+    def reregistration(self):
+        reregistrations = self.reregistration_set.filter(is_number_received=False)
+        return (reregistrations[0] if len(reregistrations) else None)
 
 class Tax(models.Model):
     amount = models.DecimalField(max_digits=19, decimal_places=2)
@@ -65,7 +65,7 @@ class Fine(models.Model):
     car = models.ForeignKey(Car)
 
 
-class Reregestration(models.Model):
+class Reregistration(models.Model):
     seller = models.CharField(max_length=20, default='', blank=True)
     buyer = models.CharField(max_length=20, default='', blank=True)
     car = models.ForeignKey(Car)

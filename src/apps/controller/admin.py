@@ -14,4 +14,4 @@ class InspectorAdmin(admin.ModelAdmin):
 
 @admin.register(models.Inspection)
 class InspectionAdmin(admin.ModelAdmin):
-    list_display = ('center', 'reregestration')
+    list_display = ('center', 'reregistration')
