@@ -1,7 +1,7 @@
 import xml.etree.ElementTree as ET
 
 from django.http import JsonResponse, QueryDict
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
@@ -38,9 +38,9 @@ class AgreementView(View):
         buyer = request.POST.get('buyer')
         exist_registrations = Reregistration.objects.filter(car=car, buyer=buyer, seller=seller)
         if (exist_registrations):
-           reregistration = exist_registrations[0]
+            reregistration = exist_registrations[0]
         else:
-           reregistration = Reregistration.objects.create(car=car, buyer=buyer, seller=seller)
+            reregistration = Reregistration.objects.create(car=car, buyer=buyer, seller=seller)
         return JsonResponse({'reregistration_id': reregistration.id})
 
     def put(self, request):

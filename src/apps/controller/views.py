@@ -6,6 +6,7 @@ from django.views import View
 from cars.models import Reregistration
 from .models import Inspector, Inspection
 
+
 class IndexView(View):
     def get(self, request):
         iin = request.GET.get('iin')
@@ -14,7 +15,10 @@ class IndexView(View):
             inspections = Reregistration.objects.filter(buyer='IIN' + iin, inspection__is_success=False)
         elif request.user.is_authenticated:
             inspector = Inspector.objects.get(user=request.user)
-            inspections = Reregistration.objects.filter(inspection__center=inspector.center, inspection__is_success=False)
+            inspections = Reregistration.objects.filter(
+                inspection__center=inspector.center,
+                inspection__is_success=False
+            )
         return render(request, 'controller/index.html', {'inspections': inspections})
 
     def post(self, request):
@@ -31,7 +35,6 @@ class IndexView(View):
         inspection.reregistration.save()
         inspections = Reregistration.objects.filter(inspection__center=inspector.center, inspection__is_success=False)
         return render(request, 'controller/index.html', {'inspections': inspections})
-
 
 
 def login(request):

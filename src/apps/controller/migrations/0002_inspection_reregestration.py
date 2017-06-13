@@ -3,7 +3,7 @@
 from __future__ import unicode_literals
 
 from django.db import migrations, models
-import django.db.models.deletion
+from django.db.models.deletion import CASCADE
 
 
 class Migration(migrations.Migration):
@@ -17,6 +17,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='inspection',
             name='reregestration',
-            field=models.OneToOneField(null=True, on_delete=django.db.models.deletion.CASCADE, to='cars.Reregestration'),
+            field=models.OneToOneField(null=True, on_delete=CASCADE, to='cars.Reregestration'),
         ),
     ]

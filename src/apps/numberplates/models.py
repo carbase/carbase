@@ -14,9 +14,9 @@ class NumberPlate(models.Model):
     # True if sold
     is_sold = models.BooleanField(default=False)
     # When was sold
-    sale_date = models.DateField(null=True,blank=True)
+    sale_date = models.DateField(null=True, blank=True)
     # Owner IIN
-    owner_id = models.CharField(max_length=12,blank=True)
+    owner_id = models.CharField(max_length=12, blank=True)
 
     class Meta:
         ordering = ['digits']

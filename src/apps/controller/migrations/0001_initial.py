@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 
 from django.conf import settings
 from django.db import migrations, models
-import django.db.models.deletion
+from django.db.models.deletion import CASCADE
 
 
 class Migration(migrations.Migration):
@@ -31,20 +31,20 @@ class Migration(migrations.Migration):
                 ('date', models.DateField()),
                 ('time_range', models.CharField(max_length=11)),
                 ('is_success', models.BooleanField()),
-                ('center', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='controller.Center')),
+                ('center', models.ForeignKey(on_delete=CASCADE, to='controller.Center')),
             ],
         ),
         migrations.CreateModel(
             name='Inspector',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('center', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='controller.Center')),
-                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                ('center', models.ForeignKey(on_delete=CASCADE, to='controller.Center')),
+                ('user', models.OneToOneField(on_delete=CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
         ),
         migrations.AddField(
             model_name='inspection',
             name='inspector',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='controller.Inspector'),
+            field=models.ForeignKey(on_delete=CASCADE, to='controller.Inspector'),
         ),
     ]

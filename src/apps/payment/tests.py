@@ -1,6 +1,6 @@
 from django.test import TestCase
 
-from .api import get_checkout_url, get_order_status
+from .api import get_checkout_url
 
 
 class CheckoutTestCase(TestCase):

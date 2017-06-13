@@ -2,6 +2,7 @@ import os
 
 from django.test import TestCase, Client
 
+
 class LoginTestCase(TestCase):
     def setUp(self):
         self.test_xml_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'test_xmls')

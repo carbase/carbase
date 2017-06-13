@@ -1,5 +1,5 @@
 from urllib.request import HTTPError, URLError
-from urllib.parse import urlparse, urlsplit, parse_qsl
+from urllib.parse import urlparse, parse_qsl
 
 import json
 import hashlib
@@ -8,7 +8,7 @@ import xml.etree.cElementTree as ET
 from cars.api import pay_by_id
 from django.conf import settings
 
-from carbase.helpers import create_guid, post_data, request_to_json
+from carbase.helpers import create_guid, post_data
 
 
 def sign(script, secret_key, parameters):

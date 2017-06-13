@@ -1,5 +1,4 @@
 from django.db import models
-from django.conf import settings
 
 
 def get_cars_by_iin(iin):
@@ -47,6 +46,7 @@ class Car(models.Model):
     def reregistration(self):
         reregistrations = self.reregistration_set.filter(is_number_received=False)
         return (reregistrations[0] if len(reregistrations) else None)
+
 
 class Tax(models.Model):
     amount = models.DecimalField(max_digits=19, decimal_places=2)

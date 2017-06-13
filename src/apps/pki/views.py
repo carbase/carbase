@@ -5,7 +5,6 @@ from cryptography.x509 import NameOID
 from datetime import datetime
 
 from django.http import JsonResponse
-from django.shortcuts import render, redirect
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
@@ -23,7 +22,7 @@ class LoginView(View):
             pem += '\n-----END CERTIFICATE-----'
             cert = x509.load_pem_x509_certificate(pem.encode('utf-8'), default_backend())
             certIssuerCN = cert.issuer.get_attributes_for_oid(NameOID.COMMON_NAME)[0].value
-            if  certIssuerCN != 'ҰЛТТЫҚ КУӘЛАНДЫРУШЫ ОРТАЛЫҚ (RSA)':
+            if certIssuerCN != 'ҰЛТТЫҚ КУӘЛАНДЫРУШЫ ОРТАЛЫҚ (RSA)':
                 raise ValueError('Ошибка проверки центра сертификации')
             if not (datetime.now() > cert.not_valid_before and datetime.now() < cert.not_valid_after):
                 raise ValueError('Время действия сертификата истекло')
