@@ -8,6 +8,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
+        ('controller', '0004_auto_20170609_0640'),
         ('cars', '0004_auto_20170609_0502'),
     ]
 

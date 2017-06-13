@@ -1,22 +1,22 @@
-from django.shortcuts import render, redirect
-from django.views import View
-from .api import get_cars_by_iin
-from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse, QueryDict
 import xml.etree.ElementTree as ET
 
-from .models import Reregistration, Car, Tax, Fine
-from controller.models import Center, Inspection
+from django.http import JsonResponse, QueryDict
+from django.shortcuts import render, redirect
+from django.utils.decorators import method_decorator
+from django.views import View
+from django.views.decorators.csrf import csrf_exempt
 
+from .api import get_cars_by_iin
+from .models import Reregistration, Car, Tax, Fine
+
+from carbase.decorators import login_required
+from controller.models import Center, Inspection
 from payment.api import get_checkout_url, get_order_status
 
 
+@method_decorator(login_required, name='dispatch')
 class CarsView(View):
     def get(self, request):
-        print(not request.session.get('user_serialNumber'))
-        if not request.session.get('user_serialNumber'):
-            return redirect('/')
         template_data = {
             'cars': get_cars_by_iin(request.session.get('user_serialNumber')),
             'reregistrations': Reregistration.objects.filter(
@@ -28,6 +28,7 @@ class CarsView(View):
         return render(request, 'cars/list.html', template_data)
 
 
+@method_decorator(login_required, name='dispatch')
 @method_decorator(csrf_exempt, name='dispatch')
 class AgreementView(View):
     def post(self, request):
@@ -75,6 +76,7 @@ class AgreementView(View):
         return xml_root[2][1].text.strip()
 
 
+@method_decorator(login_required, name='dispatch')
 def checkout(request):
     product_id = request.GET.get('product_id')
     if product_id.startswith('tax'):
@@ -101,6 +103,8 @@ def checkout(request):
     checkout = get_checkout_url(parameters)
     return JsonResponse(checkout)
 
+
+@method_decorator(login_required, name='dispatch')
 def payment_status(request):
     order_id = request.GET.get('order_id')
     order_info = get_order_status(order_id)
