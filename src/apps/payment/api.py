@@ -1,5 +1,5 @@
 from urllib.request import HTTPError, URLError
-from urllib.parse import urlparse, urlsplit
+from urllib.parse import urlparse, urlsplit, parse_qsl
 
 import json
 import hashlib
@@ -51,6 +51,8 @@ def get_checkout_url(parameters):
     secret_key      = settings.PAYBOX['SECRET_KEY']
     payment_url     = settings.PAYBOX['PAYMENT_URL']
     result_url      = settings.PAYBOX['RESULT_URL']
+    success_url     = settings.PAYBOX['SUCCESS_URL']
+    failure_url     = settings.PAYBOX['FAILURE_URL']
     testing_mode    = settings.PAYBOX['TESTING_MODE']
     script          = urlparse(payment_url).path[1:]
     salt            = settings.SECRET_KEY
@@ -62,6 +64,8 @@ def get_checkout_url(parameters):
         'pg_order_id':          order_id,
         'pg_salt':              salt,
         'pg_result_url':        result_url,
+        'pg_success_url':       success_url,
+        'pg_failure_url':       failure_url,
         'pg_testing_mode':      testing_mode,
     }
     params['pg_sig'] = sign(script, secret_key, params)
@@ -93,7 +97,17 @@ def get_order_status(order_id):
 
 def set_callback(request):
 
-    print(request.body)
+    if (request.method == 'POST'):
+        # convert query string to dictionary
+        data = dict(parse_qsl(request.body.decode('utf-8')))
+        # get transaction result
+        result = data['pg_result']
+        # check result: 1 - success, 0 - fail
+        if int(result) == 1:
+            product_id = data['pg_order_id'].split(':')[0]
+            pay_by_id(product_id)
+        else:
+            # has error
+            return 1
 
     return 0
-
