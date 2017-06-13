@@ -152,9 +152,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MCI = get_secret('MCI')
 
 
-PAYMENT_GATEWAYS = {
-    "FONDY": get_secret('FONDY'),
-}
+PAYBOX = get_secret('PAYBOX')
 
 
 FIXTURE_DIRS = (
