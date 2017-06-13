@@ -71,6 +71,7 @@ def get_checkout_url(parameters):
     params['pg_sig'] = sign(script, secret_key, params)
 
     data = do_request(payment_url, params)
+    data['response']['pg_order_id'] = order_id
 
     return data
 
