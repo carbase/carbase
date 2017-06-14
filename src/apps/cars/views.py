@@ -1,4 +1,5 @@
 import xml.etree.ElementTree as ET
+from math import floor
 
 from django.http import JsonResponse, QueryDict
 from django.shortcuts import render
@@ -76,7 +77,7 @@ class AgreementView(View):
         return xml_root[2][1].text.strip()
 
 
-@method_decorator(login_required, name='dispatch')
+@login_required
 def checkout(request):
     product_id = request.GET.get('product_id')
     if product_id.startswith('tax'):
@@ -89,14 +90,14 @@ def checkout(request):
     if product_id.startswith('reg'):
         parameters = {
             'product_id': product_id,
-            'amount': 1145845,
+            'amount': 11458.45,
             'order_desc': 'За выпуск СРТС и ГРНЗ'
         }
     else:
         entity = Model.objects.get(id=entity_id)
         parameters = {
             'product_id': product_id,
-            'amount': int(entity.amount * 100),
+            'amount': floor(entity.amount),
             'order_desc': entity.info
         }
 
@@ -104,22 +105,23 @@ def checkout(request):
     return JsonResponse(checkout)
 
 
-@method_decorator(login_required, name='dispatch')
+@login_required
 def payment_status(request):
     order_id = request.GET.get('order_id')
     order_info = get_order_status(order_id)
-    product_id = order_info['response']['order_id'].split('_')[0]
-    if product_id.startswith('tax'):
-        Model = Tax
-        entity_id = product_id[3:]
-    elif product_id.startswith('fine'):
-        Model = Fine
-        entity_id = product_id[4:]
-    else:
-        Model = Reregistration
-        entity_id = product_id[3:]
-    entity = Model.objects.get(id=entity_id)
-    entity.is_paid = True
-    entity.is_tax_paid = True
-    entity.save()
+    if order_info['response']['pg_transaction_status'] == 'ok':
+        product_id = order_id.split(':')[0]
+        if product_id.startswith('tax'):
+            Model = Tax
+            entity_id = product_id[3:]
+        elif product_id.startswith('fine'):
+            Model = Fine
+            entity_id = product_id[4:]
+        else:
+            Model = Reregistration
+            entity_id = product_id[3:]
+        entity = Model.objects.get(id=entity_id)
+        entity.is_paid = True
+        entity.is_tax_paid = True
+        entity.save()
     return JsonResponse(order_info)

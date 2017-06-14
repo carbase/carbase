@@ -23,89 +23,61 @@ $.put = function(url, data, callback, type){
 
 function openPaymentModal(target) {
   $.get('/cars/checkout?product_id='+target.dataset.productid, function(resp) {
-    var orderId = resp.response.order_id
-    var checkoutUrl = resp.response.checkout_url
-    $ipsp.get('checkout').config({
-      'wrapper': '#' + target.dataset.productid + 'PayFrameModal',
-      'styles': {
-        'body': {'overflow': 'hidden'},
-        '.page-section-shopinfo': {display: 'none'},
-        '.page-section-footer': {display: 'none'}
-      }
-    }).scope(function () {
-      this.setModal(false)
-      this.width(625)
-      this.height(460)
-      this.addCallback(function (data, type) {
-        if (data.action === 'redirect') {
-          var frameModal = document.getElementById(target.dataset.productid + 'PayFrameModal')
-          frameModal.innerHTML = '<p style="text-align:center">Проверка оплаты</p>'
-          var checkStatusInterval = setInterval(function () {
-            $.get('/cars/payment_status?order_id=' + orderId, function(resp) {
-              if (resp.response.order_status === 'approved') {
-                clearInterval(checkStatusInterval)
-                $('#' + target.dataset.productid + 'PayModal').modal('hide')
-                $('#' + target.dataset.productid + 'PaidResult').html('<span>Оплачено</span>')
-                $('#' + target.dataset.productid + 'Row').removeClass('text-danger')
-                $('#' + target.dataset.productid + 'Row').addClass('text-success')
-              }
-            });
-          }, 1000)
+    var orderId = resp.response.pg_order_id
+    var checkoutUrl = resp.response.pg_redirect_url
+    $('<iframe>', {
+      src: checkoutUrl,
+      id:  target.dataset.productid + 'PayFrame',
+      frameborder: 0,
+      scrolling: 'no'
+    }).appendTo('#' + target.dataset.productid + 'PayFrameModal');
+    var checkStatusInterval = setInterval(function () {
+      $.get('/cars/payment_status?order_id=' + orderId, function(resp) {
+        if (resp.response.pg_transaction_status === 'ok') {
+          clearInterval(checkStatusInterval)
+          $('#' + target.dataset.productid + 'PayModal').modal('hide')
+          $('#' + target.dataset.productid + 'PaidResult').html('<span>Оплачено</span>')
+          $('#' + target.dataset.productid + 'Row').removeClass('text-danger')
+          $('#' + target.dataset.productid + 'Row').addClass('text-success')
         }
-        return false
-      })
-      this.loadUrl(checkoutUrl)
-    })
+      });
+    }, 10000)
   })
 }
 
 function loadRegPaymentPage(reg_id) {
   var product_id = 'reg' + reg_id
   $.get('/cars/checkout?product_id=' + product_id, function(resp) {
-    var orderId = resp.response.order_id
-    var checkoutUrl = resp.response.checkout_url
-    $ipsp.get('checkout').config({
-      'wrapper': '#' + product_id + 'PayFrameModal',
-      'styles': {
-        'body': {'overflow': 'hidden'},
-        '.page-section-shopinfo': {display: 'none'},
-        '.page-section-footer': {display: 'none'}
-      }
-    }).scope(function () {
-      this.setModal(false)
-      this.width(625)
-      this.height(460)
-      this.addCallback(function (data, type) {
-        if (data.action === 'redirect') {
-          var frameModal = document.getElementById(product_id + 'PayFrameModal')
-          frameModal.innerHTML = '<p style="text-align:center">Проверка оплаты</p>'
-          var checkStatusInterval = setInterval(function () {
-            $.get('/cars/payment_status?order_id=' + orderId, function(resp) {
-              if (resp.response.order_status === 'approved') {
-                clearInterval(checkStatusInterval)
-                var step_2_elem = $('#reregistrationModalBuyer' + reg_id + ' .step_2')
-                var step_2_progress = $('#reregistrationModalBuyer' + reg_id + ' .step_2 .progress-bar')
-                step_2_progress.one('transitionend', function() {
-                  var step_3_elem = $('#reregistrationModalBuyer' + reg_id + ' .step_3')
-                  var step_3_progress = $('#reregistrationModalBuyer' + reg_id + ' .step_3 .progress-bar')
-                  step_3_elem.addClass('active');
-                  step_3_progress.one('transitionend', function() {
-                    var step_3_elem = $('#reregistrationModalBuyer' + reg_id + ' .step_3');
-                    step_3_elem.removeClass('disabled');
-                    $('#reregistrationModalBuyer' + reg_id + ' .step_2_body').addClass('hidden')
-                    $('#reregistrationModalBuyer' + reg_id + ' .step_3_body').removeClass('hidden')
-                  });
-                });
-                step_2_elem.removeClass('active')
-                step_2_elem.addClass('complete')
-              }
+    var orderId = resp.response.pg_order_id
+    var checkoutUrl = resp.response.pg_redirect_url
+    $('<iframe>', {
+      src: checkoutUrl,
+      id:  'myFrame',
+      frameborder: 0,
+      scrolling: 'no'
+    }).appendTo('#' + product_id + 'PayFrameModal');
+    var checkStatusInterval = setInterval(function () {
+      $.get('/cars/payment_status?order_id=' + orderId, function(resp) {
+        if (resp.response.pg_transaction_status === 'ok') {
+          clearInterval(checkStatusInterval)
+          var step_2_elem = $('#reregistrationModalBuyer' + reg_id + ' .step_2')
+          var step_2_progress = $('#reregistrationModalBuyer' + reg_id + ' .step_2 .progress-bar')
+          step_2_progress.one('transitionend', function() {
+            var step_3_elem = $('#reregistrationModalBuyer' + reg_id + ' .step_3')
+            var step_3_progress = $('#reregistrationModalBuyer' + reg_id + ' .step_3 .progress-bar')
+            step_3_elem.addClass('active');
+            step_3_progress.one('transitionend', function() {
+              var step_3_elem = $('#reregistrationModalBuyer' + reg_id + ' .step_3');
+              step_3_elem.removeClass('disabled');
+              $('#reregistrationModalBuyer' + reg_id + ' .step_2_body').addClass('hidden')
+              $('#reregistrationModalBuyer' + reg_id + ' .step_3_body').removeClass('hidden')
             });
-          }, 1000)
+          });
+          step_2_elem.removeClass('active')
+          step_2_elem.addClass('complete')
         }
-        return false
-      })
-      this.loadUrl(checkoutUrl)
-    })
+      });
+    }, 10000)
   })
 }
 
