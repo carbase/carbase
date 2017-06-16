@@ -7,6 +7,8 @@ from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 
+from wkhtmltopdf.views import PDFTemplateView
+
 from .api import get_cars_by_iin
 from .models import Reregistration, Car, Tax, Fine
 
@@ -27,6 +29,16 @@ class CarsView(View):
             'centers': Center.objects.all(),
         }
         return render(request, 'cars/list.html', template_data)
+
+
+class AgreementPDFView(PDFTemplateView):
+    def get_context_data(self, **kwargs):
+        context = super(AgreementPDFView, self).get_context_data(**kwargs)
+        context['reregistration'] = Reregistration.objects.get(id=kwargs['agreement_id'])
+        return context
+
+    show_content_in_browser = True
+    template_name = 'cars/agreement-pdf.html'
 
 
 @method_decorator(login_required, name='dispatch')
