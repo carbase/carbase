@@ -1,4 +1,5 @@
 from datetime import datetime
+import math
 
 from django.db import models
 from django.conf import settings
@@ -36,8 +37,8 @@ class NumberPlate(models.Model):
 
     def get_price(self):
         if self.digits in settings.VIP1:
-            return settings.VIP1_TAX * settings.MCI
+            return math.floor(settings.VIP1_TAX * settings.MCI)
         elif self.digits in settings.VIP2:
-            return settings.VIP2_TAX * settings.MCI
+            return math.floor(settings.VIP2_TAX * settings.MCI)
         else:
-            return settings.GRNZ_TAX * settings.MCI
+            return math.floor(settings.GRNZ_TAX * settings.MCI)

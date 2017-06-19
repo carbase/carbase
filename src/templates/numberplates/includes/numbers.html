@@ -1,3 +1,4 @@
+{% load humanize %}
 <li><a href="#" data-target="#numberplatesModal" data-toggle="modal" aria-expanded="false">Мои номера</a></li>
 <div class="modal fade numberplatesModal" id="numberplatesModal" tabindex="-1" role="dialog">
   <div class="modal-dialog modal-lg" role="document">
@@ -16,7 +17,16 @@
           </div>
           <div role="tabpanel" class="tab-pane" id="numberPlatesModalBuy">
             {% for number in available_numbers %}
-              <div class="number">{{ number.digits }} {{ number.characters }} {{ number.region }}</div>
+              <div class="number">
+                <div class="row">
+                  <span class="digits">{{ number.digits }}</span>
+                  <span class="chars">{{ number.characters }}</span>
+                  <span class="region">{{ number.region }}</span>
+                </div>
+                <button data-full-number="{{ number.digits }}{{number.characters}}{{number.region}}" class="btn btn-default btn-success buy-button">
+                  Купить за {{ number.get_price|intcomma }}₸
+                </button>
+              </div>
             {% endfor %}
           </div>
        </div>
