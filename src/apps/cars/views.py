@@ -13,13 +13,14 @@ from .models import Reregistration, Car, Tax, Fine
 
 from carbase.decorators import login_required
 from controller.models import Center, Inspection
-from numberplates.models import NumberPlate
+# , set_number_plate_owner
 from payment.api import get_checkout_url, get_order_status
 
 
 @method_decorator(login_required, name='dispatch')
 class CarsView(View):
     def get(self, request):
+        from numberplates.views import get_number_plates
         template_data = {
             'cars': get_cars_by_iin(request.session.get('user_serialNumber')),
             'reregistrations': Reregistration.objects.filter(
@@ -27,7 +28,7 @@ class CarsView(View):
                 is_number_received=False
             ),
             'centers': Center.objects.all(),
-            'available_numbers': NumberPlate.objects.filter(is_sold=False)
+            'available_numbers': get_number_plates()
         }
         return render(request, 'cars/list.html', template_data)
 
