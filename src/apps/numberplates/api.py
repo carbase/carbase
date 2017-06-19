@@ -25,6 +25,9 @@ def get_number_plates(center_id=None, limit=None, offset=None, search_pattern=No
     if search_pattern is not None:
         filters.append(Q(digits__startswith=search_pattern))
 
+    # show only available
+    filters.append(Q(is_sold=False))
+
     return NumberPlate.objects.filter(*filters)[off:(off+lim)]
 
 
