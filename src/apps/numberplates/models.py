@@ -4,6 +4,7 @@ import math
 from django.db import models
 from django.conf import settings
 
+from controller.models import Center
 
 class NumberPlate(models.Model):
     # 001,100,777,etc.
@@ -22,6 +23,8 @@ class NumberPlate(models.Model):
     buyer_id = models.CharField(max_length=12, blank=True)
     # Form setup
     is_installed = models.BooleanField(default=False)
+    # CON
+    center = models.ForeignKey(Center, null=True)
 
     class Meta:
         ordering = ['digits']
@@ -29,9 +32,9 @@ class NumberPlate(models.Model):
     def __str__(self):
         return '{}{}{}'.format(self.digits, self.characters, self.region)
 
-    def set_owner(self, buyer_id, owner_id):
-        self.buyer_id = buyer_id
-        self.owner_id = owner_id
+    def set_owner(self, user_id):
+        self.buyer_id = user_id
+        self.owner_id = user_id
         self.is_sold = True
         self.sale_date = datetime.now()
 
