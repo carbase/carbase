@@ -121,3 +121,7 @@ h2 {
   display: inline;
   width: auto;
 }
+
+.step_2_body .input-group-checkbox {
+  width: 10%;
+}

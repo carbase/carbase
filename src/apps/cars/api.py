@@ -71,6 +71,7 @@ class Reregistration(models.Model):
     car = models.ForeignKey(Car)
     amount = models.DecimalField(max_digits=19, decimal_places=2, default=0)
     amount_text = models.CharField(max_length=256, blank=True)
+    number = models.CharField(max_length=8, blank=True, default='')
     seller_sign = models.TextField(blank=True)
     buyer_sign = models.TextField(blank=True)
     created = models.DateTimeField(auto_now_add=True)
