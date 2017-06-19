@@ -14,6 +14,7 @@ from .models import Reregistration, Car, Tax, Fine
 
 from carbase.decorators import login_required
 from controller.models import Center, Inspection
+from numberplates.models import NumberPlate
 from payment.api import get_checkout_url, get_order_status
 
 
@@ -27,6 +28,7 @@ class CarsView(View):
                 is_number_received=False
             ),
             'centers': Center.objects.all(),
+            'available_numbers': NumberPlate.objects.filter(is_sold=False)
         }
         return render(request, 'cars/list.html', template_data)
 

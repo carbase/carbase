@@ -4,6 +4,9 @@
     <div class="navbar-header">
       <a href="/"><img class="navbar-brand" src="{% static 'img/logo.png' %}"></a>
     </div>
+    <ul class="nav navbar-nav">
+      {% include "numberplates/includes/numbers.html" %}
+    </ul>
     <ul class="nav navbar-nav navbar-right">
       {% for reregistration in reregistrations %}
         <li><a href="#" data-target="#reregistrationModalBuyer{{reregistration.id}}" data-toggle="modal" aria-expanded="false"> Перерегистрация {{ reregistration.car.manufacturer }} {{ reregistration.car.model }}</a></li>
