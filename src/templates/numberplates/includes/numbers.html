@@ -3,17 +3,30 @@
 <div class="modal fade numberplatesModal" id="numberplatesModal" tabindex="-1" role="dialog">
   <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
-      <div class="modal-header">
+      <div class="modal-body">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
         <ul class="nav nav-tabs">
           <li role="presentation" class="active"><a href="#numberPlatesModalMy" role="tab" data-toggle="tab">Мои номера</a></li>
           <li role="presentation"><a href="#numberPlatesModalBuy" role="tab" data-toggle="tab">Купить номера</a></li>
         </ul>
-      </div>
-      <div class="modal-body">
         <div class="tab-content">
           <div role="tabpanel" class="tab-pane active" id="numberPlatesModalMy">
-            Номеров не найдено
+            {% if owned_numbers %}
+              {% for number in owned_numbers %}
+                <div class="number">
+                  <div class="row">
+                    <span class="digits">{{ number.digits }}</span>
+                    <span class="chars">{{ number.characters }}</span>
+                    <span class="region">{{ number.region }}</span>
+                  </div>
+                  <button data-full-number="{{ number.digits }}{{number.characters}}{{number.region}}" class="btn btn-default btn-primary number-info">
+                    Куплено {{number.sale_date}} за {{ number.get_price|intcomma }}₸
+                  </button>
+                </div>
+              {% endfor %}
+            {% else %}
+            <p>Номеров не найдено</p>
+            {% endif %}
           </div>
           <div role="tabpanel" class="tab-pane" id="numberPlatesModalBuy">
             {% for number in available_numbers %}

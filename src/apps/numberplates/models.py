@@ -6,6 +6,7 @@ from django.conf import settings
 
 from controller.models import Center
 
+
 class NumberPlate(models.Model):
     # 001,100,777,etc.
     digits = models.CharField(max_length=3)
