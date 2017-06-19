@@ -1,44 +1,17 @@
-from django.http import JsonResponse
-from django.shortcuts import render
-from django.utils.decorators import method_decorator
-from django.views import View
-
-from .api import set_owner
-from .models import NumberPlate
+from .api import get_owner_number_plates, get_number_plates, set_owner
 
 from carbase.decorators import login_required
 
 
-@method_decorator(login_required, name='dispatch')
-class NumberPlatesView(View):
-    def get(self, request):
-        template_data = {
-            'numberplates': NumberPlate.objects.filter(is_sold=False),
-        }
-        return render(request, 'numberplates/list.html', template_data)
+@login_required
+def get_number_plates(owner_id=None, center_id=None, limit=None, offset=None, search_pattern=None):
+    if owner_id is not None:
+        return get_owner_number_plates(owner_id=owner_id)
+
+    return get_number_plates(center_id=center_id, limit=limit, offset=offset,
+                             search_pattern=search_pattern)
 
 
-@method_decorator(login_required, name='dispatch')
-class PersonNumberPlatesView(View):
-    def get(self, request):
-        person_id = request.session.get('user_serialNumber')
-        template_data = {
-            'numberplates': NumberPlate.objects.filter(owner_id=person_id),
-        }
-        return render(request, 'numberplates/person-list.html', template_data)
-
-    def post(self, request):
-        number_id = request.POST.get('number_id')
-        buyer_id = request.session.get('user_serialNumber')
-        owner_id = request.POST.get('owner_id')
-        number, msg = set_owner(number_id=number_id, buyer_id=buyer_id, owner_id=owner_id)
-        if not number:
-            return JsonResponse({
-                'numberplate': number.id,
-                'message': msg,
-            })
-        else:
-            return JsonResponse({
-                'numberplate': 0,
-                'message': msg,
-            })
+@login_required
+def set_number_plate_owner(plate_number, user_id):
+    return set_owner(plate_number=plate_number, user_id=user_id)
