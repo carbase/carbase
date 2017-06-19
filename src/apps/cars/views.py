@@ -5,7 +5,6 @@ from django.http import JsonResponse, QueryDict
 from django.shortcuts import render
 from django.utils.decorators import method_decorator
 from django.views import View
-from django.views.decorators.csrf import csrf_exempt
 
 from wkhtmltopdf.views import PDFTemplateView
 
@@ -44,7 +43,6 @@ class AgreementPDFView(PDFTemplateView):
 
 
 @method_decorator(login_required, name='dispatch')
-@method_decorator(csrf_exempt, name='dispatch')
 class AgreementView(View):
     def post(self, request):
         car_id = request.POST.get('car_id')
