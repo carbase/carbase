@@ -29,18 +29,21 @@
             {% endif %}
           </div>
           <div role="tabpanel" class="tab-pane" id="numberPlatesModalBuy">
-            {% for number in available_numbers %}
-              <div class="number">
-                <div class="row">
-                  <span class="digits">{{ number.digits }}</span>
-                  <span class="chars">{{ number.characters }}</span>
-                  <span class="region">{{ number.region }}</span>
+            <div id="numberplatesPaymentContainer"></div>
+            <div id="availableNumberList">
+              {% for number in available_numbers %}
+                <div class="number">
+                  <div class="row">
+                    <span class="digits">{{ number.digits }}</span>
+                    <span class="chars">{{ number.characters }}</span>
+                    <span class="region">{{ number.region }}</span>
+                  </div>
+                  <button data-price="{{ number.get_price|intcomma }}" data-number-id="{{ number.id }}" class="btn btn-default btn-success buy-button">
+                    Купить за {{ number.get_price|intcomma }}₸
+                  </button>
                 </div>
-                <button data-full-number="{{ number.digits }}{{number.characters}}{{number.region}}" class="btn btn-default btn-success buy-button">
-                  Купить за {{ number.get_price|intcomma }}₸
-                </button>
-              </div>
-            {% endfor %}
+              {% endfor %}
+            </div>
           </div>
        </div>
       </div>

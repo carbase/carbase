@@ -5,6 +5,7 @@ from django.http import JsonResponse, QueryDict
 from django.shortcuts import render
 from django.utils.decorators import method_decorator
 from django.views import View
+from django.views.decorators.csrf import csrf_exempt
 
 from wkhtmltopdf.views import PDFTemplateView
 
@@ -14,11 +15,13 @@ from .models import Reregistration, Car, Tax, Fine
 from carbase.decorators import login_required
 from controller.models import Center, Inspection
 # , set_number_plate_owner
+from numberplates.models import NumberPlate
 from numberplates.views import get_number_plates
 from payment.api import get_checkout_url, get_order_status
 
 
 @method_decorator(login_required, name='dispatch')
+@method_decorator(csrf_exempt, name='dispatch')
 class CarsView(View):
     def get(self, request):
         template_data = {
@@ -45,6 +48,7 @@ class AgreementPDFView(PDFTemplateView):
 
 
 @method_decorator(login_required, name='dispatch')
+@method_decorator(csrf_exempt, name='dispatch')
 class AgreementView(View):
     def post(self, request):
         car_id = request.POST.get('car_id')
@@ -79,6 +83,10 @@ class AgreementView(View):
             inspection.center_id = request.PUT.get('inspectionCenterId')
             inspection.date = request.PUT.get('inspectionDate')
             inspection.save()
+        if request.PUT.get('number'):
+            number = NumberPlate.objects.get(id=request.PUT.get('number'))
+            reregistration.number = str(number)
+        print(request.PUT, reregistration.number)
         reregistration.save()
         return JsonResponse({
             'reregistration_id': reregistration.id,
@@ -94,25 +102,40 @@ class AgreementView(View):
 @login_required
 def checkout(request):
     product_id = request.GET.get('product_id')
-    if product_id.startswith('tax'):
-        Model = Tax
-        entity_id = product_id[3:]
-    elif product_id.startswith('fine'):
-        Model = Fine
-        entity_id = product_id[4:]
 
     if product_id.startswith('reg'):
+        reregistration = Reregistration.objects.get(id=product_id[3:])
+        reg_amount = 11458.45
+        if reregistration.number:
+            num_str = reregistration.number
+            number = NumberPlate.objects.get(digits=num_str[0:3], characters=num_str[3:6], region=num_str[6:])
+            if not number.is_sold:
+                reg_amount = number.get_price()
         parameters = {
             'product_id': product_id,
-            'amount': 11458.45,
+            'amount': reg_amount,
             'order_desc': 'За выпуск СРТС и ГРНЗ'
         }
-    else:
-        entity = Model.objects.get(id=entity_id)
+    elif product_id.startswith('num'):
+        number = NumberPlate.objects.get(id=product_id[3:])
         parameters = {
             'product_id': product_id,
-            'amount': floor(entity.amount),
-            'order_desc': entity.info
+            'amount': floor(number.get_price()),
+            'order_desc': 'Покупка номера ' + str(number)
+        }
+    elif product_id.startswith('fine'):
+        fine = Tax.objects.get(id=product_id[4:])
+        parameters = {
+            'product_id': product_id,
+            'amount': floor(fine.amount),
+            'order_desc': fine.info
+        }
+    elif product_id.startswith('tax'):
+        tax = Tax.objects.get(id=product_id[3:])
+        parameters = {
+            'product_id': product_id,
+            'amount': floor(tax.amount),
+            'order_desc': tax.info
         }
 
     checkout = get_checkout_url(parameters)
@@ -131,10 +154,15 @@ def payment_status(request):
         elif product_id.startswith('fine'):
             Model = Fine
             entity_id = product_id[4:]
+        elif product_id.startswith('num'):
+            Model = NumberPlate
+            entity_id = product_id[3:]
         else:
             Model = Reregistration
             entity_id = product_id[3:]
         entity = Model.objects.get(id=entity_id)
+        if product_id.startswith('num'):
+            entity.set_owner(request.session.get('user_serialNumber')[3:])
         entity.is_paid = True
         entity.is_tax_paid = True
         entity.save()

@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load humanize %}
 
 {% block title %}Мои машины{% endblock %}
 {% block styles %}
@@ -194,55 +195,83 @@
                 {% include "cars/includes/agreement.html" with car=car reregistration=reregistration is_buyer=True %}
               </div>
               <div class="step_2_body {% if not reregistration.buyer_sign or not reregistration.seller_sign or reregistration.number %}hidden{% endif %}">
-                {% if reregistration.buyer_sign and reregistration.seller_sign and not reregistration.number %}
-                  <div class="panel-group" id="reg{{reregistration.id}}NumberSelector" role="tablist" aria-multiselectable="true">
-                    <div class="panel panel-default">
-                      <div class="panel-heading" role="tab">
-                        <h4 class="panel-title">
-                          <a role="button" data-toggle="collapse" href="#reg{{reregistration.id}}NumberPanel1">
-                            Случайно сгенерированная последовательность
-                          </a>
-                        </h4>
-                      </div>
-                      <div id="reg{{reregistration.id}}NumberPanel1" class="panel-collapse collapse" data-parent="#reg{{reregistration.id}}NumberSelector" role="tabpanel">
-                        <div class="panel-body">
-                          Получить случайно сгенерированная последовательность
-                          <button>Далее</button>
-                        </div>
-                      </div>
+                <div class="panel-group" id="reg{{reregistration.id}}NumberSelector" role="tablist" aria-multiselectable="true">
+                  <div class="panel panel-default">
+                    <div class="panel-heading" role="tab">
+                      <h4 class="panel-title">
+                        <a role="button" data-toggle="collapse" href="#reg{{reregistration.id}}NumberPanel1">
+                          Случайно сгенерированная последовательность
+                        </a>
+                      </h4>
                     </div>
-                    <div class="panel panel-default">
-                      <div class="panel-heading" role="tab">
-                        <h4 class="panel-title">
-                          <a class="collapsed" role="button" data-toggle="collapse" href="#reg{{reregistration.id}}NumberPanel2">
-                            Выбрать из ранее купленных номеров
-                          </a>
-                        </h4>
-                      </div>
-                      <div id="reg{{reregistration.id}}NumberPanel2" class="panel-collapse collapse" data-parent="#reg{{reregistration.id}}NumberSelector" role="tabpanel">
-                        <div class="panel-body">
-                          У вас нету номеров
-                          <button>Далее</button>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="panel panel-default">
-                      <div class="panel-heading" role="tab">
-                        <h4 class="panel-title">
-                          <a class="collapsed" role="button" data-toggle="collapse" href="#reg{{reregistration.id}}NumberPanel3">
-                            Купить номер
-                          </a>
-                        </h4>
-                      </div>
-                      <div id="reg{{reregistration.id}}NumberPanel3" class="panel-collapse collapse" data-parent="#reg{{reregistration.id}}NumberSelector" role="tabpanel">
-                        <div class="panel-body">
-                          Номера:
-                          <button>Далее</button>
-                        </div>
+                    <div id="reg{{reregistration.id}}NumberPanel1" class="panel-collapse collapse in" data-parent="#reg{{reregistration.id}}NumberSelector" role="tabpanel">
+                      <div class="panel-body">
+                        <label>
+                        <input type="radio" name="reregistrationNumber" value="" checked>
+                          Получить случайно сгенерированную последовательность
+                        </label>
                       </div>
                     </div>
                   </div>
-                {% endif %}
+                  <div class="panel panel-default">
+                    <div class="panel-heading" role="tab">
+                      <h4 class="panel-title">
+                        <a class="collapsed" role="button" data-toggle="collapse" href="#reg{{reregistration.id}}NumberPanel2">
+                          Выбрать из ранее купленных номеров
+                        </a>
+                      </h4>
+                    </div>
+                    <div id="reg{{reregistration.id}}NumberPanel2" class="panel-collapse collapse" data-parent="#reg{{reregistration.id}}NumberSelector" role="tabpanel">
+                      <div class="panel-body">
+                        {% if owned_numbers %}
+                          {% for number in owned_numbers %}
+                          <label>
+                            <input type="radio" name="reregistrationNumber" value="{{ number.id }}">
+                            <div class="number">
+                              <div class="row">
+                                <span class="digits">{{ number.digits }}</span>
+                                <span class="chars">{{ number.characters }}</span>
+                                <span class="region">{{ number.region }}</span>
+                              </div>
+                            </div>
+                          </label>
+                          {% endfor %}
+                        {% else %}
+                          У вас нету номеров
+                        {% endif %}
+                      </div>
+                    </div>
+                  </div>
+                  <div class="panel panel-default">
+                    <div class="panel-heading" role="tab">
+                      <h4 class="panel-title">
+                        <a class="collapsed" role="button" data-toggle="collapse" href="#reg{{reregistration.id}}NumberPanel3">
+                          Купить номер
+                        </a>
+                      </h4>
+                    </div>
+                    <div id="reg{{reregistration.id}}NumberPanel3" class="panel-collapse collapse" data-parent="#reg{{reregistration.id}}NumberSelector" role="tabpanel">
+                      <div class="panel-body">
+                        {% for number in available_numbers %}
+                        <label>
+                          <input type="radio" name="reregistrationNumber" value="{{ number.pk }}">
+                          <div class="number">
+                            <div class="row">
+                              <span class="digits">{{ number.digits }}</span>
+                              <span class="chars">{{ number.characters }}</span>
+                              <span class="region">{{ number.region }}</span>
+                            </div>
+                            <div class="btn btn-default btn-success">
+                              Цена {{ number.get_price|intcomma }}₸
+                            </div>
+                          </div>
+                        </label>
+                        {% endfor %}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <button class="btn btn-primary" data-regid="{{ reregistration.id }}" id="reregistrationStep2SubmitButton">Далее</button>
               </div>
               <div class="step_3_body {% if not reregistration.number or reregistration.is_tax_paid %}hidden{% endif %}">
                 <div class="modal-body agreement-pay-modal" id="reg{{reregistration.id}}PayFrameModal"></div>
