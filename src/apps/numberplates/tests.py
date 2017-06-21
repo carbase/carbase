@@ -32,13 +32,24 @@ class NumberPlatesTestCase(TestCase):
 
     def test_number_list_on_pattern(self):
         rows = 9
-        pattern = '00'
+        pattern = '00 77'
         for i in range(rows):
-            dts = '00{}'.format(i+1)
-            NumberPlate.objects.create(digits=dts, characters='KAZ', region='01',
-                                       owner_id='123456789100')
+            # first pattern
+            NumberPlate.objects.create(
+                digits='00{}'.format(i+1),
+                characters='KAZ',
+                region='01',
+                owner_id='123456789100'
+            )
+            # second pattern
+            NumberPlate.objects.create(
+                digits='77{}'.format(i+1),
+                characters='KAZ',
+                region='01',
+                owner_id='123456789100'
+            )
         fetched = get_number_plates(search_pattern=pattern)
-        self.assertEqual(rows, len(fetched))
+        self.assertEqual(rows*2, len(fetched))
 
     def test_set_owner(self):
         plate_number = '001KAZ01'

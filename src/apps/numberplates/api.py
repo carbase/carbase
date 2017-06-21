@@ -1,3 +1,5 @@
+from functools import reduce
+
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
 
@@ -23,7 +25,9 @@ def get_number_plates(center_id=None, limit=None, offset=None, search_pattern=No
 
     # search pattern specified
     if search_pattern is not None:
-        filters.append(Q(digits__startswith=search_pattern))
+        values = search_pattern.split(' ')
+        query = reduce(lambda q, value: q|Q(digits__startswith=value), values, Q())
+        filters.append(query)
 
     # show only available
     filters.append(Q(is_sold=False))
