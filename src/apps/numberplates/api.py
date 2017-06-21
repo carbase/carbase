@@ -26,7 +26,7 @@ def get_number_plates(center_id=None, limit=None, offset=None, search_pattern=No
     # search pattern specified
     if search_pattern is not None:
         values = search_pattern.split(' ')
-        query = reduce(lambda q, value: q|Q(digits__startswith=value), values, Q())
+        query = reduce(lambda q, value: q|Q(digits__contains=value), values, Q())
         filters.append(query)
 
     # show only available
