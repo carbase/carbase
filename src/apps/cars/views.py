@@ -1,6 +1,7 @@
 import xml.etree.ElementTree as ET
 from math import floor
 
+from django.contrib.humanize.templatetags.humanize import intcomma
 from django.http import JsonResponse, QueryDict
 from django.shortcuts import render
 from django.utils.decorators import method_decorator
@@ -167,3 +168,18 @@ def payment_status(request):
         entity.is_tax_paid = True
         entity.save()
     return JsonResponse(order_info)
+
+
+@login_required
+def get_numbers(request):
+    numbers = get_number_plates(search_pattern=request.GET.get('q'))
+    numbers_list = []
+    for number in numbers:
+        numbers_list.append({
+            'id': number.id,
+            'digits': number.digits,
+            'characters': number.characters,
+            'region': number.region,
+            'price': intcomma(number.get_price())
+        })
+    return JsonResponse(numbers_list, safe=False)

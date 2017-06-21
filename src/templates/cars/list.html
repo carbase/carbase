@@ -252,21 +252,29 @@
                     </div>
                     <div id="reg{{reregistration.id}}NumberPanel3" class="panel-collapse collapse" data-parent="#reg{{reregistration.id}}NumberSelector" role="tabpanel">
                       <div class="panel-body">
-                        {% for number in available_numbers %}
-                        <label>
-                          <input type="radio" name="reregistrationNumber" value="{{ number.pk }}">
-                          <div class="number">
-                            <div class="row">
-                              <span class="digits">{{ number.digits }}</span>
-                              <span class="chars">{{ number.characters }}</span>
-                              <span class="region">{{ number.region }}</span>
+                        <div class="input-group" id="numberPlatesReregistrationSearchGroup">
+                          <input type="text" class="form-control" placeholder="Поиск номеров...">
+                          <span class="input-group-btn">
+                            <button class="btn btn-default" type="button">Найти</button>
+                          </span>
+                        </div>
+                        <div id="numberPlatesReregistrationNumbers">
+                          {% for number in available_numbers %}
+                          <label>
+                            <input type="radio" name="reregistrationNumber" value="{{ number.pk }}">
+                            <div class="number">
+                              <div class="row">
+                                <span class="digits">{{ number.digits }}</span>
+                                <span class="chars">{{ number.characters }}</span>
+                                <span class="region">{{ number.region }}</span>
+                              </div>
+                              <div class="btn btn-default btn-success">
+                                Цена {{ number.get_price|intcomma }}₸
+                              </div>
                             </div>
-                            <div class="btn btn-default btn-success">
-                              Цена {{ number.get_price|intcomma }}₸
-                            </div>
-                          </div>
-                        </label>
-                        {% endfor %}
+                          </label>
+                          {% endfor %}
+                        </div>
                       </div>
                     </div>
                   </div>

@@ -4,7 +4,7 @@
     <div class="navbar-header">
       <a href="/"><img class="navbar-brand" src="{% static 'img/logo.png' %}"></a>
     </div>
-    {% if request.session.user_commonName %}
+    {% if request.session.user_commonName and request.path == '/cars/' %}
       <ul class="nav navbar-nav">
         {% include "numberplates/includes/numbers.html" %}
       </ul>

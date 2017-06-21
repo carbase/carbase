@@ -31,18 +31,26 @@
           <div role="tabpanel" class="tab-pane" id="numberPlatesModalBuy">
             <div id="numberplatesPaymentContainer"></div>
             <div id="availableNumberList">
-              {% for number in available_numbers %}
-                <div class="number">
-                  <div class="row">
-                    <span class="digits">{{ number.digits }}</span>
-                    <span class="chars">{{ number.characters }}</span>
-                    <span class="region">{{ number.region }}</span>
+              <div class="input-group" id="numberPlatesModalBuySearchGroup">
+                <input type="text" class="form-control" placeholder="Поиск номеров...">
+                <span class="input-group-btn">
+                  <button class="btn btn-default" type="button">Найти</button>
+                </span>
+              </div>
+              <div id="numberPlatesModalNumbers">
+                {% for number in available_numbers %}
+                  <div class="number">
+                    <div class="row">
+                      <span class="digits">{{ number.digits }}</span>
+                      <span class="chars">{{ number.characters }}</span>
+                      <span class="region">{{ number.region }}</span>
+                    </div>
+                    <button data-price="{{ number.get_price|intcomma }}" data-number-id="{{ number.id }}" class="btn btn-default btn-success buy-button">
+                      Купить за {{ number.get_price|intcomma }}₸
+                    </button>
                   </div>
-                  <button data-price="{{ number.get_price|intcomma }}" data-number-id="{{ number.id }}" class="btn btn-default btn-success buy-button">
-                    Купить за {{ number.get_price|intcomma }}₸
-                  </button>
-                </div>
-              {% endfor %}
+                {% endfor %}
+              </div>
             </div>
           </div>
        </div>
