@@ -8,14 +8,14 @@ from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 
-from wkhtmltopdf.views import PDFTemplateView
+from wkhtmltopdf.views import PDFTemplateView, PDFTemplateResponse
 
-from .api import get_cars_by_iin
+from .api import get_cars_by_iin, get_email_by_iin
 from .models import Reregistration, Car, Tax, Fine
 
 from carbase.decorators import login_required
+from carbase.helpers import send_mail
 from controller.models import Center, Inspection
-# , set_number_plate_owner
 from numberplates.models import NumberPlate
 from numberplates.views import get_number_plates
 from payment.api import get_checkout_url, get_order_status
@@ -87,8 +87,17 @@ class AgreementView(View):
         if request.PUT.get('number'):
             number = NumberPlate.objects.get(id=request.PUT.get('number'))
             reregistration.number = str(number)
-        print(request.PUT, reregistration.number)
         reregistration.save()
+        is_sign_request = request.PUT.get('seller_sign') or request.PUT.get('buyer_sign')
+        if reregistration.seller_sign and reregistration.buyer_sign and is_sign_request:
+            emails = [get_email_by_iin(reregistration.buyer[3:]), get_email_by_iin(reregistration.seller[3:])]
+            email_title = 'Договор купли/продажи'
+            email_text = 'Договор купли/продажи находиться в приложении к письму'
+            attach_filename = 'Договор купли/продажи.pdf'
+            pdf_resp = PDFTemplateResponse(request, 'cars/agreement-pdf.html', {'reregistration': reregistration})
+            attach_data = pdf_resp.rendered_content
+            attach_mime = 'application/pdf'
+            send_mail(email_title, email_text, emails, attach_filename, attach_data, attach_mime)
         return JsonResponse({
             'reregistration_id': reregistration.id,
             'seller_sign': reregistration.seller_sign,
