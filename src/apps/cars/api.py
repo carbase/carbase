@@ -28,6 +28,14 @@ def pay_by_id(product_id):
         reg.save()
 
 
+def get_email_by_iin(iin):
+    try:
+        email_obj = Email.objects.get(iin=iin)
+        return email_obj.email
+    except Email.ObjectDoesNotExist:
+        pass
+
+
 class Car(models.Model):
     manufacturer = models.CharField(max_length=256, default='')
     model = models.CharField(max_length=256, default='')
@@ -78,3 +86,8 @@ class Reregistration(models.Model):
     updated = models.DateTimeField(auto_now=True)
     is_tax_paid = models.BooleanField(default=False)
     is_number_received = models.BooleanField(default=False)
+
+
+class Email(models.Model):
+    iin = models.CharField(max_length=12)
+    email = models.CharField(max_length=256)

@@ -21,3 +21,8 @@ class CarAdmin(admin.ModelAdmin):
 @admin.register(models.Reregistration)
 class ReregistrationAdmin(admin.ModelAdmin):
     list_display = ('car', 'seller', 'buyer')
+
+
+@admin.register(models.Email)
+class EmailAdmin(admin.ModelAdmin):
+    list_display = ('iin', 'email')

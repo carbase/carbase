@@ -15,10 +15,8 @@ class IndexView(View):
             inspections = Reregistration.objects.filter(buyer='IIN' + iin, inspection__is_success=False)
         elif request.user.is_authenticated:
             inspector = Inspector.objects.get(user=request.user)
-            inspections = Reregistration.objects.filter(
-                inspection__center=inspector.center,
-                inspection__is_success=False
-            )
+            inspections = Reregistration.objects.exclude(inspection__is_success=True)
+            inspections.filter(inspection__center=inspector.center)
         return render(request, 'controller/index.html', {'inspections': inspections})
 
     def post(self, request):
