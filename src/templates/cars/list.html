@@ -217,7 +217,7 @@
                     <div id="reg{{reregistration.id}}NumberPanel1" class="panel-collapse collapse in" data-parent="#reg{{reregistration.id}}NumberSelector" role="tabpanel">
                       <div class="panel-body">
                         <label>
-                        <input type="radio" name="reregistrationNumber" value="" checked>
+                        <input type="radio" name="reregistrationNumber" value="RANDOM" checked>
                           Получить случайно сгенерированную последовательность
                         </label>
                       </div>
@@ -294,10 +294,12 @@
               </div>
               <div class="step_3_body {% if not reregistration.number or reregistration.is_tax_paid %}hidden{% endif %}">
                 <div class="modal-body agreement-pay-modal" id="reg{{reregistration.id}}PayFrameModal"></div>
-                {% if reregistration.number and not reregistration.is_tax_paid %}
-                  <script>window.onload = function() { loadRegPaymentPage({{ reregistration.id }}) }</script>
-                {% else %}
-                  <div class="tax_is_paid_text">Оплата произведена</div>
+                {% if reregistration.number %}
+                  {% if not reregistration.is_tax_paid %}
+                    <script>window.onload = function() { loadRegPaymentPage({{ reregistration.id }}) }</script>
+                  {% else %}
+                    <div class="tax_is_paid_text">Оплата произведена</div>
+                  {% endif %}
                 {% endif %}
               </div>
               <div class="step_4_body {% if not reregistration.is_tax_paid %}hidden{% endif %}">

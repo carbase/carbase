@@ -85,7 +85,9 @@ class AgreementView(View):
             inspection.date = request.PUT.get('inspectionDate')
             inspection.save()
         if request.PUT.get('number'):
-            number = NumberPlate.objects.get(id=request.PUT.get('number'))
+            number = request.PUT.get('number')
+            if number != 'RANDOM':
+                number = NumberPlate.objects.get(id=number)
             reregistration.number = str(number)
         reregistration.save()
         is_sign_request = request.PUT.get('seller_sign') or request.PUT.get('buyer_sign')
@@ -116,7 +118,7 @@ def checkout(request):
     if product_id.startswith('reg'):
         reregistration = Reregistration.objects.get(id=product_id[3:])
         reg_amount = 11458.45
-        if reregistration.number:
+        if reregistration.number and reregistration.number != 'RANDOM':
             num_str = reregistration.number
             number = NumberPlate.objects.get(digits=num_str[0:3], characters=num_str[3:6], region=num_str[6:])
             if not number.is_sold:
