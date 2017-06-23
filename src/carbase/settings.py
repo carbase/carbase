@@ -48,9 +48,11 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.humanize',
+    'django.contrib.sites',
 
     'debug_toolbar',
     'wkhtmltopdf',
+    'qrcode',
 
     'cars.apps.CarsConfig',
     'controller.apps.ControllerConfig',

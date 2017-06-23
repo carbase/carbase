@@ -1,3 +1,4 @@
+{% load qr_tags %}
 <div class="agreement-text">
   <div class="agreement-xml" id="agreementXml{{reregistration.id}}">
     <agreement>
@@ -85,11 +86,11 @@
   </p>
   <h3>ПОДПИСИ СТОРОН</h3>
   {% if is_buyer %}
-    <p>Продавец: <span id="sellerSign{{reregistration.id}}">{{ reregistration.seller_sign }}</span></p>
-    <p>Покупатель: <span id="buyerSign{{reregistration.id}}">{% if reregistration.buyer_sign %}{{ reregistration.buyer_sign }}{% else %}<button data-reregistrationid="{{reregistration.id}}" data-side="buyer" onclick="signAgreement(this)" class="btn btn-default">Подписать</button>{% endif %}</span></p>
+    <p class="agreementSign">Продавец: <br><span id="sellerSign{{reregistration.id}}">{% if reregistration.seller_sign %}{% qr_from_text reregistration.seller_sign "l" %}{% endif %}</span></p>
+    <p class="agreementSign">Покупатель: <br><span id="buyerSign{{reregistration.id}}">{% if reregistration.buyer_sign %}{% qr_from_text reregistration.buyer_sign "l" %}{% else %}<button data-reregistrationid="{{reregistration.id}}" data-side="buyer" onclick="signAgreement(this)" class="btn btn-default">Подписать</button>{% endif %}</span></p>
   {% else %}
-    <p>Продавец: <span id="sellerSign{{reregistration.id}}">{% if reregistration.seller_sign %}{{ reregistration.seller_sign }}{% else %}<button data-reregistrationid="{{reregistration.id}}" data-side="seller" onclick="signAgreement(this)" class="btn btn-default">Подписать</button>{% endif %}</span></p>
-    <p>Покупатель: <span id="buyerSign{{reregistration.id}}">{{ reregistration.buyer_sign }}</span></p>
+    <p class="agreementSign">Продавец: <br><span id="sellerSign{{reregistration.id}}">{% if reregistration.seller_sign %}{% qr_from_text reregistration.seller_sign "l" %}{% else %}<button data-reregistrationid="{{reregistration.id}}" data-side="seller" onclick="signAgreement(this)" class="btn btn-default">Подписать</button>{% endif %}</span></p>
+    <p class="agreementSign">Покупатель: <br><span id="buyerSign{{reregistration.id}}">{% if reregistration.buyer_sign %}{% qr_from_text reregistration.buyer_sign "l" %}{% endif %}</span></p>
   {% endif %}
 
   <a href="/cars/agreement/{{reregistration.id}}" target="_blank">Скачать в PDF</a>
