@@ -156,7 +156,7 @@
       </div>
     {% endfor %}
     {% for reregistration in reregistrations %}
-      <div class="modal fade reregistrationModal" id="reregistrationModalBuyer{{reregistration.id}}" tabindex="-1" role="dialog">
+      <div class="modal fade reregistrationModal reregistration-modal-buyer" id="reregistrationModalBuyer{{reregistration.id}}" tabindex="-1" role="dialog">
         <div class="modal-dialog modal-lg" role="document">
           <div class="modal-content">
             <div class="modal-header">
@@ -195,6 +195,16 @@
                 {% include "cars/includes/agreement.html" with car=car reregistration=reregistration is_buyer=True %}
               </div>
               <div class="step_2_body {% if not reregistration.buyer_sign or not reregistration.seller_sign or reregistration.number %}hidden{% endif %}">
+                {% if reregistration.is_tax_paid %}
+                  <div class="number">
+                    <div class="row">
+                      <span class="digits">{{ reregistration.number|slice:":3" }}</span>
+                      <span class="chars">{{ reregistration.number|slice:"3:6" }}</span>
+                      <span class="region">{{ reregistration.number|slice:"6:" }}</span>
+                    </div>
+                  </div>
+                  <p class="text-warning">Невозможно сменить номер после оплаты!</p>
+                {% else %}
                 <div class="panel-group" id="reg{{reregistration.id}}NumberSelector" role="tablist" aria-multiselectable="true">
                   <div class="panel panel-default">
                     <div class="panel-heading" role="tab">
@@ -280,11 +290,14 @@
                   </div>
                 </div>
                 <button class="btn btn-primary" data-regid="{{ reregistration.id }}" id="reregistrationStep2SubmitButton">Далее</button>
+                {% endif %}
               </div>
               <div class="step_3_body {% if not reregistration.number or reregistration.is_tax_paid %}hidden{% endif %}">
                 <div class="modal-body agreement-pay-modal" id="reg{{reregistration.id}}PayFrameModal"></div>
                 {% if reregistration.number and not reregistration.is_tax_paid %}
                   <script>window.onload = function() { loadRegPaymentPage({{ reregistration.id }}) }</script>
+                {% else %}
+                  <div class="tax_is_paid_text">Оплата произведена</div>
                 {% endif %}
               </div>
               <div class="step_4_body {% if not reregistration.is_tax_paid %}hidden{% endif %}">

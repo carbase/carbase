@@ -135,3 +135,7 @@ h2 {
 .agreementSign img {
   border: 1px solid #000;
 }
+
+.reregistration-modal-buyer .complete .bs-wizard-dot, .reregistration-modal-buyer .active .bs-wizard-dot {
+  cursor: pointer;
+}

@@ -45,40 +45,89 @@ function openPaymentModal(target) {
   })
 }
 
+$('#reregistrationStep2SubmitButton').on('click', function() {
+  var numberId = $('input[name="reregistrationNumber"]:checked').val()
+  var reg_id = $(this).data('regid')
+  $.put('/cars/agreement', {'number': numberId, 'reregistrationId': reg_id}, function(resp) {
+    var step_2_elem = $('#reregistrationModalBuyer' + reg_id + ' .step_2')
+    var step_2_progress = $('#reregistrationModalBuyer' + reg_id + ' .step_2 .progress-bar')
+    step_2_progress.one('transitionend', function() {
+      var step_3_elem = $('#reregistrationModalBuyer' + reg_id + ' .step_3')
+      var step_3_progress = $('#reregistrationModalBuyer' + reg_id + ' .step_3 .progress-bar')
+      step_3_elem.addClass('active');
+      step_3_progress.one('transitionend', function() {
+        var step_3_elem = $('#reregistrationModalBuyer' + reg_id + ' .step_3');
+        step_3_elem.removeClass('disabled');
+        hide_step_bodies($('#reregistrationModalBuyer' + resp.reregistration_id))
+        $('#reregistrationModalBuyer' + reg_id + ' .step_3_body').removeClass('hidden')
+        enable_wizard_dot()
+      });
+    });
+    loadRegPaymentPage(reg_id);
+    if(step_2_elem.hasClass('complete')) {
+      hide_step_bodies($('#reregistrationModalBuyer' + resp.reregistration_id))
+      $('#reregistrationModalBuyer' + reg_id + ' .step_3_body').removeClass('hidden')
+    } else {
+      step_2_elem.removeClass('active')
+      step_2_elem.addClass('complete')
+    }
+  });
+})
+
+var paymentStatusIntervals = {}
+
 function loadRegPaymentPage(reg_id) {
   var product_id = 'reg' + reg_id
-  $.get('/cars/checkout?product_id=' + product_id, function(resp) {
-    var orderId = resp.response.pg_order_id
-    var checkoutUrl = resp.response.pg_redirect_url
-    $('<iframe>', {
-      src: checkoutUrl,
-      id:  'myFrame',
-      frameborder: 0,
-      scrolling: 'no'
-    }).appendTo('#' + product_id + 'PayFrameModal');
-    var checkStatusInterval = setInterval(function () {
-      $.get('/cars/payment_status?order_id=' + orderId, function(resp) {
-        if (resp.response.pg_transaction_status === 'ok') {
-          clearInterval(checkStatusInterval)
-          var step_3_elem = $('#reregistrationModalBuyer' + reg_id + ' .step_3')
-          var step_3_progress = $('#reregistrationModalBuyer' + reg_id + ' .step_3 .progress-bar')
-          step_3_progress.one('transitionend', function() {
-            var step_4_elem = $('#reregistrationModalBuyer' + reg_id + ' .step_4')
-            var step_4_progress = $('#reregistrationModalBuyer' + reg_id + ' .step_4 .progress-bar')
-            step_4_elem.addClass('active');
-            step_4_progress.one('transitionend', function() {
-              var step_4_elem = $('#reregistrationModalBuyer' + reg_id + ' .step_4');
-              step_4_elem.removeClass('disabled');
-              $('#reregistrationModalBuyer' + reg_id + ' .step_3_body').addClass('hidden')
-              $('#reregistrationModalBuyer' + reg_id + ' .step_4_body').removeClass('hidden')
+  if (!$('#reregistrationModalBuyer' + reg_id + ' .tax_is_paid_text').length) {
+    if(paymentStatusIntervals[product_id]) {
+      clearInterval(paymentStatusIntervals[product_id])
+    }
+    $('#' + product_id + 'PayFrameModal').html('')
+    $.get('/cars/checkout?product_id=' + product_id, function(resp) {
+      var orderId = resp.response.pg_order_id
+      var checkoutUrl = resp.response.pg_redirect_url
+      $('<iframe>', {
+        src: checkoutUrl,
+        id:  'myFrame',
+        frameborder: 0,
+        scrolling: 'no'
+      }).appendTo('#' + product_id + 'PayFrameModal');
+      var checkStatusInterval = setInterval(function () {
+        $.get('/cars/payment_status?order_id=' + orderId, function(resp) {
+          if (resp.response.pg_transaction_status === 'ok') {
+            clearInterval(checkStatusInterval)
+            var step_3_elem = $('#reregistrationModalBuyer' + reg_id + ' .step_3')
+            var step_3_progress = $('#reregistrationModalBuyer' + reg_id + ' .step_3 .progress-bar')
+            step_3_progress.one('transitionend', function() {
+              var step_4_elem = $('#reregistrationModalBuyer' + reg_id + ' .step_4')
+              var step_4_progress = $('#reregistrationModalBuyer' + reg_id + ' .step_4 .progress-bar')
+              step_4_elem.addClass('active');
+              step_4_progress.one('transitionend', function() {
+                var step_4_elem = $('#reregistrationModalBuyer' + reg_id + ' .step_4');
+                step_4_elem.removeClass('disabled');
+                hide_step_bodies($('#reregistrationModalBuyer' + reg_id))
+                $('#reregistrationModalBuyer' + reg_id + ' .step_4_body').removeClass('hidden')
+                var is_paid_text = '<div class="tax_is_paid_text">Оплата произведена</div>'
+                var number_freeze_text = '<p class="text-warning">Невозможно сменить номер после оплаты!</p>'
+                console.log($('#reregistrationModalBuyer' + reg_id + ' .step_3_body'))
+                $('#reregistrationModalBuyer' + reg_id + ' .step_3_body').html(is_paid_text)
+                $('#reregistrationModalBuyer' + reg_id + ' .step_2_body').html(number_freeze_text)
+                enable_wizard_dot();
+              });
             });
-          });
-          step_3_elem.removeClass('active')
-          step_3_elem.addClass('complete')
-        }
-      });
-    }, 10000)
-  })
+            if(step_3_elem.hasClass('complete')) {
+              hide_step_bodies($('#reregistrationModalBuyer' + reg_id))
+              $('#reregistrationModalBuyer' + reg_id + ' .step_4_body').removeClass('hidden')
+            } else {
+              step_3_elem.removeClass('active')
+              step_3_elem.addClass('complete')
+            }
+          }
+        });
+      }, 10000)
+      paymentStatusIntervals[product_id] = checkStatusInterval
+    })
+  }
 }
 
 function createAgreement(target) {
@@ -193,10 +242,12 @@ function signAgreement(target) {
       }
       $.put('/cars/agreement', data, function(resp) {
         if (side == 'seller') {
-          $('#sellerSign' + data.reregistrationId).html(resp.seller_sign)
+          var qr_code = '<img src="https://chart.googleapis.com/chart?cht=qr&amp;chs=350x350&amp;chl=' + resp.seller_sign + '">'
+          $('#sellerSign' + data.reregistrationId).html(qr_code)
         }
         if (side == 'buyer') {
-          $('#buyerSign' + data.reregistrationId).html(resp.buyer_sign)
+          var qr_code = '<img src="https://chart.googleapis.com/chart?cht=qr&amp;chs=350x350&amp;chl=' + resp.buyer_sign + '">'
+          $('#buyerSign' + data.reregistrationId).html(qr_code)
           if (resp.reregistration_id) {
             var step_1_elem = $('#reregistrationModalBuyer' + resp.reregistration_id + ' .step_1')
             var step_1_progress = $('#reregistrationModalBuyer' + resp.reregistration_id + ' .step_1 .progress-bar')
@@ -207,13 +258,19 @@ function signAgreement(target) {
               step_2_progress.one('transitionend', function() {
                 var step_2_elem = $('#reregistrationModalBuyer' + resp.reregistration_id + ' .step_2');
                 step_2_elem.removeClass('disabled');
-                $('#reregistrationModalBuyer' + resp.reregistration_id + ' .step_1_body').addClass('hidden')
+                hide_step_bodies($('#reregistrationModalBuyer' + resp.reregistration_id))
                 $('#reregistrationModalBuyer' + resp.reregistration_id + ' .step_2_body').removeClass('hidden')
+                enable_wizard_dot();
               });
             });
             loadRegPaymentPage(resp.reregistration_id);
-            step_1_elem.removeClass('active')
-            step_1_elem.addClass('complete')
+            if(step_1_elem.hasClass('complete')) {
+              hide_step_bodies($('#reregistrationModalBuyer' + resp.reregistration_id))
+              $('#reregistrationModalBuyer' + reg_id + ' .step_2_body').removeClass('hidden')
+            } else {
+              step_1_elem.removeClass('active')
+              step_1_elem.addClass('complete')
+            }
           }
         }
       })
@@ -244,3 +301,37 @@ function change_inspection_time(target) {
     }
   })
 }
+
+var enable_wizard_dot = function() {
+  $('.reregistration-modal-buyer .complete .bs-wizard-dot, .reregistration-modal-buyer .active .bs-wizard-dot').unbind('click')
+  $('.reregistration-modal-buyer .complete .bs-wizard-dot, .reregistration-modal-buyer .active .bs-wizard-dot').on('click', function() {
+    var dot = $(this)
+    var step = dot.parent('.bs-wizard-step')
+    var modal = dot.closest('.modal')
+    if (step.hasClass('step_1')) {
+      hide_step_bodies(modal)
+      modal.find('.step_1_body').removeClass('hidden')
+    }
+    if (step.hasClass('step_2')) {
+      hide_step_bodies(modal)
+      modal.find('.step_2_body').removeClass('hidden')
+    }
+    if (step.hasClass('step_3')) {
+      hide_step_bodies(modal)
+      modal.find('.step_3_body').removeClass('hidden')
+    }
+    if (step.hasClass('step_4')) {
+      hide_step_bodies(modal)
+      modal.find('.step_4_body').removeClass('hidden')
+    }
+  })
+}
+
+var hide_step_bodies = function(modal) {
+  console.log(modal)
+  modal.find('.step_1_body').addClass('hidden')
+  modal.find('.step_2_body').addClass('hidden')
+  modal.find('.step_3_body').addClass('hidden')
+  modal.find('.step_4_body').addClass('hidden')
+}
+enable_wizard_dot();

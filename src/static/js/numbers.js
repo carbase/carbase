@@ -32,29 +32,6 @@ var bind_buy_button = function() {
 }
 bind_buy_button()
 
-$('#reregistrationStep2SubmitButton').on('click', function() {
-  var numberId = $('input[name="reregistrationNumber"]:checked').val()
-  var reg_id = $(this).data('regid')
-  $.put('/cars/agreement', {'number': numberId, 'reregistrationId': reg_id}, function(resp) {
-    var step_2_elem = $('#reregistrationModalBuyer' + reg_id + ' .step_2')
-    var step_2_progress = $('#reregistrationModalBuyer' + reg_id + ' .step_2 .progress-bar')
-    step_2_progress.one('transitionend', function() {
-      var step_3_elem = $('#reregistrationModalBuyer' + reg_id + ' .step_3')
-      var step_3_progress = $('#reregistrationModalBuyer' + reg_id + ' .step_3 .progress-bar')
-      step_3_elem.addClass('active');
-      step_3_progress.one('transitionend', function() {
-        var step_3_elem = $('#reregistrationModalBuyer' + reg_id + ' .step_3');
-        step_3_elem.removeClass('disabled');
-        $('#reregistrationModalBuyer' + reg_id + ' .step_2_body').addClass('hidden')
-        $('#reregistrationModalBuyer' + reg_id + ' .step_3_body').removeClass('hidden')
-      });
-    });
-    loadRegPaymentPage(reg_id);
-    step_2_elem.removeClass('active')
-    step_2_elem.addClass('complete')
-  });
-})
-
 $('#numberPlatesModalBuySearchGroup button').on('click', function() {
   var pattern = $('#numberPlatesModalBuySearchGroup input').val()
   $.get('/cars/numbers?q=' + pattern, function(resp) {
