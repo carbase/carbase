@@ -37,7 +37,7 @@ $.delete = function(url, data, callback, type){
 }
 
 function openPaymentModal(target) {
-  $.get('/cars/checkout?product_id='+target.dataset.productid, function(resp) {
+  $.get('/payment/checkout?product_id='+target.dataset.productid, function(resp) {
     var orderId = resp.response.pg_order_id
     var checkoutUrl = resp.response.pg_redirect_url
     $('<iframe>', {
@@ -47,7 +47,7 @@ function openPaymentModal(target) {
       scrolling: 'no'
     }).appendTo('#' + target.dataset.productid + 'PayFrameModal');
     var checkStatusInterval = setInterval(function () {
-      $.get('/cars/payment_status?order_id=' + orderId, function(resp) {
+      $.get('/payment/payment_status?order_id=' + orderId, function(resp) {
         if (resp.response.pg_transaction_status === 'ok') {
           clearInterval(checkStatusInterval)
           $('#' + target.dataset.productid + 'PayModal').modal('hide')
@@ -62,7 +62,7 @@ function openPaymentModal(target) {
 
 function cancelAgreement(target) {
   var reg_id = $(target).data('reregistrationid')
-  $.delete('/cars/agreement', {'reregistrationId': reg_id}, function(resp) {
+  $.delete('/cars/agreement', {'reregistrationId': reg_id}, function() {
     window.location.reload(true);
   });
 }
@@ -115,7 +115,7 @@ function loadRegPaymentPage(reg_id) {
         scrolling: 'no'
       }).appendTo('#' + product_id + 'PayFrameModal');
       var checkStatusInterval = setInterval(function () {
-        $.get('/cars/payment_status?order_id=' + orderId, function(resp) {
+        $.get('/payment/payment_status?order_id=' + orderId, function(resp) {
           if (resp.response.pg_transaction_status === 'ok') {
             clearInterval(checkStatusInterval)
             var step_3_elem = $('#reregistrationModalBuyer' + reg_id + ' .step_3')
@@ -179,47 +179,6 @@ function createAgreement(target) {
   })
 }
 
-function pkiSign(agreementid) {
-  var storagePath = ''
-  var password = ''
-  var keyAlias = ''
-  var webSocket = new WebSocket('wss://127.0.0.1:13579/')
-  var xmlToSign = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
-  xmlToSign += document.getElementById('agreementXml' + agreementid).innerHTML
-  webSocket.onopen = function () {
-    webSocket.send('{"method":"browseKeyStore","args":["PKCS12","P12",""]}')
-  }
-
-  webSocket.onmessage = function (event) {
-    var eventData = JSON.parse(event.data)
-    if (eventData.result.endsWith && eventData.result.endsWith('.p12')) {
-      storagePath = eventData.result
-      password = prompt('Введите пароль')
-      webSocket.send(JSON.stringify({
-        'method': 'getKeys', 'args': ['PKCS12', storagePath, password, 'SIGN']
-      }))
-    }
-    if (eventData.result.startsWith && eventData.result.startsWith('RSA|')) {
-      keyAlias = eventData.result.split('|')[3]
-      webSocket.send(JSON.stringify({
-        'method': 'signXml',
-        'args': [
-          'PKCS12',
-          storagePath,
-          keyAlias,
-          password,
-          xmlToSign
-        ]
-      }))
-    }
-    if (eventData.result.startsWith && eventData.result.startsWith('<?xml version="1.0"')) {
-      data.append('side', side)
-      data.append('signed_xml', eventData.result)
-      xhr.send(data)
-    }
-  }
-}
-
 function signAgreement(target) {
   var side = target.dataset.side;
   var data = { 'reregistrationId': target.dataset.reregistrationid };
@@ -228,7 +187,7 @@ function signAgreement(target) {
   var keyAlias = ''
   var webSocket = new WebSocket('wss://127.0.0.1:13579/')
   var xmlToSign = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
-  xmlToSign += document.getElementById('agreementXml' + target.dataset.reregistrationid).innerHTML
+  xmlToSign += $(target).closest('.modal-body').find('.agreement-xml').html()
 
   webSocket.onopen = function () {
     webSocket.send('{"method":"browseKeyStore","args":["PKCS12","P12",""]}')
@@ -238,10 +197,31 @@ function signAgreement(target) {
     var eventData = JSON.parse(event.data)
     if (eventData.result.endsWith && eventData.result.endsWith('.p12')) {
       storagePath = eventData.result
-      password = prompt('Введите пароль')
-      webSocket.send(JSON.stringify({
-        'method': 'getKeys', 'args': ['PKCS12', storagePath, password, 'SIGN']
-      }))
+      var reregistrationModal = $(target).closest('.modal')
+      reregistrationModal.modal('hide')
+      var passwordPrompt = bootbox.prompt({
+        title: "Введите пароль",
+        inputType: 'password',
+        buttons: {
+          confirm: {
+            label: 'Ok',
+            className: 'btn-success'
+          },
+          cancel: {
+            label: 'Cancel',
+            className: 'hidden',
+          }
+        },
+        callback: function (result) {
+          password = result
+          webSocket.send(JSON.stringify({
+            'method': 'getKeys', 'args': ['PKCS12', storagePath, password, 'SIGN']
+          }))
+        }
+      });
+      passwordPrompt.on('hidden.bs.modal', function() {
+        reregistrationModal.modal('show');
+      });
     }
     if (eventData.result.startsWith && eventData.result.startsWith('RSA|')) {
       keyAlias = eventData.result.split('|')[3]
@@ -265,12 +245,13 @@ function signAgreement(target) {
         data['buyer_sign'] = eventData.result
       }
       $.put('/cars/agreement', data, function(resp) {
+        var qr_code
         if (side == 'seller') {
-          var qr_code = '<img src="https://chart.googleapis.com/chart?cht=qr&amp;chs=350x350&amp;chl=' + resp.seller_sign + '">'
+          qr_code = '<img src="https://chart.googleapis.com/chart?cht=qr&amp;chs=350x350&amp;chl=' + resp.seller_sign + '">'
           $('#sellerSign' + data.reregistrationId).html(qr_code)
         }
         if (side == 'buyer') {
-          var qr_code = '<img src="https://chart.googleapis.com/chart?cht=qr&amp;chs=350x350&amp;chl=' + resp.buyer_sign + '">'
+          qr_code = '<img src="https://chart.googleapis.com/chart?cht=qr&amp;chs=350x350&amp;chl=' + resp.buyer_sign + '">'
           $('#buyerSign' + data.reregistrationId).html(qr_code)
           if (resp.reregistration_id) {
             var step_1_elem = $('#reregistrationModalBuyer' + resp.reregistration_id + ' .step_1')
@@ -290,7 +271,7 @@ function signAgreement(target) {
             loadRegPaymentPage(resp.reregistration_id);
             if(step_1_elem.hasClass('complete')) {
               hide_step_bodies($('#reregistrationModalBuyer' + resp.reregistration_id))
-              $('#reregistrationModalBuyer' + reg_id + ' .step_2_body').removeClass('hidden')
+              $('#reregistrationModalBuyer' + resp.reregistration_id + ' .step_2_body').removeClass('hidden')
             } else {
               step_1_elem.removeClass('active')
               step_1_elem.addClass('complete')

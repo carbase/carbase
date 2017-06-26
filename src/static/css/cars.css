@@ -139,3 +139,10 @@ h2 {
 .reregistration-modal-buyer .complete .bs-wizard-dot, .reregistration-modal-buyer .active .bs-wizard-dot {
   cursor: pointer;
 }
+
+.ui-dialog {
+  z-index: 1060;
+}
+.ui-dialog input{
+  z-index: 1061;
+}

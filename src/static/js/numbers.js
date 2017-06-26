@@ -1,7 +1,7 @@
 var bind_buy_button = function() {
   $('.number .buy-button').on('click', function() {
     var payButton = $(this)
-    $.get('/cars/checkout?product_id=num' + payButton.data('number-id'), function(resp) {
+    $.get('/payment/checkout?product_id=num' + payButton.data('number-id'), function(resp) {
       var orderId = resp.response.pg_order_id
       var checkoutUrl = resp.response.pg_redirect_url
       $('<iframe>', {
@@ -11,7 +11,7 @@ var bind_buy_button = function() {
       }).appendTo('#numberplatesPaymentContainer');
       $('#availableNumberList').hide();
       var checkStatusInterval = setInterval(function () {
-        $.get('/cars/payment_status?order_id=' + orderId, function(resp) {
+        $.get('/payment/payment_status?order_id=' + orderId, function(resp) {
           if (resp.response.pg_transaction_status === 'ok') {
             clearInterval(checkStatusInterval)
             $('#numberplatesPaymentContainer').html('')
@@ -19,7 +19,7 @@ var bind_buy_button = function() {
             $('#availableNumberList').show()
             payButton.parent().hide()
             var numberHtml = payButton.parent().find('.row').prop('outerHTML')
-            today = (new Date()).toLocaleDateString("ru-RU", { year: 'numeric', month: 'long', day: 'numeric' })
+            var today = (new Date()).toLocaleDateString("ru-RU", { year: 'numeric', month: 'long', day: 'numeric' })
             numberHtml = '<div class="number">' + numberHtml
             numberHtml += '<button class="btn btn-default btn-primary number-info">Куплен ' + today + ' за ' + payButton.data('price') + '₸</button>'
             numberHtml += '</div>'
@@ -34,7 +34,7 @@ bind_buy_button()
 
 $('#numberPlatesModalBuySearchGroup button').on('click', function() {
   var pattern = $('#numberPlatesModalBuySearchGroup input').val()
-  $.get('/cars/numbers?q=' + pattern, function(resp) {
+  $.get('/numberplates/numbers?q=' + pattern, function(resp) {
     $('#numberPlatesModalNumbers').html('')
     resp.forEach(function(number) {
       var numberElement = '<div class="number">'
@@ -56,7 +56,7 @@ $('#numberPlatesModalBuySearchGroup button').on('click', function() {
 
 $('#numberPlatesReregistrationSearchGroup button').on('click', function() {
   var pattern = $('#numberPlatesReregistrationSearchGroup input').val()
-  $.get('/cars/numbers?q=' + pattern, function(resp) {
+  $.get('/numberplates/numbers?q=' + pattern, function(resp) {
     $('#numberPlatesReregistrationNumbers').html('')
     resp.forEach(function(number) {
       var numberElement = '<label><input type="radio" name="reregistrationNumber" value="' + number.id + '">'
