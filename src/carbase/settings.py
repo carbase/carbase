@@ -116,7 +116,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ru-RU'
 
 
 TIME_ZONE = 'UTC'
@@ -132,6 +132,7 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
 STATIC_ROOT = get_secret('STATIC_ROOT')
+
 
 DEBUG_TOOLBAR_PANELS = [
     'debug_toolbar.panels.versions.VersionsPanel',
@@ -173,7 +174,6 @@ VIP2_TAX = get_secret('VIP2_TAX')
 SRTS_TAX = get_secret('SRTS_TAX')
 GRNZ_TAX = get_secret('GRNZ_TAX')
 
-LANGUAGE_CODE = 'ru-RU'
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp-relay.gmail.com'
@@ -181,5 +181,6 @@ EMAIL_PORT = 587
 EMAIL_HOST_USER = 'noreply@carbase.kz'
 EMAIL_HOST_PASSWORD = get_secret('EMAIL_HOST_PASSWORD')
 EMAIL_USE_TLS = True
+
 
 WKHTMLTOPDF_CMD = get_secret('WKHTMLTOPDF_CMD')

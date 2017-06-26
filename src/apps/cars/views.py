@@ -1,7 +1,5 @@
 import xml.etree.ElementTree as ET
-from math import floor
 
-from django.contrib.humanize.templatetags.humanize import intcomma
 from django.http import JsonResponse, QueryDict
 from django.shortcuts import render
 from django.utils.decorators import method_decorator
@@ -18,7 +16,6 @@ from carbase.helpers import send_mail
 from controller.models import Center, Inspection
 from numberplates.models import NumberPlate
 from numberplates.views import get_number_plates
-from payment.api import get_checkout_url, get_order_status
 
 
 @method_decorator(login_required, name='dispatch')
@@ -119,88 +116,3 @@ class AgreementView(View):
     def get_sign(self, xml):
         xml_root = ET.fromstring(xml)
         return xml_root[2][1].text.strip()
-
-
-@login_required
-def checkout(request):
-    product_id = request.GET.get('product_id')
-
-    if product_id.startswith('reg'):
-        reregistration = Reregistration.objects.get(id=product_id[3:])
-        reg_amount = 11458.45
-        if reregistration.number and reregistration.number != 'RANDOM':
-            num_str = reregistration.number
-            number = NumberPlate.objects.get(digits=num_str[0:3], characters=num_str[3:6], region=num_str[6:])
-            if not number.is_sold:
-                reg_amount = number.get_price()
-        parameters = {
-            'product_id': product_id,
-            'amount': reg_amount,
-            'order_desc': 'За выпуск СРТС и ГРНЗ'
-        }
-    elif product_id.startswith('num'):
-        number = NumberPlate.objects.get(id=product_id[3:])
-        parameters = {
-            'product_id': product_id,
-            'amount': floor(number.get_price()),
-            'order_desc': 'Покупка номера ' + str(number)
-        }
-    elif product_id.startswith('fine'):
-        fine = Tax.objects.get(id=product_id[4:])
-        parameters = {
-            'product_id': product_id,
-            'amount': floor(fine.amount),
-            'order_desc': fine.info
-        }
-    elif product_id.startswith('tax'):
-        tax = Tax.objects.get(id=product_id[3:])
-        parameters = {
-            'product_id': product_id,
-            'amount': floor(tax.amount),
-            'order_desc': tax.info
-        }
-
-    checkout = get_checkout_url(parameters)
-    return JsonResponse(checkout)
-
-
-@login_required
-def payment_status(request):
-    order_id = request.GET.get('order_id')
-    order_info = get_order_status(order_id)
-    if order_info['response']['pg_transaction_status'] == 'ok':
-        product_id = order_id.split(':')[0]
-        if product_id.startswith('tax'):
-            Model = Tax
-            entity_id = product_id[3:]
-        elif product_id.startswith('fine'):
-            Model = Fine
-            entity_id = product_id[4:]
-        elif product_id.startswith('num'):
-            Model = NumberPlate
-            entity_id = product_id[3:]
-        else:
-            Model = Reregistration
-            entity_id = product_id[3:]
-        entity = Model.objects.get(id=entity_id)
-        if product_id.startswith('num'):
-            entity.set_owner(request.session.get('user_serialNumber')[3:])
-        entity.is_paid = True
-        entity.is_tax_paid = True
-        entity.save()
-    return JsonResponse(order_info)
-
-
-@login_required
-def get_numbers(request):
-    numbers = get_number_plates(search_pattern=request.GET.get('q'))
-    numbers_list = []
-    for number in numbers:
-        numbers_list.append({
-            'id': number.id,
-            'digits': number.digits,
-            'characters': number.characters,
-            'region': number.region,
-            'price': intcomma(number.get_price())
-        })
-    return JsonResponse(numbers_list, safe=False)
