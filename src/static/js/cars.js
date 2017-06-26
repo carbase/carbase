@@ -21,6 +21,21 @@ $.put = function(url, data, callback, type){
   });
 }
 
+$.delete = function(url, data, callback, type){
+  if ( $.isFunction(data) ){
+    type = type || callback,
+    callback = data,
+    data = {}
+  }
+   return $.ajax({
+    url: url,
+    type: 'DELETE',
+    success: callback,
+    data: data,
+    contentType: type
+  });
+}
+
 function openPaymentModal(target) {
   $.get('/cars/checkout?product_id='+target.dataset.productid, function(resp) {
     var orderId = resp.response.pg_order_id
@@ -43,6 +58,13 @@ function openPaymentModal(target) {
       });
     }, 10000)
   })
+}
+
+function cancelAgreement(target) {
+  var reg_id = $(target).data('reregistrationid')
+  $.delete('/cars/agreement', {'reregistrationId': reg_id}, function(resp) {
+    window.location.reload(true);
+  });
 }
 
 $('#reregistrationStep2SubmitButton').on('click', function() {
@@ -109,7 +131,6 @@ function loadRegPaymentPage(reg_id) {
                 $('#reregistrationModalBuyer' + reg_id + ' .step_4_body').removeClass('hidden')
                 var is_paid_text = '<div class="tax_is_paid_text">Оплата произведена</div>'
                 var number_freeze_text = '<p class="text-warning">Невозможно сменить номер после оплаты!</p>'
-                console.log($('#reregistrationModalBuyer' + reg_id + ' .step_3_body'))
                 $('#reregistrationModalBuyer' + reg_id + ' .step_3_body').html(is_paid_text)
                 $('#reregistrationModalBuyer' + reg_id + ' .step_2_body').html(number_freeze_text)
                 enable_wizard_dot();
@@ -148,6 +169,9 @@ function createAgreement(target) {
           $('#carPanel' + car_id + ' .reregistrationModal .step_1_body').addClass('hidden')
           $('#carPanel' + car_id + ' .reregistrationModal .step_2_body').removeClass('hidden')
         });
+      });
+      $.each($('.agreementSign button'), function (index, item) {
+        $(item).attr('data-reregistrationid', resp.reregistration_id);
       });
       step_1_elem.removeClass('active')
       step_1_elem.addClass('complete')
@@ -293,7 +317,6 @@ function change_inspection_time(target) {
       var inspection_date = $('#reregistrationModalBuyer' + resp.reregistration_id + ' .datepicker.form-control').val()
       var inspection_time = $('#inspectionTimeInput'+ resp.reregistration_id).val()
       $('#reregistrationModalBuyer' + resp.reregistration_id + ' .step_4_body p:first-child').text('Ваша бронь: ' + inspection_place + ', ' + inspection_date + ', ' + inspection_time )
-      console.log($('#reregistrationModalBuyer' + resp.reregistration_id + ' .step_4_body p:nth-child(2)').text().trim())
       if (!$('#reregistrationModalBuyer' + resp.reregistration_id + ' .step_4_body p:nth-child(2)').text().trim().startsWith('Вы можете изменить бронь:')) {
         $('#reregistrationModalBuyer' + resp.reregistration_id + ' .step_4_body p:nth-child(2)').prepend('Вы можете изменить бронь: ')
       }
@@ -328,7 +351,6 @@ var enable_wizard_dot = function() {
 }
 
 var hide_step_bodies = function(modal) {
-  console.log(modal)
   modal.find('.step_1_body').addClass('hidden')
   modal.find('.step_2_body').addClass('hidden')
   modal.find('.step_3_body').addClass('hidden')

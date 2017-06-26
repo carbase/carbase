@@ -63,6 +63,16 @@ class AgreementView(View):
             reregistration = Reregistration.objects.create(car=car, buyer=buyer, seller=seller)
         return JsonResponse({'reregistration_id': reregistration.id})
 
+    def delete(self, request):
+        reregistration_id = QueryDict(request.body).get('reregistrationId')
+        reregistration = Reregistration.objects.get(id=reregistration_id)
+        user_sn = request.session.get('user_serialNumber')
+        if reregistration.buyer == user_sn or reregistration.seller == user_sn:
+            reregistration.delete()
+            return JsonResponse({'result': 'success'})
+        else:
+            return JsonResponse({'result': 'error'})
+
     def put(self, request):
         request.PUT = QueryDict(request.body)
         reregistration_id = request.PUT.get('reregistrationId')
