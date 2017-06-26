@@ -1,5 +1,5 @@
 var pki_storagePath;
-function pki_getLoginKeys() {
+$('.login-keys-button').on('click', function() {
   var pki_webSocket = new WebSocket('wss://127.0.0.1:13579/');
   pki_webSocket.onclose = function(event) {
     if (!event.wasClean) {
@@ -21,12 +21,13 @@ function pki_getLoginKeys() {
       pki_storagePath = resp.result;
       pki_webSocket.close();
       $("#certLocationButton").hide();
+      $('#certInfo').html('');
       $("#certPassword").css('display', 'table');
     }
   }
-}
+})
 
-function pkiLogin() {
+$('.login-button').on('click', function() {
   var pki_password = document.getElementById('certPasswordInput').value;
   var pki_webSocket = new WebSocket('wss://127.0.0.1:13579/');
   pki_webSocket.onmessage = function(event) {
@@ -58,12 +59,12 @@ function pkiLogin() {
 
     }
   }
-}
+})
 
-function pkiLogout() {
+$('.logout-button').on('click', function() {
   $.post("/pki/logout/", function(data) {
     if (data.status === 'success') {
-      window.location.reload();
+      window.location.replace('/');
     }
   });
-}
+})

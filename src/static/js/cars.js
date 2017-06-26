@@ -36,8 +36,9 @@ $.delete = function(url, data, callback, type){
   });
 }
 
-function openPaymentModal(target) {
-  $.get('/payment/checkout?product_id='+target.dataset.productid, function(resp) {
+$('.car-taxes .pay-button, .car-fines .pay-button').on('click', function() {
+  var target = this;
+  $.get('/payment/checkout?product_id=' + target.dataset.productid, function(resp) {
     var orderId = resp.response.pg_order_id
     var checkoutUrl = resp.response.pg_redirect_url
     $('<iframe>', {
@@ -58,14 +59,15 @@ function openPaymentModal(target) {
       });
     }, 10000)
   })
-}
+})
 
-function cancelAgreement(target) {
+$('.agreementSign .cancel-button').on('click', function() {
+  var target = this
   var reg_id = $(target).data('reregistrationid')
   $.delete('/cars/agreement', {'reregistrationId': reg_id}, function() {
     window.location.reload(true);
   });
-}
+})
 
 $('#reregistrationStep2SubmitButton').on('click', function() {
   var numberId = $('input[name="reregistrationNumber"]:checked').val()
@@ -105,7 +107,7 @@ function loadRegPaymentPage(reg_id) {
       clearInterval(paymentStatusIntervals[product_id])
     }
     $('#' + product_id + 'PayFrameModal').html('')
-    $.get('/cars/checkout?product_id=' + product_id, function(resp) {
+    $.get('/payment/checkout?product_id=' + product_id, function(resp) {
       var orderId = resp.response.pg_order_id
       var checkoutUrl = resp.response.pg_redirect_url
       $('<iframe>', {
@@ -151,7 +153,8 @@ function loadRegPaymentPage(reg_id) {
   }
 }
 
-function createAgreement(target) {
+$('.reregistrationModal .submit-iin-button').on('click', function() {
+  var target = this
   var car_id = target.dataset.carid;
   var data = {'car_id': car_id, 'buyer': 'IIN' + $('#reregistration' + car_id + 'BuyerIIN').val()};
   $.post('/cars/agreement', data, function(resp) {
@@ -177,9 +180,10 @@ function createAgreement(target) {
       step_1_elem.addClass('complete')
     }
   })
-}
+})
 
-function signAgreement(target) {
+$('.agreementSign .sign-button').on('click', function() {
+  var target = this
   var side = target.dataset.side;
   var data = { 'reregistrationId': target.dataset.reregistrationid };
   var storagePath = ''
@@ -281,11 +285,10 @@ function signAgreement(target) {
       })
     }
   }
+})
 
-
-}
-
-function change_inspection_time(target) {
+$('.reserve-time-button').on('click', function() {
+  var target = this
   var data = {
     'reregistrationId': target.dataset.reregistrationid,
     'inspectionCenterId': $('#inspectionPlaceInput'+ target.dataset.reregistrationid).val(),
@@ -304,7 +307,7 @@ function change_inspection_time(target) {
       target.innerText = 'Изменить бронь'
     }
   })
-}
+})
 
 var enable_wizard_dot = function() {
   $('.reregistration-modal-buyer .complete .bs-wizard-dot, .reregistration-modal-buyer .active .bs-wizard-dot').unbind('click')

@@ -3,7 +3,7 @@
   <span class="input-group-addon">Пароль: </span>
   <input type="password" class="form-control" id="certPasswordInput">
   <span class="input-group-btn">
-    <button class="btn btn-primary" onclick="pkiLogin()">Войти</button>
+    <button class="btn btn-primary login-button">Войти</button>
   </span>
 </div>
 
@@ -11,4 +11,4 @@
   {% csrf_token %}
   <input type="hidden" id="loginFormSignedXml" name="signedXml">
 </form>
-<button class="btn btn-primary" id="certLocationButton" onclick="pki_getLoginKeys()">Выбрать сертификат</button>
+<button class="btn btn-primary login-keys-button" id="certLocationButton">Выбрать сертификат</button>

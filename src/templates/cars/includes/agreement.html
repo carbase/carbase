@@ -98,8 +98,8 @@
         {% if reregistration.buyer_sign %}
           {% qr_from_text reregistration.buyer_sign "l" %}
         {% else %}
-          <button data-reregistrationid="{{reregistration.id}}" data-side="buyer" onclick="signAgreement(this)" class="btn btn-default">Подписать</button>
-          <button data-reregistrationid="{{reregistration.id}}" onclick="cancelAgreement(this)" type="button" class="btn btn-danger">Отказаться от перерегистрации</button>
+          <button data-reregistrationid="{{reregistration.id}}" data-side="buyer" class="btn btn-default sign-button">Подписать</button>
+          <button data-reregistrationid="{{reregistration.id}}" class="btn btn-danger cancel-button">Отказаться от перерегистрации</button>
         {% endif %}
       </span>
     </p>
@@ -109,8 +109,8 @@
         {% if reregistration.seller_sign %}
           {% qr_from_text reregistration.seller_sign "l" %}
         {% else %}
-          <button data-reregistrationid="{{reregistration.id}}" data-side="seller" onclick="signAgreement(this)" class="btn btn-default">Подписать</button>
-          <button data-reregistrationid="{{reregistration.id}}" onclick="cancelAgreement(this)" type="button" class="btn btn-danger">Отказаться от перерегистрации</button>
+          <button data-reregistrationid="{{reregistration.id}}" data-side="seller" class="btn btn-default sign-button">Подписать</button>
+          <button data-reregistrationid="{{reregistration.id}}" class="btn btn-danger cancel-button">Отказаться от перерегистрации</button>
         {% endif %}
       </span>
     </p>

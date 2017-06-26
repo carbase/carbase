@@ -67,7 +67,7 @@
                             {% if fine.is_paid %}
                               <span>Оплачено</span>
                             {% else %}
-                              <button class='btn btn-default' onclick="openPaymentModal(this)" data-productId="fine{{fine.id}}" data-toggle="modal" data-target="#fine{{fine.id}}PayModal">
+                              <button class='btn btn-default pay-button' data-productId="fine{{fine.id}}" data-toggle="modal" data-target="#fine{{fine.id}}PayModal">
                                 Оплатить
                               </button>
                             {% endif %}
@@ -95,7 +95,7 @@
                             {% if tax.is_paid%}
                               <span>Оплачено</span>
                             {% else %}
-                              <button class='btn btn-default' onclick="openPaymentModal(this)" data-productId="tax{{tax.id}}" data-toggle="modal" data-target="#tax{{tax.id}}PayModal">
+                              <button class='btn btn-default pay-button' data-productId="tax{{tax.id}}" data-toggle="modal" data-target="#tax{{tax.id}}PayModal">
                                 Оплатить
                               </button>
                             {% endif %}
@@ -138,7 +138,7 @@
                               <span class="input-group-addon" id="sizing-addon1">Введите ИИН покупателя</span>
                               <input type="text" maxlength="12" id="reregistration{{car.id}}BuyerIIN" class="form-control" placeholder="000000000000">
                               <span class="input-group-btn">
-                                <button class="btn btn-default" data-carid="{{car.id}}" onclick="createAgreement(this)" type="button">Отправить</button>
+                                <button class="btn btn-default submit-iin-button" data-carid="{{car.id}}" type="button">Отправить</button>
                               </span>
                             </div>
                           </div>
@@ -322,7 +322,7 @@
                       <option>12:00-15:00</option>
                       <option>15:00-18:00</option>
                     </select>
-                    <button class="btn btn-default" data-reregistrationid="{{ reregistration.id }}" onclick="change_inspection_time(this)">Изменить бронь</button>
+                    <button class="btn btn-default reserve-time-button" data-reregistrationid="{{ reregistration.id }}">Изменить бронь</button>
                   </p>
                 {% else %}
                   <p>Забронируйте удобное для вас время осмотра ТС на территории спецЦОНа:</p>
@@ -338,7 +338,7 @@
                       <option>12:00-15:00</option>
                       <option>15:00-18:00</option>
                     </select>
-                    <button class="btn btn-default"  data-reregistrationid="{{ reregistration.id }}" onclick="change_inspection_time(this)">Забронировать</button>
+                    <button class="btn btn-default reserve-time-button"  data-reregistrationid="{{ reregistration.id }}">Забронировать</button>
                   </p>
                 {% endif %}
               </div>
