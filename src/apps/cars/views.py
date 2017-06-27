@@ -9,7 +9,7 @@ from django.views.decorators.csrf import csrf_exempt
 from wkhtmltopdf.views import PDFTemplateView, PDFTemplateResponse
 
 from .api import get_cars_by_iin, get_email_by_iin
-from .models import Reregistration, Car, Tax, Fine
+from .models import Reregistration, Car
 
 from carbase.decorators import login_required
 from carbase.helpers import send_mail

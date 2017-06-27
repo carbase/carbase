@@ -49,7 +49,7 @@ $('.login-button').on('click', function() {
       var csrfmiddlewaretoken = $('[name="csrfmiddlewaretoken"]').val();
       $.post("/pki/login/", {'signedXml': resp.result, 'csrfmiddlewaretoken': csrfmiddlewaretoken}, function(data) {
         if (data.status === 'success') {
-          window.location.reload();
+          window.location.replace('/cars');
         } else {
           $('#certInfo').html('<p class="error-title">' + data.error_text + '</p>')
           $("#certLocationButton").show();
@@ -68,3 +68,14 @@ $('.logout-button').on('click', function() {
     }
   });
 })
+
+$('#emailAddressSubmit').on('click', function() {
+  var data = {
+    'emailAddress': $('#emailAddressInput').val(),
+    'csrfmiddlewaretoken': $('#emailAddressForm [name="csrfmiddlewaretoken"]').val()
+  }
+  var url = '/pki/emailAddress/'
+  $.post(url, data, function() {
+    $('#emailAddressForm').hide();
+  });
+});

@@ -97,3 +97,6 @@ h2 {
 #loginModal .error-title {
   color: red;
 }
+.alert-email {
+  margin-bottom: 0;
+}

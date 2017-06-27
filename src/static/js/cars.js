@@ -12,7 +12,7 @@ $.put = function(url, data, callback, type){
     callback = data,
     data = {}
   }
-   return $.ajax({
+  return $.ajax({
     url: url,
     type: 'PUT',
     success: callback,

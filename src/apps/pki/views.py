@@ -40,3 +40,11 @@ class LogoutView(View):
     def post(self, request):
         request.session.flush()
         return JsonResponse({'status': 'success'})
+
+
+def change_email_address(request):
+    if request.POST.get('emailAddress'):
+        request.session['user_emailAddress'] = request.POST.get('emailAddress')
+    if request.POST.get('phoneNumber'):
+        request.session['user_phoneNumber'] = request.POST.get('phoneNumber')
+    return JsonResponse({'status': 'success'})
