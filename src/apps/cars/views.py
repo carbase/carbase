@@ -9,7 +9,7 @@ from django.views.decorators.csrf import csrf_exempt
 from wkhtmltopdf.views import PDFTemplateView, PDFTemplateResponse
 
 from .api import get_cars_by_iin, get_email_by_iin
-from .models import Reregistration, Car
+from .models import Reregistration, Car, Deregistration
 
 from carbase.decorators import login_required
 from carbase.helpers import send_mail
@@ -47,6 +47,41 @@ class AgreementPDFView(PDFTemplateView):
 
 @method_decorator(login_required, name='dispatch')
 @method_decorator(csrf_exempt, name='dispatch')
+class DeregistrationView(View):
+    def post(self, request):
+        car = Car.objects.get(id=request.POST.get('car_id'))
+        exist_degistrations = Deregistration.objects.filter(car=car)
+        if exist_degistrations:
+            deregistration = exist_degistrations[0]
+        else:
+            deregistration = Deregistration.objects.create(
+                is_transit_number=bool(request.POST.get('is_transit_number')),
+                car=car,
+                is_paid=bool(request.POST.get('is_paid')),
+                is_success=False
+            )
+        return JsonResponse({'deregistration_id': deregistration.id, 'car_id': deregistration.car.id})
+
+    def put(self, request):
+        request.PUT = QueryDict(request.body)
+        deregistration_id = request.PUT.get('deregistrationId')
+        deregistration = Deregistration.objects.get(id=deregistration_id)
+        print(request.PUT)
+        if request.PUT.get('inspectionDate'):
+            inspections = Inspection.objects.filter(deregistration=deregistration)
+            if len(inspections):
+                inspection = inspections[0]
+            else:
+                inspection = Inspection.objects.create(deregistration=deregistration)
+            inspection.time_range = request.PUT.get('inspectionTimeRange')
+            inspection.center_id = request.PUT.get('inspectionCenterId')
+            inspection.date = request.PUT.get('inspectionDate')
+            inspection.save()
+        return JsonResponse({'deregistration_id': deregistration.id, 'car_id': deregistration.car.id})
+
+
+@method_decorator(login_required, name='dispatch')
+@method_decorator(csrf_exempt, name='dispatch')
 class AgreementView(View):
     def post(self, request):
         car_id = request.POST.get('car_id')
@@ -54,7 +89,7 @@ class AgreementView(View):
         seller = request.session.get('user_serialNumber')
         buyer = request.POST.get('buyer')
         exist_registrations = Reregistration.objects.filter(car=car, buyer=buyer, seller=seller)
-        if (exist_registrations):
+        if exist_registrations:
             reregistration = exist_registrations[0]
         else:
             reregistration = Reregistration.objects.create(car=car, buyer=buyer, seller=seller)

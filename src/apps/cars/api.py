@@ -47,6 +47,7 @@ class Car(models.Model):
     year = models.CharField(max_length=5, default='', blank=True)
     passport_number = models.CharField(max_length=64, default='', blank=True)
     engine_capacity = models.IntegerField(default=0, blank=True)
+    is_registred = models.BooleanField(default=True)
 
     def __str__(self):
         return self.manufacturer + ' ' + self.model
@@ -54,6 +55,19 @@ class Car(models.Model):
     def reregistration(self):
         reregistrations = self.reregistration_set.filter(is_number_received=False)
         return (reregistrations[0] if len(reregistrations) else None)
+
+    def deregistration(self):
+        deregistrations = self.deregistration_set.filter()
+        return (deregistrations[0] if len(deregistrations) else None)
+
+
+class Deregistration(models.Model):
+    is_paid = models.BooleanField()
+    is_transit_number = models.BooleanField()
+    car = models.ForeignKey(Car)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+    is_success = models.BooleanField()
 
 
 class Tax(models.Model):

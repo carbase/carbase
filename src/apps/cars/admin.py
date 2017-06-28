@@ -23,6 +23,11 @@ class ReregistrationAdmin(admin.ModelAdmin):
     list_display = ('car', 'seller', 'buyer')
 
 
+@admin.register(models.Deregistration)
+class DeregistrationAdmin(admin.ModelAdmin):
+    list_display = ('car', 'created', 'is_success', 'is_transit_number', 'is_paid')
+
+
 @admin.register(models.Email)
 class EmailAdmin(admin.ModelAdmin):
     list_display = ('iin', 'email')

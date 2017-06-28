@@ -87,7 +87,7 @@ h2 {
   text-align: center;
 }
 
-.reregistrationModal .modal-lg {
+.reregistrationModal .modal-lg, .deregistrationModal .modal-lg {
   width: 1048px;
 }
 
@@ -149,4 +149,20 @@ h2 {
 
 .alert-email {
   margin-bottom: 0;
+}
+
+.car-action {
+  cursor: pointer;
+}
+
+.car-action .modal {
+  cursor: auto;
+}
+
+.car-action .panel-heading, .car-action > .btn {
+  border-radius: 0;
+}
+
+.car-action .deregistrationModal {
+  text-align: left;
 }

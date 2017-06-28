@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load humanize %}
+{% load cars_filters %}
 
 {% block title %}Мои машины{% endblock %}
 {% block styles %}
@@ -52,7 +53,7 @@
           <div class='panel-footer'>
             <ul class="list-group">
               <li class="list-group-item car-action">
-                <div class="panel panel-default">
+                <div class="panel panel-default {% if car|is_all_fines_paid %}panel-success{% else %}panel-danger{% endif %}">
                   <div class="collapsed panel-heading" data-target="#carFine{{car.number}}" data-toggle="collapse" aria-expanded="false">
                     <div class="car-action-text">Штрафы</div>
                   </div>
@@ -80,7 +81,7 @@
                 </div>
               </li>
               <li class="list-group-item car-action">
-                <div class="panel panel-default">
+                <div class="panel panel-default {% if car|is_all_taxes_paid %}panel-success{% else %}panel-danger{% endif %}">
                   <div class="collapsed panel-heading" data-target="#carTax{{car.number}}" data-toggle="collapse" aria-expanded="false">
                     <div class="car-action-text">Налоги</div>
                   </div>
@@ -108,7 +109,7 @@
                 </div>
               </li>
               <li class="list-group-item car-action">
-                <label type="button" class="btn btn-default btn-block reregistration-button" data-toggle="modal" data-target="#reregistrationModal{{car.number}}">
+                <label type="button" class="btn btn-default btn-block reregistration-button {% if not car|is_all_fines_paid or not car|is_all_taxes_paid %}disabled{% endif %}" {% if car|is_all_fines_paid and car|is_all_taxes_paid %}data-toggle="modal" data-target="#reregistrationModal{{car.number}}"{% endif %}>
                   Перерегистрация авто
                 </label>
                 {% with reregistration=car.reregistration %}
@@ -144,6 +145,81 @@
                           </div>
                           <div class="step_2_body {% if not reregistration %}hidden{% endif%}">
                             {% include "cars/includes/agreement.html" with car=car reregistration=reregistration%}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                {% endwith %}
+              </li>
+              <li class="list-group-item car-action">
+                <label type="button" class="btn btn-default btn-block deregistration-button {% if not car|is_all_fines_paid or not car|is_all_taxes_paid %}disabled{% endif %}" {% if car|is_all_fines_paid and car|is_all_taxes_paid %}data-toggle="modal" data-target="#deregistrationModal{{car.id}}"{% endif %}>
+                  Снятие с учета
+                </label>
+                {% with deregistration=car.deregistration %}
+                  <div class="modal fade deregistrationModal" id="deregistrationModal{{car.id}}" tabindex="-1" role="dialog">
+                    <div class="modal-dialog modal-lg" role="document">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <div class="row bs-wizard" style="border-bottom:0;">
+                            <div class="col-xs-6 bs-wizard-step step_1 {% if not deregistration %}active{% else %}complete{% endif %}">
+                              <div class="text-center bs-wizard-stepnum">Шаг 1</div>
+                              <div class="progress"><div class="progress-bar"></div></div>
+                              <label class="bs-wizard-dot"></label>
+                              <div class="bs-wizard-info text-center">Оплата транзитных номеров(опционально)</div>
+                            </div>
+                            <div class="col-xs-6 bs-wizard-step step_2 {% if not deregistration %}disabled{% else %}active{% endif %}">
+                              <div class="text-center bs-wizard-stepnum">Шаг 2</div>
+                              <div class="progress"><div class="progress-bar"></div></div>
+                              <label class="bs-wizard-dot"></label>
+                              <div class="bs-wizard-info text-center">Сверка номеров</div>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="modal-body">
+                          <div class="step_1_body {% if deregistration %}hidden{% endif%}">
+                            <div class="input-group input-group-lg">
+                              <button class="btn btn-warning no-transit-numbers-button" data-car-id='{{ car.id }}'>Мне не нужны транзитные номера</button>
+                            </div>
+                          </div>
+                          <div class="step_2_body {% if not deregistration %}hidden{% endif%}">
+                            {% if deregistration.inspection %}
+                              <p>
+                                Ваша бронь: г. {{deregistration.inspection.center.city}} {{deregistration.inspection.center.address}},
+                                {{deregistration.inspection.date}},
+                                {{deregistration.inspection.time_range}}
+                              </p>
+                              <p>Вы можете изменить бронь:
+                                <select class="inspection-place-input" id="inspectionPlaceInput{{deregistration.id}}">
+                                {% for center in centers %}
+                                  <option value="{{ center.pk }}">г. {{ center.city }}, {{ center.address }}</option>
+                                {% endfor %}
+                                </select>
+                                <input type="date" id="inspectionDateInput{{deregistration.id}}" class="datepicker"></input>
+                                <select class="inspection-time-input" id="inspectionTimeInput{{deregistration.id}}">
+                                  <option>9:00-12:00</option>
+                                  <option>12:00-15:00</option>
+                                  <option>15:00-18:00</option>
+                                </select>
+                                <button class="btn btn-default deregistration-time-button" data-deregistrationid="{{ deregistration.id }}">Изменить бронь</button>
+                              </p>
+                            {% else %}
+                              <p>Забронируйте удобное для вас время осмотра ТС на территории спецЦОНа:</p>
+                              <p>
+                                <select class="inspection-place-input" id="inspectionPlaceInput{{deregistration.id}}">
+                                  {% for center in centers %}
+                                    <option value="{{ center.pk }}">г. {{ center.city }}, {{ center.address }}</option>
+                                  {% endfor %}
+                                </select>
+                                <input type="date" id="inspectionDateInput{{deregistration.id}}" class="datepicker"></input>
+                                <select class="inspection-time-input" id="inspectionTimeInput{{deregistration.id}}">
+                                  <option>9:00-12:00</option>
+                                  <option>12:00-15:00</option>
+                                  <option>15:00-18:00</option>
+                                </select>
+                                <button class="btn btn-default deregistration-time-button"  data-deregistrationid="{{ deregistration.id }}">Забронировать</button>
+                              </p>
+                            {% endif %}
                           </div>
                         </div>
                       </div>

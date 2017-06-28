@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-from cars.models import Reregistration
+from cars.models import Reregistration, Deregistration
 
 
 class Center(models.Model):
@@ -20,3 +20,4 @@ class Inspection(models.Model):
     is_success = models.BooleanField(default=False)
     inspector = models.ForeignKey(Inspector, null=True)
     reregistration = models.OneToOneField(Reregistration, null=True)
+    deregistration = models.OneToOneField(Deregistration, null=True)
