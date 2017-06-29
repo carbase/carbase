@@ -341,7 +341,7 @@ enable_wizard_dot();
 
 $('.no-transit-numbers-button').on('click', function() {
   var car_id = $(this).data('car-id')
-  $.post('/cars/deregistration', {'is_transit_number': 0, 'car_id': car_id}, function(resp) {
+  $.post('/cars/deregistration', {'car_id': car_id}, function(resp) {
     if (resp.deregistration_id) {
       var step_1_elem = $('#carPanel' + car_id + ' .deregistrationModal .step_1')
       var step_1_progress = $('#carPanel' + car_id + ' .deregistrationModal .step_1 .progress-bar')
@@ -359,6 +359,50 @@ $('.no-transit-numbers-button').on('click', function() {
       });
       step_1_elem.removeClass('active')
       step_1_elem.addClass('complete')
+    }
+  });
+})
+
+
+$('.with-transit-numbers-button').on('click', function() {
+  var car_id = $(this).data('car-id')
+  $.post('/cars/deregistration', {'is_transit_number': 1, 'car_id': car_id}, function(resp) {
+    if (resp.deregistration_id) {
+      var product_id = 'tran' + resp.deregistration_id
+      $.get('/payment/checkout?product_id=' + product_id, function(resp) {
+        var orderId = resp.response.pg_order_id
+        var checkoutUrl = resp.response.pg_redirect_url
+        $('<iframe>', {
+          src: checkoutUrl,
+          id:  'myFrame',
+          frameborder: 0,
+          scrolling: 'no'
+        }).appendTo('#dereg' + car_id + 'TransitNumbersPayFrame');
+        var checkStatusInterval = setInterval(function () {
+          $.get('/payment/payment_status?order_id=' + orderId, function(resp) {
+            if (resp.response.pg_transaction_status === 'ok') {
+              clearInterval(checkStatusInterval)
+              var step_1_elem = $('#carPanel' + car_id + ' .deregistrationModal .step_1')
+              var step_1_progress = $('#carPanel' + car_id + ' .deregistrationModal .step_1 .progress-bar')
+              step_1_progress.one('transitionend', function() {
+                var step_2_elem = $('#carPanel' + car_id + ' .deregistrationModal .step_2')
+                var step_2_progress = $('#carPanel' + car_id + ' .deregistrationModal .step_2 .progress-bar')
+                step_2_elem.addClass('active');
+                step_2_progress.one('transitionend', function() {
+                  var step_2_elem = $('#carPanel' + car_id + ' .deregistrationModal .step_2');
+                  step_2_elem.removeClass('disabled');
+                  $('#carPanel' + car_id + ' .deregistrationModal .deregistration-time-button')[0].setAttribute('data-deregistrationid', resp.deregistration_id)
+                  $('#carPanel' + car_id + ' .deregistrationModal .step_1_body').addClass('hidden')
+                  $('#carPanel' + car_id + ' .deregistrationModal .step_2_body').removeClass('hidden')
+                });
+              });
+              step_1_elem.removeClass('active')
+              step_1_elem.addClass('complete')
+            }
+          });
+        }, 10000)
+        paymentStatusIntervals[product_id] = checkStatusInterval
+      })
     }
   });
 })

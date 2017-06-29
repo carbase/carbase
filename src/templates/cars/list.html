@@ -162,13 +162,13 @@
                       <div class="modal-content">
                         <div class="modal-header">
                           <div class="row bs-wizard" style="border-bottom:0;">
-                            <div class="col-xs-6 bs-wizard-step step_1 {% if not deregistration %}active{% else %}complete{% endif %}">
+                            <div class="col-xs-6 bs-wizard-step step_1 {% if not deregistration.is_paid %}active{% else %}complete{% endif %}">
                               <div class="text-center bs-wizard-stepnum">Шаг 1</div>
                               <div class="progress"><div class="progress-bar"></div></div>
                               <label class="bs-wizard-dot"></label>
                               <div class="bs-wizard-info text-center">Оплата транзитных номеров(опционально)</div>
                             </div>
-                            <div class="col-xs-6 bs-wizard-step step_2 {% if not deregistration %}disabled{% else %}active{% endif %}">
+                            <div class="col-xs-6 bs-wizard-step step_2 {% if not deregistration.is_paid %}disabled{% else %}active{% endif %}">
                               <div class="text-center bs-wizard-stepnum">Шаг 2</div>
                               <div class="progress"><div class="progress-bar"></div></div>
                               <label class="bs-wizard-dot"></label>
@@ -177,12 +177,40 @@
                           </div>
                         </div>
                         <div class="modal-body">
-                          <div class="step_1_body {% if deregistration %}hidden{% endif%}">
-                            <div class="input-group input-group-lg">
-                              <button class="btn btn-warning no-transit-numbers-button" data-car-id='{{ car.id }}'>Мне не нужны транзитные номера</button>
+                          <div class="step_1_body {% if deregistration.is_paid %}hidden{% endif%}">
+                            <div class="panel-group" id="dereg{{car.id}}NumberSelector" role="tablist" aria-multiselectable="true">
+                              <div class="panel panel-default">
+                                <div class="panel-heading" role="tab">
+                                  <h4 class="panel-title">
+                                    <a role="button" data-toggle="collapse" href="#dereg{{car.id}}NumberPanel1">
+                                      Без транзитных номеров
+                                    </a>
+                                  </h4>
+                                </div>
+                                <div id="dereg{{car.id}}NumberPanel1" class="panel-collapse collapse in" data-parent="#dereg{{car.id}}NumberSelector" role="tabpanel">
+                                  <div class="panel-body">
+                                    <button class="btn btn-warning no-transit-numbers-button" data-car-id='{{ car.id }}'>Мне не нужны транзитные номера</button>
+                                  </div>
+                                </div>
+                              </div>
+                              <div class="panel panel-default">
+                                <div class="panel-heading" role="tab">
+                                  <h4 class="panel-title">
+                                    <a class="collapsed" role="button" data-toggle="collapse" href="#dereg{{car.id}}NumberPanel2">
+                                      С транзитными номерами
+                                    </a>
+                                  </h4>
+                                </div>
+                                <div id="dereg{{car.id}}NumberPanel2" class="panel-collapse collapse" data-parent="#dereg{{car.id}}NumberSelector" role="tabpanel">
+                                  <div class="panel-body">
+                                    <button class="btn btn-success with-transit-numbers-button" data-car-id='{{ car.id }}'>Оплатить транзитные номера</button>
+                                    <div id="dereg{{ car.id }}TransitNumbersPayFrame"></div>
+                                  </div>
+                                </div>
+                              </div>
                             </div>
                           </div>
-                          <div class="step_2_body {% if not deregistration %}hidden{% endif%}">
+                          <div class="step_2_body {% if not deregistration.is_paid %}hidden{% endif%}">
                             {% if deregistration.inspection %}
                               <p>
                                 Ваша бронь: г. {{deregistration.inspection.center.city}} {{deregistration.inspection.center.address}},

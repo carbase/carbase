@@ -1,11 +1,12 @@
 from math import floor
 
+from django.conf import settings
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
 from carbase.helpers import http_code
 from carbase.decorators import login_required
-from cars.models import Reregistration, Tax, Fine
+from cars.models import Reregistration, Tax, Fine, Deregistration
 from numberplates.models import NumberPlate
 from .api import set_callback, get_checkout_url, get_order_status
 
@@ -59,6 +60,14 @@ def checkout(request):
             'amount': floor(tax.amount),
             'order_desc': tax.info
         }
+    elif product_id.startswith('tran'):
+        tax = Deregistration.objects.get(id=product_id[4:])
+        parameters = {
+            'product_id': product_id,
+            'amount': floor(settings.MCI * 0.3),
+            'order_desc': 'Транзитные номера для снятия с учета'
+        }
+        print(parameters)
 
     checkout = get_checkout_url(parameters)
     return JsonResponse(checkout)
@@ -79,6 +88,9 @@ def payment_status(request):
         elif product_id.startswith('num'):
             model = NumberPlate
             entity_id = product_id[3:]
+        elif product_id.startswith('tran'):
+            model = Deregistration
+            entity_id = product_id[4:]
         else:
             model = Reregistration
             entity_id = product_id[3:]

@@ -53,6 +53,9 @@ class DeregistrationView(View):
         exist_degistrations = Deregistration.objects.filter(car=car)
         if exist_degistrations:
             deregistration = exist_degistrations[0]
+            deregistration.is_transit_number = bool(request.POST.get('is_transit_number'))
+            deregistration.is_paid = bool(request.POST.get('is_paid'))
+            deregistration.save()
         else:
             deregistration = Deregistration.objects.create(
                 is_transit_number=bool(request.POST.get('is_transit_number')),
