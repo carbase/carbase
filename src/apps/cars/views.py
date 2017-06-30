@@ -69,7 +69,6 @@ class DeregistrationView(View):
         request.PUT = QueryDict(request.body)
         deregistration_id = request.PUT.get('deregistrationId')
         deregistration = Deregistration.objects.get(id=deregistration_id)
-        print(request.PUT)
         if request.PUT.get('inspectionDate'):
             inspections = Inspection.objects.filter(deregistration=deregistration)
             if len(inspections):

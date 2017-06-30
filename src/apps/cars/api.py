@@ -53,11 +53,11 @@ class Car(models.Model):
         return self.manufacturer + ' ' + self.model
 
     def reregistration(self):
-        reregistrations = self.reregistration_set.filter(is_number_received=False)
+        reregistrations = self.reregistration_set.exclude(is_number_received=True)
         return (reregistrations[0] if len(reregistrations) else None)
 
     def deregistration(self):
-        deregistrations = self.deregistration_set.filter()
+        deregistrations = self.deregistration_set.exclude(is_success=True)
         return (deregistrations[0] if len(deregistrations) else None)
 
 

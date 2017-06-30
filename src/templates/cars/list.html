@@ -47,8 +47,11 @@
         {% endif %}
       {% endfor %}
       <div class="car col-xs-6" id="carPanel{{car.id}}">
-        <div class="panel panel-default">
-          <div class="panel-heading">{{ car.manufacturer }} {{car.model}}</div>
+        <div class="panel {% if car.is_registred %}panel-default{% else %}panel-warning{% endif %}">
+          <div class="panel-heading">
+            {{ car.manufacturer }} {{car.model}}
+            <span class="pull-right">{% if car.is_registred %}{{ car.number }}{% else %}Снята с учета{% endif %}</span>
+          </div>
           <div class="panel-body"><i>Инфо о машине</i></div>
           <div class='panel-footer'>
             <ul class="list-group">
@@ -152,6 +155,7 @@
                   </div>
                 {% endwith %}
               </li>
+              {% if car.is_registred %}
               <li class="list-group-item car-action">
                 <label type="button" class="btn btn-default btn-block deregistration-button {% if not car|is_all_fines_paid or not car|is_all_taxes_paid %}disabled{% endif %}" {% if car|is_all_fines_paid and car|is_all_taxes_paid %}data-toggle="modal" data-target="#deregistrationModal{{car.id}}"{% endif %}>
                   Снятие с учета
@@ -255,6 +259,7 @@
                   </div>
                 {% endwith %}
               </li>
+              {% endif %}
             </ul>
           </div>
         </div>

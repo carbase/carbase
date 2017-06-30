@@ -67,7 +67,6 @@ def checkout(request):
             'amount': floor(settings.MCI * 0.3),
             'order_desc': 'Транзитные номера для снятия с учета'
         }
-        print(parameters)
 
     checkout = get_checkout_url(parameters)
     return JsonResponse(checkout)
