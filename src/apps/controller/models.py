@@ -7,10 +7,16 @@ class Center(models.Model):
     city = models.CharField(max_length=128)
     address = models.CharField(max_length=128)
 
+    def __str__(self):
+        return '{} {}'.format(self.city, self.address)
+
 
 class Inspector(models.Model):
     user = models.OneToOneField(User)
     center = models.ForeignKey(Center)
+
+    def __str__(self):
+        return self.user.username
 
 
 class Inspection(models.Model):
