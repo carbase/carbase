@@ -91,6 +91,13 @@ class Fine(models.Model):
     car = models.ForeignKey(Car)
 
 
+class Agreement(models.Model):
+    template_html = models.TextField()
+    template_pdf = models.TextField()
+    template_xml = models.TextField()
+    style = models.TextField()
+
+
 class Reregistration(models.Model):
     seller = models.CharField(max_length=20, default='', blank=True)
     buyer = models.CharField(max_length=20, default='', blank=True)
@@ -98,6 +105,8 @@ class Reregistration(models.Model):
     amount = models.DecimalField(max_digits=19, decimal_places=2, default=0)
     amount_text = models.CharField(max_length=256, blank=True)
     number = models.CharField(max_length=8, blank=True, default='')
+    agreement = models.ForeignKey(Agreement, null=True, blank=True)
+    agreement_text = models.TextField(blank=True, default='')
     seller_sign = models.TextField(blank=True)
     buyer_sign = models.TextField(blank=True)
     created = models.DateTimeField(auto_now_add=True)
