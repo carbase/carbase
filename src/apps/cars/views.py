@@ -8,7 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from wkhtmltopdf.views import PDFTemplateView, PDFTemplateResponse
 
-from .api import get_cars_by_iin, get_email_by_iin
+from .api import get_cars_by_iin, get_email_by_iin, get_cars_by_bin
 from .models import Reregistration, Car, Deregistration
 
 from carbase.decorators import login_required
@@ -22,8 +22,12 @@ from numberplates.views import get_number_plates
 @method_decorator(csrf_exempt, name='dispatch')
 class CarsView(View):
     def get(self, request):
+        if request.session.get('user_organizationalUnitName'):
+            cars = get_cars_by_bin(request.session.get('user_organizationalUnitName'))
+        else:
+            cars = get_cars_by_iin(request.session.get('user_serialNumber'))
         template_data = {
-            'cars': get_cars_by_iin(request.session.get('user_serialNumber')),
+            'cars': cars,
             'reregistrations': Reregistration.objects.filter(
                 buyer=request.session.get('user_serialNumber'),
                 is_number_received=False

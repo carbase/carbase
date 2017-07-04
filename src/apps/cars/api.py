@@ -5,6 +5,10 @@ def get_cars_by_iin(iin):
     return Car.objects.filter(user=iin)
 
 
+def get_cars_by_bin(bin):
+    return Car.objects.filter(user=bin)
+
+
 def get_fines_by_iin(iin):
     return Fine.objects.filter(car__user=iin)
 
@@ -40,7 +44,7 @@ class Car(models.Model):
     manufacturer = models.CharField(max_length=256, default='')
     model = models.CharField(max_length=256, default='')
     user = models.CharField(max_length=20, default='')
-    number = models.CharField(max_length=16, default='')
+    number = models.CharField(max_length=16, default='', blank=True)
     vin_code = models.CharField(max_length=20, default='')
     color_text = models.CharField(max_length=64, default='', blank=True)
     color_code = models.CharField(max_length=16, default='', blank=True)

@@ -16,7 +16,12 @@
       {% if request.session.user_commonName %}
         <li class="dropdown">
           <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-            {{ request.session.user_commonName }} <span class="caret"></span>
+            {% if request.session.user_organizationName %}
+              {{ request.session.user_organizationName }}
+            {% else %}
+              {{ request.session.user_commonName }}
+            {% endif %}
+            <span class="caret"></span>
           </a>
           <ul class="dropdown-menu">
             <li><a href="/cars">Личный кабинет</a></li>
