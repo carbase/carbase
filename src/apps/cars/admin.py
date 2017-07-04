@@ -31,3 +31,8 @@ class DeregistrationAdmin(admin.ModelAdmin):
 @admin.register(models.Email)
 class EmailAdmin(admin.ModelAdmin):
     list_display = ('iin', 'email')
+
+
+@admin.register(models.Agreement)
+class AgreementAdmin(admin.ModelAdmin):
+    pass

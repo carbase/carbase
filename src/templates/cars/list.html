@@ -139,7 +139,16 @@
                         <div class="modal-body">
                           <div class="step_1_body {% if reregistration %}hidden{% endif%}">
                             <div class="input-group input-group-lg">
-                              <span class="input-group-addon" id="sizing-addon1">Введите ИИН покупателя</span>
+                              <span class="input-group-addon">Выберете договор</span>
+                              <select class="form-control" id="reregistration{{car.id}}AgreementSelector">
+                                <option value="default" selected>Типовый договор купли/продажи ТС</option>
+                                {% for agreement in own_agreements %}
+                                  <option value="{{ agreement.id }}">{{ agreement.title }}</option>
+                                {% endfor %}
+                              </select>
+                            </div>
+                            <div class="input-group input-group-lg">
+                              <span class="input-group-addon">Введите ИИН покупателя</span>
                               <input type="text" maxlength="12" id="reregistration{{car.id}}BuyerIIN" class="form-control" placeholder="000000000000">
                               <span class="input-group-btn">
                                 <button class="btn btn-default submit-iin-button" data-carid="{{car.id}}" type="button">Отправить</button>

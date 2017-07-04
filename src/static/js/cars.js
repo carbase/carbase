@@ -153,7 +153,11 @@ function loadRegPaymentPage(reg_id) {
 $('.reregistrationModal .submit-iin-button').on('click', function() {
   var target = this
   var car_id = target.dataset.carid;
-  var data = {'car_id': car_id, 'buyer': 'IIN' + $('#reregistration' + car_id + 'BuyerIIN').val()};
+  var data = {
+    'car_id': car_id,
+    'buyer': 'IIN' + $('#reregistration' + car_id + 'BuyerIIN').val(),
+    'agreement': $('#reregistration' + car_id + 'AgreementSelector').val()
+  };
   $.post('/cars/agreement', data, function(resp) {
     if (resp.reregistration_id) {
       var step_1_elem = $('#carPanel' + car_id + ' .reregistrationModal .step_1')

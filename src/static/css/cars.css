@@ -175,3 +175,7 @@ h2 {
 .no-transit-numbers-button, .with-transit-numbers-button {
   margin: 10px;
 }
+
+.step_1_body .input-group {
+  margin-bottom: 10px;
+}

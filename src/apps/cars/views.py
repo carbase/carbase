@@ -9,7 +9,7 @@ from django.views.decorators.csrf import csrf_exempt
 from wkhtmltopdf.views import PDFTemplateView, PDFTemplateResponse
 
 from .api import get_cars_by_iin, get_email_by_iin, get_cars_by_bin
-from .models import Reregistration, Car, Deregistration
+from .models import Reregistration, Car, Deregistration, Agreement
 
 from carbase.decorators import login_required
 from carbase.helpers import send_mail
@@ -24,10 +24,13 @@ class CarsView(View):
     def get(self, request):
         if request.session.get('user_organizationalUnitName'):
             cars = get_cars_by_bin(request.session.get('user_organizationalUnitName'))
+            own_agreements = Agreement.objects.filter(owner=request.session.get('user_organizationalUnitName'))
         else:
             cars = get_cars_by_iin(request.session.get('user_serialNumber'))
+            own_agreements = []
         template_data = {
             'cars': cars,
+            'own_agreements': own_agreements,
             'reregistrations': Reregistration.objects.filter(
                 buyer=request.session.get('user_serialNumber'),
                 is_number_received=False
@@ -92,13 +95,21 @@ class AgreementView(View):
     def post(self, request):
         car_id = request.POST.get('car_id')
         car = Car.objects.get(id=car_id)
-        seller = request.session.get('user_serialNumber')
+        if request.session.get('user_organizationalUnitName'):
+            seller = request.session.get('user_organizationalUnitName')
+        else:
+            seller = request.session.get('user_serialNumber')
         buyer = request.POST.get('buyer')
+        agreement_id = request.POST.get('agreement')
         exist_registrations = Reregistration.objects.filter(car=car, buyer=buyer, seller=seller)
         if exist_registrations:
             reregistration = exist_registrations[0]
         else:
             reregistration = Reregistration.objects.create(car=car, buyer=buyer, seller=seller)
+        if agreement_id != 'default':
+            agreement = Agreement.objects.get(id=agreement_id)
+            reregistration.agreement = agreement
+            reregistration.save()
         return JsonResponse({'reregistration_id': reregistration.id})
 
     def delete(self, request):

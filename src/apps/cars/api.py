@@ -92,10 +92,12 @@ class Fine(models.Model):
 
 
 class Agreement(models.Model):
+    title = models.TextField(default='')
     template_html = models.TextField()
     template_pdf = models.TextField()
     template_xml = models.TextField()
-    style = models.TextField()
+    style = models.TextField(blank=True)
+    owner = models.CharField(max_length=20, default='')
 
 
 class Reregistration(models.Model):

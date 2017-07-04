@@ -2,7 +2,11 @@
 <div class="agreement-text">
   <div class="agreement-xml" id="agreementXml{{reregistration.id}}">
     <agreement>
-      <title>Договор купли-продажи транспортного средства</title>
+      {% if reregistration.agreement %}
+        <title>{{ reregistration.agreement.title }}</title>
+      {% else %}
+        <title>Договор купли-продажи транспортного средства</title>
+      {% endif %}
       <text>
         Гражданин Республики Казахстан {{reregistration.seller}},
         именуемый в дальнейшем «Продавец», с одной стороны, и Гражданин Республики Казахстан {{reregistration.buyer}},
@@ -31,7 +35,11 @@
       </text>
     </agreement>
   </div>
-  <h3>Договор купли-продажи транспортного средства</h3>
+  {% if reregistration.agreement %}
+    <h3>{{ reregistration.agreement.title }}</h3>
+  {% else %}
+    <h3>Договор купли-продажи транспортного средства</h3>
+  {% endif %}
   <p>
     Гражданин Республики Казахстан {{reregistration.seller}} {{reregistration.seller}},
     именуемый в дальнейшем «Продавец», с одной стороны, и Гражданин Республики Казахстан {{reregistration.buyer}},
