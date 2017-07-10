@@ -56,3 +56,7 @@ def request_to_json(request):
     '''
     data = json.loads(request.body.decode('utf-8'))
     return data
+
+
+def has_same_chars(chars):
+    return chars == len(chars) * chars[0]
