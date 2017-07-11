@@ -167,9 +167,14 @@ FIXTURE_DIRS = (
 
 VIP1 = get_secret('VIP1').split()
 VIP2 = get_secret('VIP2').split()
+VIP3 = get_secret('VIP3').split()
 
 VIP1_TAX = get_secret('VIP1_TAX')
 VIP2_TAX = get_secret('VIP2_TAX')
+VIP3_TAX = get_secret('VIP3_TAX')
+
+VIP1_EXTRA_TAX = get_secret('VIP1_EXTRA_TAX')
+VIP2_EXTRA_TAX = get_secret('VIP2_EXTRA_TAX')
 
 SRTS_TAX = get_secret('SRTS_TAX')
 GRNZ_TAX = get_secret('GRNZ_TAX')

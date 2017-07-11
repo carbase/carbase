@@ -1,4 +1,5 @@
 from django.test import TestCase
+from django.conf import settings
 
 from .models import NumberPlate
 from .api import get_owner_number_plates, get_number_plates, set_owner
@@ -58,3 +59,53 @@ class NumberPlatesTestCase(TestCase):
                                    region=plate_number[6:8])
         result = set_owner(plate_number=plate_number, user_id=owner_id)
         self.assertNotEquals(result, False)
+
+    def test_price_vip1(self):
+        series = '100ABC01'
+        number = NumberPlate.objects.create(
+            digits=series[0:3],
+            characters=series[3:6],
+            region=series[6:8]
+        )
+        price = settings.MCI * settings.VIP1_TAX
+        self.assertEqual(number.get_price(), price)
+
+    def test_price_vip2(self):
+        series = '001ABC01'
+        number = NumberPlate.objects.create(
+            digits=series[0:3],
+            characters=series[3:6],
+            region=series[6:8]
+        )
+        price = settings.MCI * settings.VIP2_TAX
+        self.assertEqual(number.get_price(), price)
+
+    def test_price_vip3(self):
+        series = '010AAA01'
+        number = NumberPlate.objects.create(
+            digits=series[0:3],
+            characters=series[3:6],
+            region=series[6:8]
+        )
+        price = settings.MCI * settings.VIP3_TAX
+        self.assertEqual(number.get_price(), price)
+
+    def test_price_vip1_extra(self):
+        series = '100AAA01'
+        number = NumberPlate.objects.create(
+            digits=series[0:3],
+            characters=series[3:6],
+            region=series[6:8]
+        )
+        price = settings.MCI * settings.VIP1_EXTRA_TAX
+        self.assertEqual(number.get_price(), price)
+
+    def test_price_vip2_extra(self):
+        series = '001BBB01'
+        number = NumberPlate.objects.create(
+            digits=series[0:3],
+            characters=series[3:6],
+            region=series[6:8]
+        )
+        price = settings.MCI * settings.VIP2_EXTRA_TAX
+        self.assertEqual(number.get_price(), price)

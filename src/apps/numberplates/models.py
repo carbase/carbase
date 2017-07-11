@@ -5,6 +5,7 @@ from django.db import models
 from django.conf import settings
 
 from controller.models import Center
+from carbase.helpers import has_same_chars
 
 
 class NumberPlate(models.Model):
@@ -40,9 +41,21 @@ class NumberPlate(models.Model):
         self.sale_date = datetime.now()
 
     def get_price(self):
+        is_extra_tax = has_same_chars(self.characters)
         if self.digits in settings.VIP1:
-            return math.floor(settings.VIP1_TAX * settings.MCI)
+            if is_extra_tax:
+                return math.floor(settings.VIP1_EXTRA_TAX * settings.MCI)
+            else:
+                return math.floor(settings.VIP1_TAX * settings.MCI)
         elif self.digits in settings.VIP2:
-            return math.floor(settings.VIP2_TAX * settings.MCI)
+            if is_extra_tax:
+                return math.floor(settings.VIP2_EXTRA_TAX * settings.MCI)
+            else:
+                return math.floor(settings.VIP2_TAX * settings.MCI)
+        elif self.digits in settings.VIP3:
+            if is_extra_tax:
+                return math.floor(settings.VIP3_TAX * settings.MCI)
+            else:
+                return math.floor(settings.GRNZ_TAX * settings.MCI)
         else:
             return math.floor(settings.GRNZ_TAX * settings.MCI)
