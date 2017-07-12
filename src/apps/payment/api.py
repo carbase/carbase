@@ -5,7 +5,7 @@ import json
 import hashlib
 import xml.etree.cElementTree as ET
 
-from cars.api import pay_by_id
+from cars.models import pay_by_id
 from django.conf import settings
 
 from carbase.helpers import create_guid, post_data

@@ -8,8 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from wkhtmltopdf.views import PDFTemplateView, PDFTemplateResponse
 
-from .api import get_cars_by_iin, get_email_by_iin, get_cars_by_bin
-from .models import Reregistration, Car, Deregistration, Agreement
+from .models import Reregistration, Car, Deregistration, Agreement, Email
 
 from carbase.decorators import login_required
 from carbase.helpers import send_mail
@@ -23,10 +22,10 @@ from numberplates.views import get_number_plates
 class CarsView(View):
     def get(self, request):
         if request.session.get('user_organizationalUnitName'):
-            cars = get_cars_by_bin(request.session.get('user_organizationalUnitName'))
+            cars = Car.objects.filter(user=request.session.get('user_organizationalUnitName'))
             own_agreements = Agreement.objects.filter(owner=request.session.get('user_organizationalUnitName'))
         else:
-            cars = get_cars_by_iin(request.session.get('user_serialNumber'))
+            cars = Car.objects.filter(user=request.session.get('user_serialNumber'))
             own_agreements = []
         template_data = {
             'cars': cars,
@@ -153,7 +152,10 @@ class AgreementView(View):
         reregistration.save()
         is_sign_request = request.PUT.get('seller_sign') or request.PUT.get('buyer_sign')
         if reregistration.seller_sign and reregistration.buyer_sign and is_sign_request:
-            emails = [get_email_by_iin(reregistration.buyer[3:]), get_email_by_iin(reregistration.seller[3:])]
+            emails = [
+                self.get_email_by_iin(reregistration.buyer[3:]),
+                self.get_email_by_iin(reregistration.seller[3:])
+            ]
             email_title = 'Договор купли/продажи'
             email_text = 'Договор купли/продажи находиться в приложении к письму'
             attach_filename = 'Договор купли/продажи.pdf'
@@ -170,3 +172,10 @@ class AgreementView(View):
     def get_sign(self, xml):
         xml_root = ET.fromstring(xml)
         return xml_root[2][1].text.strip()
+
+    def get_email_by_iin(self, iin):
+        try:
+            email_obj = Email.objects.get(iin=iin)
+            return email_obj.email
+        except Email.ObjectDoesNotExist:
+            pass
