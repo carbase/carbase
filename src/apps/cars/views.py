@@ -116,6 +116,8 @@ class AgreementView(View):
         reregistration_id = QueryDict(request.body).get('reregistrationId')
         reregistration = Reregistration.objects.get(id=reregistration_id)
         user_sn = request.session.get('user_serialNumber')
+        if request.session.get('user_organizationalUnitName'):
+            user_sn = request.session.get('user_organizationalUnitName')
         if reregistration.buyer == user_sn or reregistration.seller == user_sn:
             reregistration.delete()
             return JsonResponse({'result': 'success'})

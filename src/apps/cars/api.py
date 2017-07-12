@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.postgres.fields import JSONField
 
 
 def get_cars_by_iin(iin):
@@ -37,6 +38,25 @@ def get_email_by_iin(iin):
         email_obj = Email.objects.get(iin=iin)
         return email_obj.email
     except Email.ObjectDoesNotExist:
+        pass
+
+
+class Agreement(models.Model):
+    template = models.TextField()
+    context = JSONField()
+    owner = models.TextField()
+
+    def render(self, content_type='html'):
+        pass
+
+
+class Sign(models.Model):
+    key_info = models.TextField()
+    signed_info = models.TextField()
+    signature_value = models.TextField()
+    agreement = models.ForeignKey(Agreement)
+
+    def qr(self):
         pass
 
 
@@ -89,15 +109,6 @@ class Fine(models.Model):
     info = models.TextField()
     is_paid = models.BooleanField()
     car = models.ForeignKey(Car)
-
-
-class Agreement(models.Model):
-    title = models.TextField(default='')
-    template_html = models.TextField()
-    template_pdf = models.TextField()
-    template_xml = models.TextField()
-    style = models.TextField(blank=True)
-    owner = models.CharField(max_length=20, default='')
 
 
 class Reregistration(models.Model):
