@@ -28,6 +28,9 @@ DEBUG = bool(get_secret('DEBUG'))
 
 
 SECRET_KEY = get_secret('SECRET_KEY')
+CSRF_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
 
 
 ALLOWED_HOSTS = get_secret('ALLOWED_HOSTS').split()
