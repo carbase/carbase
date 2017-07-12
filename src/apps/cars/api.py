@@ -41,10 +41,20 @@ def get_email_by_iin(iin):
         pass
 
 
-class Agreement(models.Model):
+class AgreementTemplate(models.Model):
     template = models.TextField()
+    owner = models.CharField(max_length=22)
+    is_selected = models.BooleanField()
+    is_active = models.BooleanField()
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+
+class Agreement(models.Model):
+    template = models.ForeignKey(AgreementTemplate)
     context = JSONField()
-    owner = models.TextField()
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
 
     def render(self, content_type='html'):
         pass
@@ -55,6 +65,8 @@ class Sign(models.Model):
     signed_info = models.TextField()
     signature_value = models.TextField()
     agreement = models.ForeignKey(Agreement)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
 
     def qr(self):
         pass
