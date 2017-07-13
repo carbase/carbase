@@ -171,6 +171,7 @@ $('.reregistrationModal .submit-iin-button').on('click', function() {
           step_2_elem.removeClass('disabled');
           $('#reregistration' + car_id + 'reregistrationId').val(resp.reregistration_id)
           $('#carPanel' + car_id + ' .reregistrationModal .step_1_body').addClass('hidden')
+          $('#carPanel' + car_id + ' .reregistrationModal .step_2_body .agreement-text').html(resp.agreement)
           $('#carPanel' + car_id + ' .reregistrationModal .step_2_body').removeClass('hidden')
         });
       });
@@ -192,8 +193,9 @@ $('.agreementSign .sign-button').on('click', function() {
   var keyAlias = ''
   var webSocket = new WebSocket('wss://127.0.0.1:13579/')
   var xmlToSign = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
-  xmlToSign += $(target).closest('.modal-body').find('.agreement-xml').html()
-
+  xmlToSign += '<agreement-text>'
+  xmlToSign += $(target).closest('.modal-body').find('.agreement-text').text().trim()
+  xmlToSign += '</agreement-text>'
   webSocket.onopen = function () {
     webSocket.send('{"method":"browseKeyStore","args":["PKCS12","P12",""]}')
   }

@@ -1,5 +1,6 @@
-from django.db import models
 from django.contrib.postgres.fields import JSONField
+from django.db import models
+from django.template import Context, Template
 
 
 def pay_by_id(product_id):
@@ -19,11 +20,15 @@ def pay_by_id(product_id):
 
 class AgreementTemplate(models.Model):
     template = models.TextField()
-    owner = models.CharField(max_length=22)
+    owner = models.CharField(max_length=22, null=True, blank=True)
     is_selected = models.BooleanField()
     is_active = models.BooleanField()
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
+    display_name = models.CharField(max_length=64, null=True, blank=True)
+
+    def __str__(self):
+        return self.display_name if self.display_name else ''
 
 
 class Agreement(models.Model):
@@ -33,7 +38,10 @@ class Agreement(models.Model):
     updated = models.DateTimeField(auto_now=True)
 
     def render(self, content_type='html'):
-        pass
+        template = Template(self.template.template)
+        context = Context(self.context)
+        context['reregistration'] = Reregistration.objects.get(agreement=self)
+        return template.render(context)
 
 
 class Sign(models.Model):

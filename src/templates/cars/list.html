@@ -2,6 +2,7 @@
 {% load static %}
 {% load humanize %}
 {% load cars_filters %}
+{% load qr_tags %}
 
 {% block title %}Мои машины{% endblock %}
 {% block styles %}
@@ -141,9 +142,8 @@
                             <div class="input-group input-group-lg">
                               <span class="input-group-addon">Выберете договор</span>
                               <select class="form-control" id="reregistration{{car.id}}AgreementSelector">
-                                <option value="default" selected>Типовый договор купли/продажи ТС</option>
-                                {% for agreement in own_agreements %}
-                                  <option value="{{ agreement.id }}">{{ agreement.title }}</option>
+                                {% for agreement in agreements %}
+                                  <option value="{{ agreement.id }}">{{ agreement.display_name }}</option>
                                 {% endfor %}
                               </select>
                             </div>
@@ -156,7 +156,27 @@
                             </div>
                           </div>
                           <div class="step_2_body {% if not reregistration %}hidden{% endif%}">
-                            {% include "cars/includes/agreement.html" with car=car reregistration=reregistration%}
+                            <div class="agreement-text">
+                              {% if reregistration %}{{ reregistration.agreement.render }}{% endif %}
+                            </div>
+                            <h3 class="text-center">ПОДПИСИ СТОРОН</h3>
+                            <p class="agreementSign text-center">Продавец: <br>
+                              <span id="sellerSign{{reregistration.id}}">
+                                {% if reregistration.seller_sign %}
+                                  {% qr_from_text reregistration.seller_sign "l" %}
+                                {% else %}
+                                  <button data-reregistrationid="{{reregistration.id}}" data-side="seller" class="btn btn-default sign-button">Подписать</button>
+                                  <button data-reregistrationid="{{reregistration.id}}" class="btn btn-danger cancel-button">Отказаться от перерегистрации</button>
+                                {% endif %}
+                              </span>
+                            </p>
+                            <p class="agreementSign text-center">Покупатель: <br>
+                              <span id="buyerSign{{reregistration.id}}">
+                                {% if reregistration.buyer_sign %}
+                                  {% qr_from_text reregistration.buyer_sign "l" %}
+                                {% endif %}
+                              </span>
+                            </p>
                           </div>
                         </div>
                       </div>
@@ -311,7 +331,25 @@
             </div>
             <div class="modal-body">
               <div class="step_1_body {% if reregistration.buyer_sign and reregistration.seller_sign %}hidden{% endif%}">
-                {% include "cars/includes/agreement.html" with car=car reregistration=reregistration is_buyer=True %}
+                <div class="agreement-text">{% if reregistration %}{{ reregistration.agreement.render }}{% endif %}</div>
+                <h3 class="text-center">ПОДПИСИ СТОРОН</h3>
+                  <p class="agreementSign text-center">Продавец: <br>
+                    <span id="sellerSign{{reregistration.id}}">
+                      {% if reregistration.seller_sign %}
+                        {% qr_from_text reregistration.seller_sign "l" %}
+                      {% endif %}
+                    </span>
+                  </p>
+                  <p class="agreementSign text-center">Покупатель: <br>
+                    <span id="buyerSign{{reregistration.id}}">
+                      {% if reregistration.buyer_sign %}
+                        {% qr_from_text reregistration.buyer_sign "l" %}
+                      {% else %}
+                        <button data-reregistrationid="{{reregistration.id}}" data-side="buyer" class="btn btn-default sign-button">Подписать</button>
+                        <button data-reregistrationid="{{reregistration.id}}" class="btn btn-danger cancel-button">Отказаться от перерегистрации</button>
+                      {% endif %}
+                    </span>
+                  </p>
               </div>
               <div class="step_2_body {% if not reregistration.buyer_sign or not reregistration.seller_sign or reregistration.number %}hidden{% endif %}">
                 {% if reregistration.is_tax_paid %}

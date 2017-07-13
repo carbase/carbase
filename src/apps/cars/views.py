@@ -1,5 +1,6 @@
 import xml.etree.ElementTree as ET
 
+from django.db.models import Q
 from django.http import JsonResponse, QueryDict
 from django.shortcuts import render
 from django.utils.decorators import method_decorator
@@ -8,7 +9,8 @@ from django.views.decorators.csrf import csrf_exempt
 
 from wkhtmltopdf.views import PDFTemplateView, PDFTemplateResponse
 
-from .models import Reregistration, Car, Deregistration, Agreement, Email
+from .models import Reregistration, Car, Deregistration
+from .models import Agreement, Email, AgreementTemplate
 
 from carbase.decorators import login_required
 from carbase.helpers import send_mail
@@ -22,14 +24,15 @@ from numberplates.views import get_number_plates
 class CarsView(View):
     def get(self, request):
         if request.session.get('user_organizationalUnitName'):
-            cars = Car.objects.filter(user=request.session.get('user_organizationalUnitName'))
-            own_agreements = Agreement.objects.filter(owner=request.session.get('user_organizationalUnitName'))
+            org_bin = request.session.get('user_organizationalUnitName')
+            cars = Car.objects.filter(user=org_bin)
+            agreements = AgreementTemplate.objects.filter(Q(owner=org_bin) | Q(owner=None))
         else:
             cars = Car.objects.filter(user=request.session.get('user_serialNumber'))
-            own_agreements = []
+            agreements = AgreementTemplate.objects.filter(owner=None)
         template_data = {
             'cars': cars,
-            'own_agreements': own_agreements,
+            'agreements': agreements,
             'reregistrations': Reregistration.objects.filter(
                 buyer=request.session.get('user_serialNumber'),
                 is_number_received=False
@@ -90,7 +93,7 @@ class DeregistrationView(View):
 
 @method_decorator(login_required, name='dispatch')
 @method_decorator(csrf_exempt, name='dispatch')
-class AgreementView(View):
+class ReregistrationView(View):
     def post(self, request):
         car_id = request.POST.get('car_id')
         car = Car.objects.get(id=car_id)
@@ -106,10 +109,16 @@ class AgreementView(View):
         else:
             reregistration = Reregistration.objects.create(car=car, buyer=buyer, seller=seller)
         if agreement_id != 'default':
-            agreement = Agreement.objects.get(id=agreement_id)
+            agreement_template = AgreementTemplate.objects.get(id=agreement_id)
+            agreement_context = {
+                'seller': seller,
+                'buyer': buyer,
+                'car': '{} {}'.format(car.manufacturer, car.model)
+            }
+            agreement = Agreement.objects.create(template=agreement_template, context=agreement_context)
             reregistration.agreement = agreement
             reregistration.save()
-        return JsonResponse({'reregistration_id': reregistration.id})
+        return JsonResponse({'reregistration_id': reregistration.id, 'agreement': agreement.render()})
 
     def delete(self, request):
         reregistration_id = QueryDict(request.body).get('reregistrationId')
@@ -152,17 +161,19 @@ class AgreementView(View):
         reregistration.save()
         is_sign_request = request.PUT.get('seller_sign') or request.PUT.get('buyer_sign')
         if reregistration.seller_sign and reregistration.buyer_sign and is_sign_request:
-            emails = [
-                self.get_email_by_iin(reregistration.buyer[3:]),
-                self.get_email_by_iin(reregistration.seller[3:])
-            ]
-            email_title = 'Договор купли/продажи'
-            email_text = 'Договор купли/продажи находиться в приложении к письму'
-            attach_filename = 'Договор купли/продажи.pdf'
-            pdf_resp = PDFTemplateResponse(request, 'cars/agreement-pdf.html', {'reregistration': reregistration})
-            attach_data = pdf_resp.rendered_content
-            attach_mime = 'application/pdf'
-            send_mail(email_title, email_text, emails, attach_filename, attach_data, attach_mime)
+            pass
+            # TODO send agreement to email
+            # emails = [
+            #     self.get_email_by_iin(reregistration.buyer[3:]),
+            #     self.get_email_by_iin(reregistration.seller[3:])
+            # ]
+            # email_title = 'Договор купли/продажи'
+            # email_text = 'Договор купли/продажи находиться в приложении к письму'
+            # attach_filename = 'Договор купли/продажи.pdf'
+            # pdf_resp = PDFTemplateResponse(request, 'cars/agreement-pdf.html', {'reregistration': reregistration})
+            # attach_data = pdf_resp.rendered_content
+            # attach_mime = 'application/pdf'
+            # send_mail(email_title, email_text, emails, attach_filename, attach_data, attach_mime)
         return JsonResponse({
             'reregistration_id': reregistration.id,
             'seller_sign': reregistration.seller_sign,
@@ -171,11 +182,14 @@ class AgreementView(View):
 
     def get_sign(self, xml):
         xml_root = ET.fromstring(xml)
-        return xml_root[2][1].text.strip()
+        xml_sign = xml_root.find('{http://www.w3.org/2000/09/xmldsig#}Signature')
+        # TODO: save signature
+        sign_value = xml_sign.find('{http://www.w3.org/2000/09/xmldsig#}SignatureValue')
+        return sign_value.text
 
     def get_email_by_iin(self, iin):
         try:
             email_obj = Email.objects.get(iin=iin)
             return email_obj.email
-        except Email.ObjectDoesNotExist:
+        except Email.DoesNotExist:
             pass

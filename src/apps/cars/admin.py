@@ -33,6 +33,6 @@ class EmailAdmin(admin.ModelAdmin):
     list_display = ('iin', 'email')
 
 
-@admin.register(models.Agreement)
-class AgreementAdmin(admin.ModelAdmin):
+@admin.register(models.AgreementTemplate)
+class AgreementTemplateAdmin(admin.ModelAdmin):
     pass
