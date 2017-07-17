@@ -6,3 +6,4 @@ cryptography==1.9
 django-wkhtmltopdf==3.1.0
 django-qrcode==0.3
 uWSGI==2.0.15
+selenium==3.4.3

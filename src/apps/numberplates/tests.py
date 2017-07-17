@@ -1,8 +1,8 @@
 from django.test import TestCase
 from django.conf import settings
 
-from .models import NumberPlate
-from .api import get_owner_number_plates, get_number_plates, set_owner
+from numberplates.models import NumberPlate
+from numberplates.api import get_owner_number_plates, get_number_plates, set_owner
 
 from controller.models import Center
 

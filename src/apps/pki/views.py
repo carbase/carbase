@@ -28,7 +28,6 @@ class LoginView(View):
                 raise ValueError('Время действия сертификата истекло')
             for cert_attr in cert.subject:
                 request.session['user_' + cert_attr.oid._name] = cert_attr.value
-                print(cert_attr.oid._name, cert_attr.value)
         except ET.ParseError as err:
             return JsonResponse({'status': 'error', 'error_text': 'Ошибка проверки сертификата'})
         except ValueError as err:

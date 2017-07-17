@@ -1,6 +1,7 @@
 from functools import wraps
 
 from django.http import HttpResponseForbidden
+from django.template import loader
 
 
 def login_required(view_func):
@@ -9,5 +10,6 @@ def login_required(view_func):
         if (request.session.get('user_serialNumber') or request.user.is_authenticated):
             return view_func(request, *args, **kwargs)
         else:
-            return HttpResponseForbidden()
+            template = loader.get_template('403.html')
+            return HttpResponseForbidden(template.render(request=request))
     return _wrapped_view
