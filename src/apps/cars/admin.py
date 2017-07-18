@@ -36,3 +36,13 @@ class EmailAdmin(admin.ModelAdmin):
 @admin.register(models.AgreementTemplate)
 class AgreementTemplateAdmin(admin.ModelAdmin):
     pass
+
+
+@admin.register(models.Agreement)
+class AgreementAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(models.Sign)
+class SignAdmin(admin.ModelAdmin):
+    pass

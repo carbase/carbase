@@ -9,7 +9,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from wkhtmltopdf.views import PDFTemplateView, PDFTemplateResponse
 
-from .models import Reregistration, Car, Deregistration
+from .models import Reregistration, Car, Deregistration, Sign
 from .models import Agreement, Email, AgreementTemplate
 
 from carbase.decorators import login_required
@@ -139,8 +139,10 @@ class ReregistrationView(View):
         if request.PUT.get('seller_sign'):
             reregistration.seller_sign = self.get_sign(request.PUT.get('seller_sign'))
             reregistration.amount = request.PUT.get('amount')
+            self.save_sign(reregistration.agreement, request.PUT.get('seller_sign'))
         if request.PUT.get('buyer_sign'):
             reregistration.buyer_sign = self.get_sign(request.PUT.get('buyer_sign'))
+            self.save_sign(reregistration.agreement, request.PUT.get('buyer_sign'))
         if request.PUT.get('is_tax_paid'):
             reregistration.is_tax_paid = True
         if request.PUT.get('inspectionDate'):
@@ -158,7 +160,7 @@ class ReregistrationView(View):
             if number != 'RANDOM':
                 number = NumberPlate.objects.get(id=number)
             reregistration.number = str(number)
-        reregistration.save()
+        # reregistration.save()
         is_sign_request = request.PUT.get('seller_sign') or request.PUT.get('buyer_sign')
         if reregistration.seller_sign and reregistration.buyer_sign and is_sign_request:
             pass
@@ -186,6 +188,19 @@ class ReregistrationView(View):
         # TODO: save signature
         sign_value = xml_sign.find('{http://www.w3.org/2000/09/xmldsig#}SignatureValue')
         return sign_value.text
+
+    def save_sign(self, agreement, xml_sign):
+        xml_root = ET.fromstring(xml_sign)
+        xml_sign = xml_root.find('{http://www.w3.org/2000/09/xmldsig#}Signature')
+        sign_value = ET.tostring(xml_sign.find('{http://www.w3.org/2000/09/xmldsig#}SignatureValue'))
+        signed_info = ET.tostring(xml_sign.find('{http://www.w3.org/2000/09/xmldsig#}SignedInfo'))
+        key_info = ET.tostring(xml_sign.find('{http://www.w3.org/2000/09/xmldsig#}KeyInfo'))
+        Sign.objects.create(
+            agreement=agreement,
+            signature_value=sign_value,
+            signed_info=signed_info,
+            key_info=key_info
+        )
 
     def get_email_by_iin(self, iin):
         try:
