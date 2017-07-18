@@ -56,7 +56,11 @@ $('.login-button').on('click', function() {
           $("#certPassword").hide();
         }
       });
-
+    } else if (resp.errorCode == "EMPTY_KEY_LIST") {
+      $('#certInfo').html('<p class="error-title">Выберете сертификат с префиксом AUTH</p>')
+      $("#certLocationButton").show();
+    } else if (resp.errorCode == "WRONG_PASSWORD") {
+      $('#certInfo').html('<p class="error-title">Неверный пароль</p>')
     }
   }
 })
