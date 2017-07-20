@@ -117,24 +117,23 @@ $('.agreementSign .sign-button').on('click', function() {
           qr_code = '<img src="https://chart.googleapis.com/chart?cht=qr&amp;chs=350x350&amp;chl=' + resp.buyer_sign + '">'
           $('#buyerSign' + data.reregistrationId).html(qr_code)
           if (resp.reregistration_id) {
-            var step_1_elem = $('#reregistrationModalBuyer' + resp.reregistration_id + ' .step_1')
-            var step_1_progress = $('#reregistrationModalBuyer' + resp.reregistration_id + ' .step_1 .progress-bar')
+            var step_1_elem = $('#reregistrationFrameBuyer' + resp.reregistration_id + ' .step_1')
+            var step_1_progress = $('#reregistrationFrameBuyer' + resp.reregistration_id + ' .step_1 .progress-bar')
             step_1_progress.one('transitionend', function() {
-              var step_2_elem = $('#reregistrationModalBuyer' + resp.reregistration_id + ' .step_2')
-              var step_2_progress = $('#reregistrationModalBuyer' + resp.reregistration_id + ' .step_2 .progress-bar')
+              var step_2_elem = $('#reregistrationFrameBuyer' + resp.reregistration_id + ' .step_2')
+              var step_2_progress = $('#reregistrationFrameBuyer' + resp.reregistration_id + ' .step_2 .progress-bar')
               step_2_elem.addClass('active');
               step_2_progress.one('transitionend', function() {
-                var step_2_elem = $('#reregistrationModalBuyer' + resp.reregistration_id + ' .step_2');
+                var step_2_elem = $('#reregistrationFrameBuyer' + resp.reregistration_id + ' .step_2');
                 step_2_elem.removeClass('disabled');
-                hide_step_bodies($('#reregistrationModalBuyer' + resp.reregistration_id))
-                $('#reregistrationModalBuyer' + resp.reregistration_id + ' .step_2_body').removeClass('hidden')
+                hide_step_bodies($('#reregistrationFrameBuyer' + resp.reregistration_id))
+                $('#reregistrationFrameBuyer' + resp.reregistration_id + ' .step_2_body').removeClass('hidden')
                 enable_wizard_dot();
               });
             });
-            loadRegPaymentPage(resp.reregistration_id);
             if(step_1_elem.hasClass('complete')) {
-              hide_step_bodies($('#reregistrationModalBuyer' + resp.reregistration_id))
-              $('#reregistrationModalBuyer' + resp.reregistration_id + ' .step_2_body').removeClass('hidden')
+              hide_step_bodies($('#reregistrationFrameBuyer' + resp.reregistration_id))
+              $('#reregistrationFrameBuyer' + resp.reregistration_id + ' .step_2_body').removeClass('hidden')
             } else {
               step_1_elem.removeClass('active')
               step_1_elem.addClass('complete')
@@ -144,4 +143,108 @@ $('.agreementSign .sign-button').on('click', function() {
       })
     }
   }
+})
+
+$('#reregistrationStep2SubmitButton').on('click', function() {
+  var numberId = $('input[name="reregistrationNumber"]:checked').val()
+  var reg_id = $(this).data('regid')
+  $.put('/cars/reregistration', {'number': numberId, 'reregistrationId': reg_id}, function(resp) {
+    var step_2_elem = $('#reregistrationFrameBuyer' + reg_id + ' .step_2')
+    var step_2_progress = $('#reregistrationFrameBuyer' + reg_id + ' .step_2 .progress-bar')
+    step_2_progress.one('transitionend', function() {
+      var step_3_elem = $('#reregistrationFrameBuyer' + reg_id + ' .step_3')
+      var step_3_progress = $('#reregistrationFrameBuyer' + reg_id + ' .step_3 .progress-bar')
+      step_3_elem.addClass('active');
+      step_3_progress.one('transitionend', function() {
+        var step_3_elem = $('#reregistrationFrameBuyer' + reg_id + ' .step_3');
+        step_3_elem.removeClass('disabled');
+        hide_step_bodies($('#reregistrationFrameBuyer' + resp.reregistration_id))
+        $('#reregistrationFrameBuyer' + reg_id + ' .step_3_body').removeClass('hidden')
+        enable_wizard_dot()
+      });
+    });
+    loadRegPaymentPage(reg_id);
+    if(step_2_elem.hasClass('complete')) {
+      hide_step_bodies($('#reregistrationFrameBuyer' + resp.reregistration_id))
+      $('#reregistrationFrameBuyer' + reg_id + ' .step_3_body').removeClass('hidden')
+    } else {
+      step_2_elem.removeClass('active')
+      step_2_elem.addClass('complete')
+    }
+  });
+})
+
+function loadRegPaymentPage(reg_id) {
+  var product_id = 'reg' + reg_id
+  if (!$('#reregistrationModalBuyer' + reg_id + ' .tax_is_paid_text').length) {
+    if(paymentStatusIntervals[product_id]) {
+      clearInterval(paymentStatusIntervals[product_id])
+    }
+    $('#' + product_id + 'PayFrameModal').html('')
+    $.get('/payment/checkout?product_id=' + product_id, function(resp) {
+      var orderId = resp.response.pg_order_id
+      var checkoutUrl = resp.response.pg_redirect_url
+      $('<iframe>', {
+        src: checkoutUrl,
+        id:  'payFrame',
+        frameborder: 0,
+        scrolling: 'no'
+      }).appendTo('#' + product_id + 'PayFrameModal');
+      var checkStatusInterval = setInterval(function () {
+        $.get('/payment/payment_status?order_id=' + orderId, function(resp) {
+          if (resp.response.pg_transaction_status === 'ok') {
+            clearInterval(checkStatusInterval)
+            var step_3_elem = $('#reregistrationFrameBuyer' + reg_id + ' .step_3')
+            var step_3_progress = $('#reregistrationFrameBuyer' + reg_id + ' .step_3 .progress-bar')
+            step_3_progress.one('transitionend', function() {
+              var step_4_elem = $('#reregistrationFrameBuyer' + reg_id + ' .step_4')
+              var step_4_progress = $('#reregistrationFrameBuyer' + reg_id + ' .step_4 .progress-bar')
+              step_4_elem.addClass('active');
+              step_4_progress.one('transitionend', function() {
+                var step_4_elem = $('#reregistrationFrameBuyer' + reg_id + ' .step_4');
+                step_4_elem.removeClass('disabled');
+                hide_step_bodies($('#reregistrationFrameBuyer' + reg_id))
+                $('#reregistrationFrameBuyer' + reg_id + ' .step_4_body').removeClass('hidden')
+                var is_paid_text = '<div class="tax_is_paid_text">Оплата произведена</div>'
+                var number_freeze_text = '<p class="text-warning">Невозможно сменить номер после оплаты!</p>'
+                $('#reregistrationFrameBuyer' + reg_id + ' .step_3_body').html(is_paid_text)
+                $('#reregistrationFrameBuyer' + reg_id + ' .step_2_body').html(number_freeze_text)
+                enable_wizard_dot();
+              });
+            });
+            if(step_3_elem.hasClass('complete')) {
+              hide_step_bodies($('#reregistrationFrameBuyer' + reg_id))
+              $('#reregistrationFrameBuyer' + reg_id + ' .step_4_body').removeClass('hidden')
+            } else {
+              step_3_elem.removeClass('active')
+              step_3_elem.addClass('complete')
+            }
+          }
+        });
+      }, 10000)
+      paymentStatusIntervals[product_id] = checkStatusInterval
+    })
+  }
+}
+
+$('.reserve-time-button').on('click', function() {
+  var target = this
+  var data = {
+    'reregistrationId': target.dataset.reregistrationid,
+    'inspectionCenterId': $('#inspectionPlaceInput'+ target.dataset.reregistrationid).val(),
+    'inspectionDate': $('#inspectionDateInput'+ target.dataset.reregistrationid).val(),
+    'inspectionTimeRange': $('#inspectionTimeInput'+ target.dataset.reregistrationid).val(),
+  };
+  $.put('/cars/reregistration', data, function(resp) {
+    if (resp.reregistration_id) {
+      var inspection_place = $('#inspectionPlaceInput'+ resp.reregistration_id + ' option:selected').text();
+      var inspection_date = $('#reregistrationFrameBuyer' + resp.reregistration_id + ' .datepicker.form-control').val()
+      var inspection_time = $('#inspectionTimeInput'+ resp.reregistration_id).val()
+      $('#reregistrationFrameBuyer' + resp.reregistration_id + ' .step_4_body p:first-child').text('Ваша бронь: ' + inspection_place + ', ' + inspection_date + ', ' + inspection_time )
+      if (!$('#reregistrationFrameBuyer' + resp.reregistration_id + ' .step_4_body p:nth-child(2)').text().trim().startsWith('Вы можете изменить бронь:')) {
+        $('#reregistrationFrameBuyer' + resp.reregistration_id + ' .step_4_body p:nth-child(2)').prepend('Вы можете изменить бронь: ')
+      }
+      target.innerText = 'Изменить бронь'
+    }
+  })
 })

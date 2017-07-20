@@ -94,7 +94,13 @@ class ReregistrationView(View):
             context = {'reregistration': reregistration, 'agreements': agreements, 'car_id': car_id}
             return render(request, 'cars/reregistration_seller.html', context)
         else:
-            return render(request, 'cars/reregistration_buyer.html', {'reregistration': reregistration})
+            context = {
+                'owned_numbers': get_number_plates(owner_id=request.session.get('user_serialNumber')[3:]),
+                'available_numbers': get_number_plates(),
+                'reregistration': reregistration,
+                'centers': Center.objects.all()
+            }
+            return render(request, 'cars/reregistration_buyer.html', context)
 
     def post(self, request):
         car_id = request.POST.get('car_id')

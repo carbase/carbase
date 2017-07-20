@@ -1,0 +1,225 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+{% load cars_filters %}
+{% load qr_tags %}
+
+{% block title %}Мои машины{% endblock %}
+{% block styles %}
+  <link href="{% static 'css/flatpickr/datepicker.min.css' %}" rel="stylesheet">
+  <link href="{% static 'css/cars.css' %}" rel="stylesheet">
+  <link href="{% static 'css/numbers.css' %}" rel="stylesheet">
+  <link href="{% static 'css/reregistration.css' %}" rel="stylesheet">
+{% endblock %}
+{% block scripts %}
+  <script src="{% static 'js/flatpickr/datepicker.min.js' %}"></script>
+  <script src="{% static 'js/flatpickr/ru.js' %}"></script>
+  <script src="{% static 'js/bootstrap/bootbox.min.js' %}"></script>
+  <script src="{% static 'js/pki.js' %}"></script>
+  <script src="{% static 'js/cars.js' %}"></script>
+  <script src="{% static 'js/numbers.js' %}"></script>
+  <script src="{% static 'js/reregistration.js' %}"></script>
+{% endblock %}
+
+
+{% block content %}
+<div id="reregistrationFrameBuyer{{reregistration.id}}">
+  <div class="row bs-wizard" style="border-bottom:0;">
+    <div class="col-xs-3 bs-wizard-step step_1 {% if reregistration.buyer_sign and reregistration.seller_sign %}complete{% else %}active{% endif %}">
+      <div class="text-center bs-wizard-stepnum">Шаг 1</div>
+      <div class="progress"><div class="progress-bar"></div></div>
+      <label class="bs-wizard-dot"></label>
+      <div class="bs-wizard-info text-center">Подписание договора</div>
+    </div>
+
+    <div class="col-xs-3 bs-wizard-step step_2 {% if reregistration.number %}complete{% elif reregistration.buyer_sign and reregistration.seller_sign %}active{% else %}disabled{% endif %}">
+      <div class="text-center bs-wizard-stepnum">Шаг 2</div>
+      <div class="progress"><div class="progress-bar"></div></div>
+      <label class="bs-wizard-dot"></label>
+      <div class="bs-wizard-info text-center">Выбор номера</div>
+    </div>
+
+    <div class="col-xs-3 bs-wizard-step step_3 {% if reregistration.is_tax_paid %}complete{% elif reregistration.number %}active{% else %}disabled{% endif %}">
+      <div class="text-center bs-wizard-stepnum">Шаг 3</div>
+      <div class="progress"><div class="progress-bar"></div></div>
+      <label class="bs-wizard-dot"></label>
+      <div class="bs-wizard-info text-center">Оплата</div>
+    </div>
+
+    <div class="col-xs-3 bs-wizard-step step_4 {% if reregistration.is_tax_paid %}active{% else %}disabled{% endif %}">
+      <div class="text-center bs-wizard-stepnum">Шаг 4</div>
+      <div class="progress"><div class="progress-bar"></div></div>
+      <label class="bs-wizard-dot"></label>
+      <div class="bs-wizard-info text-center">Запись на сверку</div>
+    </div>
+  </div>
+  <div class="step_1_body {% if reregistration.buyer_sign and reregistration.seller_sign %}hidden{% endif%}">
+    <div class="agreement-text">{% if reregistration %}{{ reregistration.agreement.render }}{% endif %}</div>
+    <h3 class="text-center">ПОДПИСИ СТОРОН</h3>
+      <p class="agreementSign text-center">Продавец: <br>
+        <span id="sellerSign{{reregistration.id}}">
+          {% if reregistration.seller_sign %}
+            {% qr_from_text reregistration.seller_sign "l" %}
+          {% endif %}
+        </span>
+      </p>
+      <p class="agreementSign text-center">Покупатель: <br>
+        <span id="buyerSign{{reregistration.id}}">
+          {% if reregistration.buyer_sign %}
+            {% qr_from_text reregistration.buyer_sign "l" %}
+          {% else %}
+            <button data-reregistrationid="{{reregistration.id}}" data-side="buyer" class="btn btn-default sign-button">Подписать</button>
+            <button data-reregistrationid="{{reregistration.id}}" class="btn btn-danger cancel-button">Отказаться от перерегистрации</button>
+          {% endif %}
+        </span>
+      </p>
+  </div>
+  <div class="step_2_body {% if not reregistration.buyer_sign or not reregistration.seller_sign or reregistration.number %}hidden{% endif %}">
+    {% if reregistration.is_tax_paid %}
+      <div class="number">
+        <div class="row">
+          <span class="digits">{{ reregistration.number|slice:":3" }}</span>
+          <span class="chars">{{ reregistration.number|slice:"3:6" }}</span>
+          <span class="region">{{ reregistration.number|slice:"6:" }}</span>
+        </div>
+      </div>
+      <p class="text-warning">Невозможно сменить номер после оплаты!</p>
+    {% else %}
+    <div class="panel-group" id="reg{{reregistration.id}}NumberSelector" role="tablist" aria-multiselectable="true">
+      <div class="panel panel-default">
+        <div class="panel-heading" role="tab">
+          <h4 class="panel-title">
+            <a role="button" data-toggle="collapse" href="#reg{{reregistration.id}}NumberPanel1">
+              Случайно сгенерированная последовательность
+            </a>
+          </h4>
+        </div>
+        <div id="reg{{reregistration.id}}NumberPanel1" class="panel-collapse collapse in" data-parent="#reg{{reregistration.id}}NumberSelector" role="tabpanel">
+          <div class="panel-body">
+            <label>
+            <input type="radio" name="reregistrationNumber" value="RANDOM" checked>
+              Получить случайно сгенерированную последовательность
+            </label>
+          </div>
+        </div>
+      </div>
+      <div class="panel panel-default">
+        <div class="panel-heading" role="tab">
+          <h4 class="panel-title">
+            <a class="collapsed" role="button" data-toggle="collapse" href="#reg{{reregistration.id}}NumberPanel2">
+              Выбрать из ранее купленных номеров
+            </a>
+          </h4>
+        </div>
+        <div id="reg{{reregistration.id}}NumberPanel2" class="panel-collapse collapse" data-parent="#reg{{reregistration.id}}NumberSelector" role="tabpanel">
+          <div class="panel-body">
+            {% if owned_numbers %}
+              {% for number in owned_numbers %}
+              <label>
+                <input type="radio" name="reregistrationNumber" value="{{ number.id }}">
+                <div class="number">
+                  <div class="row">
+                    <span class="digits">{{ number.digits }}</span>
+                    <span class="chars">{{ number.characters }}</span>
+                    <span class="region">{{ number.region }}</span>
+                  </div>
+                </div>
+              </label>
+              {% endfor %}
+            {% else %}
+              У вас нету номеров
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      <div class="panel panel-default">
+        <div class="panel-heading" role="tab">
+          <h4 class="panel-title">
+            <a class="collapsed" role="button" data-toggle="collapse" href="#reg{{reregistration.id}}NumberPanel3">
+              Купить номер
+            </a>
+          </h4>
+        </div>
+        <div id="reg{{reregistration.id}}NumberPanel3" class="panel-collapse collapse" data-parent="#reg{{reregistration.id}}NumberSelector" role="tabpanel">
+          <div class="panel-body">
+            <div class="input-group" id="numberPlatesReregistrationSearchGroup">
+              <input type="text" class="form-control" placeholder="Поиск номеров...">
+              <span class="input-group-btn">
+                <button class="btn btn-default" type="button">Найти</button>
+              </span>
+            </div>
+            <div id="numberPlatesReregistrationNumbers">
+              {% for number in available_numbers %}
+              <label>
+                <input type="radio" name="reregistrationNumber" value="{{ number.pk }}">
+                <div class="number">
+                  <div class="row">
+                    <span class="digits">{{ number.digits }}</span>
+                    <span class="chars">{{ number.characters }}</span>
+                    <span class="region">{{ number.region }}</span>
+                  </div>
+                  <div class="btn btn-default btn-success">
+                    Цена {{ number.get_price|intcomma }}₸
+                  </div>
+                </div>
+              </label>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <button class="btn btn-primary" data-regid="{{ reregistration.id }}" id="reregistrationStep2SubmitButton">Далее</button>
+    {% endif %}
+  </div>
+  <div class="step_3_body {% if not reregistration.number or reregistration.is_tax_paid %}hidden{% endif %}">
+    <div class="modal-body agreement-pay-modal" id="reg{{reregistration.id}}PayFrameModal"></div>
+    {% if reregistration.number %}
+      {% if not reregistration.is_tax_paid %}
+        <script>window.onload = function() { loadRegPaymentPage({{ reregistration.id }}) }</script>
+      {% else %}
+        <div class="tax_is_paid_text">Оплата произведена</div>
+      {% endif %}
+    {% endif %}
+  </div>
+  <div class="step_4_body {% if not reregistration.is_tax_paid %}hidden{% endif %}">
+    {% if reregistration.inspection %}
+      <p>
+        Ваша бронь: г. {{reregistration.inspection.center.city}} {{reregistration.inspection.center.address}},
+        {{reregistration.inspection.date}},
+        {{reregistration.inspection.time_range}}
+      </p>
+      <p>Вы можете изменить бронь:
+        <select id="inspectionPlaceInput{{reregistration.id}}">
+        {% for center in centers %}
+          <option value="{{ center.pk }}">г. {{ center.city }}, {{ center.address }}</option>
+        {% endfor %}
+        </select>
+        <input type="date" id="inspectionDateInput{{reregistration.id}}" class="datepicker"></input>
+        <select id="inspectionTimeInput{{reregistration.id}}">
+          <option>9:00-12:00</option>
+          <option>12:00-15:00</option>
+          <option>15:00-18:00</option>
+        </select>
+        <button class="btn btn-default reserve-time-button" data-reregistrationid="{{ reregistration.id }}">Изменить бронь</button>
+      </p>
+    {% else %}
+      <p>Забронируйте удобное для вас время осмотра ТС на территории спецЦОНа:</p>
+      <p>
+        <select id="inspectionPlaceInput{{reregistration.id}}">
+          {% for center in centers %}
+            <option value="{{ center.pk }}">г. {{ center.city }}, {{ center.address }}</option>
+          {% endfor %}
+        </select>
+        <input type="date" id="inspectionDateInput{{reregistration.id}}" class="datepicker"></input>
+        <select id="inspectionTimeInput{{reregistration.id}}">
+          <option>9:00-12:00</option>
+          <option>12:00-15:00</option>
+          <option>15:00-18:00</option>
+        </select>
+        <button class="btn btn-default reserve-time-button"  data-reregistrationid="{{ reregistration.id }}">Забронировать</button>
+      </p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
