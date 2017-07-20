@@ -104,7 +104,8 @@ h2 {
 }
 
 .reregistrationModal iframe {
-  width: 521px;
+  width: 100%;
+  border-width: 0px;
   height: 660px;
 }
 

@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+{% load cars_filters %}
+{% load qr_tags %}
+
+{% block title %}Мои машины{% endblock %}
+{% block styles %}
+  <link href="{% static 'css/flatpickr/datepicker.min.css' %}" rel="stylesheet">
+  <link href="{% static 'css/cars.css' %}" rel="stylesheet">
+  <link href="{% static 'css/numbers.css' %}" rel="stylesheet">
+  <link href="{% static 'css/reregistration.css' %}" rel="stylesheet">
+{% endblock %}
+{% block scripts %}
+  <script src="{% static 'js/flatpickr/datepicker.min.js' %}"></script>
+  <script src="{% static 'js/flatpickr/ru.js' %}"></script>
+  <script src="{% static 'js/bootstrap/bootbox.min.js' %}"></script>
+  <script src="{% static 'js/pki.js' %}"></script>
+  <script src="{% static 'js/cars.js' %}"></script>
+  <script src="{% static 'js/numbers.js' %}"></script>
+  <script src="{% static 'js/reregistration.js' %}"></script>
+{% endblock %}
+
+
+{% block content %}
+<div id="reregistrationFrame{{car_id}}">
+  <div class="row bs-wizard">
+    <div class="col-xs-6 bs-wizard-step step_1 {% if not reregistration %}active{% else %}complete{% endif %}">
+      <div class="text-center bs-wizard-stepnum">Шаг 1</div>
+      <div class="progress"><div class="progress-bar"></div></div>
+      <label class="bs-wizard-dot"></label>
+      <div class="bs-wizard-info text-center">Данные покупателя</div>
+    </div>
+    <div class="col-xs-6 bs-wizard-step step_2 {% if not reregistration %}disabled{% else %}active{% endif %}">
+      <div class="text-center bs-wizard-stepnum">Шаг 2</div>
+      <div class="progress"><div class="progress-bar"></div></div>
+      <label class="bs-wizard-dot"></label>
+      <div class="bs-wizard-info text-center">Подписание договора</div>
+    </div>
+  </div>
+  <div class="step_1_body step_body {% if reregistration %}hidden{% endif%}">
+    <div class="input-group input-group-lg">
+      <span class="input-group-addon">Выберете договор</span>
+      <select class="form-control" id="reregistration{{car_id}}AgreementSelector">
+        {% for agreement in agreements %}
+          <option value="{{ agreement.id }}">{{ agreement.display_name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="input-group input-group-lg">
+      <span class="input-group-addon">Введите ИИН покупателя</span>
+      <input type="text" maxlength="12" id="reregistration{{car_id}}BuyerIIN" class="form-control" placeholder="000000000000">
+      <span class="input-group-btn">
+        <button class="btn btn-default submit-iin-button" data-carid="{{car_id}}" type="button">Отправить</button>
+      </span>
+    </div>
+  </div>
+  <div class="step_2_body step_body {% if not reregistration %}hidden{% endif%}">
+    <div class="agreement-text">
+      {% if reregistration %}{{ reregistration.agreement.render }}{% endif %}
+    </div>
+    <h3 class="text-center">ПОДПИСИ СТОРОН</h3>
+    <p class="agreementSign text-center">Продавец: <br>
+      <span id="sellerSign{{reregistration.id}}">
+        {% if reregistration.seller_sign %}
+          {% qr_from_text reregistration.seller_sign "l" %}
+        {% else %}
+          <button data-reregistrationid="{{reregistration.id}}" data-side="seller" class="btn btn-default sign-button">Подписать</button>
+          <button data-reregistrationid="{{reregistration.id}}" class="btn btn-danger cancel-button">Отказаться от перерегистрации</button>
+        {% endif %}
+      </span>
+    </p>
+    <p class="agreementSign text-center">Покупатель: <br>
+      <span id="buyerSign{{reregistration.id}}">
+        {% if reregistration.buyer_sign %}
+          {% qr_from_text reregistration.buyer_sign "l" %}
+        {% endif %}
+      </span>
+    </p>
+  </div>
+</div>
+{% endblock %}
