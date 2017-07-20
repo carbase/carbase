@@ -39,7 +39,21 @@ class CarsView(View):
 @method_decorator(csrf_exempt, name='dispatch')
 class DeregistrationView(View):
     def get(self, request):
-        return JsonResponse({'request': 'good'})
+        user = request.session.get('user_organizationalUnitName')
+        if not user:
+            user = request.session.get('user_serialNumber')
+        car_id = request.GET.get('car')
+
+        try:
+            deregistration = Reregistration.objects.get(car=car_id)
+        except Reregistration.DoesNotExist:
+            deregistration = None
+        context = {
+            'deregistration': deregistration,
+            'centers': Center.objects.all(),
+            'car_id': car_id
+        }
+        return render(request, 'cars/deregistration.html', context)
 
     def post(self, request):
         car = Car.objects.get(id=request.POST.get('car_id'))

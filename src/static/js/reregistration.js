@@ -248,3 +248,37 @@ $('.reserve-time-button').on('click', function() {
     }
   })
 })
+
+var enable_wizard_dot = function() {
+  $('.reregistration-frame-buyer .complete .bs-wizard-dot, .reregistration-frame-buyer .active .bs-wizard-dot').unbind('click')
+  $('.reregistration-frame-buyer .complete .bs-wizard-dot, .reregistration-frame-buyer .active .bs-wizard-dot').on('click', function() {
+    var dot = $(this)
+    console.log(dot)
+    var step = dot.parent('.bs-wizard-step')
+    var modal = dot.closest('.reregistration-frame-buyer')
+    if (step.hasClass('step_1')) {
+      hide_step_bodies(modal)
+      modal.find('.step_1_body').removeClass('hidden')
+    }
+    if (step.hasClass('step_2')) {
+      hide_step_bodies(modal)
+      modal.find('.step_2_body').removeClass('hidden')
+    }
+    if (step.hasClass('step_3')) {
+      hide_step_bodies(modal)
+      modal.find('.step_3_body').removeClass('hidden')
+    }
+    if (step.hasClass('step_4')) {
+      hide_step_bodies(modal)
+      modal.find('.step_4_body').removeClass('hidden')
+    }
+  })
+}
+
+var hide_step_bodies = function(modal) {
+  modal.find('.step_1_body').addClass('hidden')
+  modal.find('.step_2_body').addClass('hidden')
+  modal.find('.step_3_body').addClass('hidden')
+  modal.find('.step_4_body').addClass('hidden')
+}
+enable_wizard_dot();

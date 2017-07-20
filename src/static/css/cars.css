@@ -112,6 +112,7 @@ h2 {
 .deregistrationModal iframe {
   width: 100%;
   height: 660px;
+  border-width: 0px;
 }
 
 .pay-modal .modal-dialog {
