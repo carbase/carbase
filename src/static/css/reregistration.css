@@ -8,7 +8,7 @@
   margin-right: 0px;
 }
 
-.step_3_body iframe {
+.step_3_body iframe, .deregistration-frame iframe {
   width: 100%;
   height: 620px;
 }
