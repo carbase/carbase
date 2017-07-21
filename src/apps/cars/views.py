@@ -46,7 +46,7 @@ class DeregistrationView(View):
 
         try:
             deregistration = Deregistration.objects.get(car=car_id)
-        except Reregistration.DoesNotExist:
+        except Deregistration.DoesNotExist:
             deregistration = None
         context = {
             'deregistration': deregistration,
