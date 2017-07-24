@@ -7,7 +7,7 @@ import debug_toolbar
 
 
 urlpatterns = [
-    url(r'^admin/', admin.site.urls),
+    url(r'^lYq2COXC7cHzWrJ7/', admin.site.urls),
     url(r'^cars/', include('cars.urls')),
     url(r'^pki/', include('pki.urls')),
     url(r'^payment/', include('payment.urls')),
