@@ -1,3 +1,11 @@
+$(".datepicker").flatpickr({
+  'locale': 'ru',
+  'altFormat': 'j F Y',
+  'minDate': 'today',
+  'altInput': true,
+  'dateFormat': 'Y-m-j'
+});
+
 $('.no-transit-numbers-button').on('click', function() {
   var car_id = $(this).data('car-id')
   var post_data = {'car_id': car_id, 'is_transit_number': 0, 'is_paid': 1}

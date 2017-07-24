@@ -1,13 +1,5 @@
 var paymentStatusIntervals = {}
 
-$(".datepicker").flatpickr({
-  'locale': 'ru',
-  'altFormat': 'j F Y',
-  'minDate': 'today',
-  'altInput': true,
-  'dateFormat': 'Y-m-j'
-});
-
 $.put = function(url, data, callback, type){
   if ( $.isFunction(data) ){
     type = type || callback,

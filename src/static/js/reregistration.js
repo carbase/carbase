@@ -1,3 +1,10 @@
+$(".datepicker").flatpickr({
+  'locale': 'ru',
+  'altFormat': 'j F Y',
+  'minDate': 'today',
+  'altInput': true,
+  'dateFormat': 'Y-m-j'
+});
 $('.step_1_body .submit-iin-button').on('click', function() {
   var target = this
   var car_id = target.dataset.carid;
