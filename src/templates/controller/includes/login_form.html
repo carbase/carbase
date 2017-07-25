@@ -1,0 +1,8 @@
+<div class="login-form-wrapper">
+  <form action="/controller/login/" class="form-horizontal" method="POST">
+    {% csrf_token %}
+    <div class="form-group"><label for="loginUsername">Логин</label><input id="loginUsername" class="form-control input-lg" type="text" name="username"></div>
+    <div class="form-group"><label for="loginPassword">Пароль</label><input id="loginPassword" class="form-control input-lg" type="password" name="password"></div>
+    <div class="form-group"><input type="submit" class="form-control btn btn-success input-lg" value="Войти"></div>
+  </form
+</div>

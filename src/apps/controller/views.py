@@ -1,55 +1,23 @@
 from django.contrib import auth
-from django.http import HttpResponse
+from django.http import JsonResponse, QueryDict
 from django.shortcuts import render, redirect
+from django.utils.decorators import method_decorator
 from django.views import View
+from django.views.decorators.csrf import csrf_exempt
 
-from cars.models import Reregistration, Deregistration
 from .models import Inspector, Inspection
 
 
 class IndexView(View):
     def get(self, request):
-        iin = request.GET.get('iin')
-        reregistrations = []
-        deregistrations = []
-        if iin:
-            reregistrations = Reregistration.objects.filter(buyer='IIN' + iin, inspection__is_success=False)
-            deregistrations = Deregistration.objects.filter(car__owner='IIN' + iin, inspection__is_success=False)
-        elif request.user.is_authenticated:
+        template_data = {
+            'is_allower': request.user.username.startswith('all'),
+            'is_revisor': request.user.username.startswith('rev'),
+        }
+        if request.user.is_authenticated:
             inspector = Inspector.objects.get(user=request.user)
-            reregistrations = Reregistration.objects.exclude(inspection__is_success=True)
-            reregistrations.filter(inspection__center=inspector.center)
-            deregistrations = Deregistration.objects.exclude(inspection__is_success=True)
-            deregistrations.filter(inspection__center=inspector.center)
-        template_data = {'reregistrations': reregistrations, 'deregistrations': deregistrations}
-        return render(request, 'controller/index.html', template_data)
-
-    def post(self, request):
-        if not request.user.username.startswith('mvd'):
-            return HttpResponse(401)
-        inspection = Inspection.objects.get(id=request.POST.get('id'))
-        inspector = request.user.inspector
-        inspection.inspector = request.user.inspector
-        inspection.is_success = True
-        inspection.save()
-        if inspection.reregistration:
-            inspection.reregistration.car.user = inspection.reregistration.buyer
-            inspection.reregistration.car.number = inspection.reregistration.number
-            inspection.reregistration.car.is_registred = True
-            inspection.reregistration.car.save()
-            inspection.reregistration.is_number_received = True
-            inspection.reregistration.save()
-        if inspection.deregistration:
-            inspection.deregistration.car.is_registred = False
-            inspection.deregistration.car.save()
-            inspection.deregistration.is_success = True
-            inspection.deregistration.save()
-
-        reregistrations = Reregistration.objects.exclude(inspection__is_success=True)
-        reregistrations.filter(inspection__center=inspector.center)
-        deregistrations = Deregistration.objects.exclude(inspection__is_success=True)
-        deregistrations.filter(inspection__center=inspector.center)
-        template_data = {'reregistrations': reregistrations, 'deregistrations': deregistrations}
+            inspections = Inspection.objects.filter(center=inspector.center)
+            template_data['inspections'] = inspections
         return render(request, 'controller/index.html', template_data)
 
 
@@ -63,4 +31,41 @@ def login(request):
 
 
 def logout(request):
+    auth.logout(request)
     return redirect('/controller')
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class InspectionView(View):
+    def put(self, request):
+        request.PUT = QueryDict(request.body)
+        inspection = Inspection.objects.get(id=request.PUT.get('id'))
+        if request.PUT.get('is_prelimenary_success'):
+            inspection.is_prelimenary_success = bool(int(request.PUT.get('is_prelimenary_success')))
+            inspection.allower = request.user.inspector
+        if request.PUT.get('prelimenary_result'):
+            inspection.prelimenary_result = request.PUT.get('prelimenary_result')
+        if request.PUT.get('is_revision_success'):
+            inspection.is_revision_success = bool(int(request.PUT.get('is_revision_success')))
+            inspection.revisor = request.user.inspector
+        if request.PUT.get('revision_result'):
+            inspection.revision_result = request.PUT.get('revision_result')
+        if request.PUT.get('is_success'):
+            if inspection.reregistration:
+                inspection.reregistration.car.user = inspection.reregistration.buyer
+                inspection.reregistration.car.number = inspection.reregistration.number
+                inspection.reregistration.car.is_registred = True
+                inspection.reregistration.car.save()
+                inspection.reregistration.is_number_received = True
+                inspection.reregistration.save()
+            if inspection.deregistration:
+                inspection.deregistration.car.is_registred = False
+                inspection.deregistration.car.save()
+                inspection.deregistration.is_success = True
+                inspection.deregistration.save()
+            inspection.is_success = bool(int(request.PUT.get('is_success')))
+        if request.PUT.get('result'):
+            inspection.result = request.PUT.get('result')
+
+        inspection.save()
+        return JsonResponse({'result': 'success'})

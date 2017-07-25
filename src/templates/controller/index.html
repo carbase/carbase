@@ -10,68 +10,122 @@
 
 {% block content %}
   {% if request.user.is_authenticated %}
-    <form action="" method="GET">
-      <div class="input-group">
-        <span class="input-group-addon">Введите ИИН</span>
-        <input type="text" class="form-control" name="iin" value="{{request.GET.iin}}" maxlength="12" placeholder="000000000000">
-        <span class="input-group-btn">
-          <input class="btn btn-default" type="submit" value="Поиск">
-        </span>
-      </div>
-    </form>
+    {% include 'controller/includes/search_form.html' %}
   {% else %}
-    <form action="/controller/login/" method="POST">
-      {% csrf_token %}
-      <input type="text" name="username" placeholder="Логин">
-      <input type="password" name="password" placeholder="Пароль">
-      <input type="submit" class="btn btn-default" value="Войти">
-    </form>
+    {% include 'controller/includes/login_form.html' %}
   {% endif %}
-  {% for inspection in reregistrations %}
-    <div v-if="cars.length" v-for='car in cars' class='car col-xs-12 col-md-6'>
-      <form action="" method="POST">
-        {% csrf_token %}
-        <div class='panel panel-default'>
-          <div class='panel-body'>
-            <div class='panel-body'>
-              <h2>Производитель: <b>{{inspection.car.manufacturer}}</b></h2>
-              <h2>Модель: <b>{{inspection.car.model}}</b></h2>
-              <h2>Номер: <b>{{inspection.car.number}}</b></h2>
-              <h2>VIN-код: <b>{{inspection.car.vin_code}}</b></h2>
-            </div>
-          </div>
-          <div class='panel-footer'>
-            <input type="hidden" name="id" value="{{inspection.inspection.id}}">
-            <input type="hidden" name="status" value="success">
-            <input class="btn btn-default" type="submit" value="Подтвердить">
-            <span class="pull-right btn">Перерегистрация авто</span>
-          </div>
+  <div class="panel-group col-md-8 col-md-offset-2" role="tablist">
+    {% for inspection in inspections %}
+    {% if inspection.reregistration %}{% with car=inspection.reregistration.car %}
+      <div class="panel panel-default">
+        <div class="panel-heading" role="tab" id="headingOne" data-toggle="collapse" data-target="#car{{car.id}}">
+          <span class="panel-title">
+            {{ car.manufacturer }} {{ car.model }} {{ car.number }} {{ car.user }}</span>
+          <span class="pull-right">
+            <i>
+            {% if inspection.is_success %}
+              Инспекция завершена
+            {% elif inspection.result %}
+              В заключении отказано
+            {% elif inspection.is_revision_success %}
+              Ожидается заключение
+            {% elif inspection.revision_result %}
+              Отказано при осмотре ТС
+            {% elif inspection.is_prelimenary_success %}
+              Ожидается результат осмотра ТС
+            {% elif inspection.prelimenary_result %}
+              Отказано при предварительной проверке
+            {% else %}
+              Ожидается предварительная проверка
+            {% endif %}
+            </i>
+            <span class="glyphicon {% if inspection.is_prelimenary_success %} glyphicon-ok success {% elif inspection.prelimenary_result %} glyphicon-remove text-danger {% else %} glyphicon-ok muted {% endif %}"></span>
+            <span class="glyphicon {% if inspection.is_revision_success %} glyphicon-ok success {% elif inspection.revision_result %} glyphicon-remove text-danger {% else %} glyphicon-ok muted {% endif %}"></span>
+            <span class="glyphicon {% if inspection.is_success %} glyphicon-ok success {% elif inspection.result %} glyphicon-remove text-danger {% else %} glyphicon-ok muted {% endif %}"></span>
+          </span>
         </div>
-      </form>
-    </div>
-  {% endfor %}
+        <div id="car{{car.id}}" class="panel-collapse collapse" role="tabpanel">
+          <div class="panel-body">
+            <p class="text-center">Подробная информация о ТС, продавце, покупателе.</p>
+            <p class="text-center">Договор купли-продажи.</p>
+            {% if inspection.prelimenary_result %}
+              <p> Результат предварительной проверки: {{ inspection.prelimenary_result }} </p>
+            {% elif is_allower %}
+              <button class="btn btn-danger" data-toggle="modal" data-target="#declinePrelimenary{{inspection.id}}Modal">Отказать в регистрации ТС</button>
+              <div class="modal fade" id="declinePrelimenary{{inspection.id}}Modal" tabindex="-1" role="dialog">
+                <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                      <h4 class="modal-title">Причина отказа</h4>
+                    </div>
+                    <div class="modal-body">
+                      <textarea class="form-control" id="declinePrelimenary{{inspection.id}}Reason"></textarea>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-danger decline-prelimenary-submit" data-inspectionid="{{ inspection.id }}">Отказать</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <button class="btn btn-success pull-right accept-prelimenary-submit" data-inspectionid="{{ inspection.id }}">Подтвердить предварительную проверку</button>
+            {% elif is_revisor %}
+              <p>Ожидается предварительная проверка</p>
+            {% endif %}
 
-  {% for inspection in deregistrations %}
-    <div v-if="cars.length" v-for='car in cars' class='car col-xs-12 col-md-6'>
-      <form action="" method="POST">
-        {% csrf_token %}
-        <div class='panel panel-default'>
-          <div class='panel-body'>
-            <div class='panel-body'>
-              <h2>Производитель: <b>{{inspection.car.manufacturer}}</b></h2>
-              <h2>Модель: <b>{{inspection.car.model}}</b></h2>
-              <h2>Номер: <b>{{inspection.car.number}}</b></h2>
-              <h2>VIN-код: <b>{{inspection.car.vin_code}}</b></h2>
-            </div>
-          </div>
-          <div class='panel-footer'>
-            <input type="hidden" name="id" value="{{inspection.inspection.id}}">
-            <input type="hidden" name="status" value="success">
-            <input class="btn btn-default" type="submit" value="Подтвердить">
-            <span class="pull-right btn">Снятие с учета</span>
+            {% if inspection.revision_result %}
+              <p> Результат осмотра ТС: {{ inspection.revision_result }} </p>
+            {% elif is_revisor %}
+              <button class="btn btn-danger" data-toggle="modal" data-target="#declineRevision{{inspection.id}}Modal">Отказать в регистрации ТС</button>
+              <div class="modal fade" id="declineRevision{{inspection.id}}Modal" tabindex="-1" role="dialog">
+                <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                      <h4 class="modal-title">Причина отказа</h4>
+                    </div>
+                    <div class="modal-body">
+                      <textarea class="form-control" id="declineRevision{{inspection.id}}Reason"></textarea>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-danger decline-revision-submit" data-inspectionid="{{ inspection.id }}">Отказать</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <button class="btn btn-success pull-right accept-revision-submit" data-inspectionid="{{ inspection.id }}">Подтвердить осмотр ТС</button>
+            {% elif is_allower %}
+              <p>Ожидается осмотр ТС</p>
+            {% endif %}
+
+            {% if inspection.result %}
+              <p> Результат заключения: {{ inspection.result }} </p>
+            {% elif is_allower %}
+              <button class="btn btn-danger" data-toggle="modal" data-target="#declineFinal{{inspection.id}}Modal">Отказать в регистрации ТС</button>
+              <div class="modal fade" id="declineFinal{{inspection.id}}Modal" tabindex="-1" role="dialog">
+                <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                      <h4 class="modal-title">Причина отказа</h4>
+                    </div>
+                    <div class="modal-body">
+                      <textarea class="form-control" id="declineFinal{{inspection.id}}Reason"></textarea>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-danger decline-final-submit" data-inspectionid="{{ inspection.id }}">Отказать</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <button class="btn btn-success pull-right accept-final-submit" data-inspectionid="{{ inspection.id }}">Подтвердить перерегистрацию</button>
+            {% elif is_allower %}
+              <p>Ожидается заключение</p>
+            {% endif %}
           </div>
         </div>
-      </form>
-    </div>
-  {% endfor %}
+      </div>
+    {% endwith %}{% endif %}
+    {% endfor %}
+  </div>
 {% endblock %}

@@ -2,7 +2,7 @@
   font-family: 'LicensePlate';
   font-style: normal;
   font-weight: 400;
-  src: local('LicensePlate'), local('LicensePlate-Regular'), url(/static/font/LicensePlate.woff2) format('woff2');
+  src: local('LicensePlate'), local('LicensePlate-Regular'), url(/static/css/fonts/LicensePlate.woff2) format('woff2');
 }
 
 .number {

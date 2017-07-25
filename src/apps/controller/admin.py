@@ -9,7 +9,7 @@ class CenterAdmin(admin.ModelAdmin):
 
 @admin.register(models.Inspector)
 class InspectorAdmin(admin.ModelAdmin):
-    list_display = ('user', 'center')
+    list_display = ('user', 'center', 'role')
 
 
 @admin.register(models.Inspection)
