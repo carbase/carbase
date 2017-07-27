@@ -1,10 +1,10 @@
 from django.contrib import auth
+from django.db.models import Q
 from django.http import JsonResponse, QueryDict
 from django.shortcuts import render, redirect
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
-
 from .models import Inspector, Inspection
 
 
@@ -14,10 +14,27 @@ class IndexView(View):
             'is_allower': request.user.username.startswith('all'),
             'is_revisor': request.user.username.startswith('rev'),
         }
+        inspections = []
         if request.user.is_authenticated:
             inspector = Inspector.objects.get(user=request.user)
-            inspections = Inspection.objects.filter(center=inspector.center)
-            template_data['inspections'] = inspections
+            q = request.GET.get('q')
+            if q:
+                inspections = Inspection.objects.filter(
+                    Q(reregistration__buyer__icontains=q) |
+                    Q(reregistration__seller__icontains=q) |
+                    Q(reregistration__car__number__icontains=q) |
+                    Q(reregistration__car__vin_code__icontains=q) |
+                    Q(reregistration__car__manufacturer__icontains=q) |
+                    Q(reregistration__car__model__icontains=q) |
+                    Q(deregistration__car__user__icontains=q) |
+                    Q(deregistration__car__number__icontains=q) |
+                    Q(deregistration__car__vin_code__icontains=q) |
+                    Q(deregistration__car__manufacturer__icontains=q) |
+                    Q(deregistration__car__model__icontains=q)
+                )
+            else:
+                inspections = Inspection.objects.filter(center=inspector.center).exclude(is_success=True)
+        template_data['inspections'] = inspections
         return render(request, 'controller/index.html', template_data)
 
 
