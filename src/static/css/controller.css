@@ -1,0 +1,17 @@
+.login-form-wrapper {
+  width: 50%;
+  margin: 100px auto;
+}
+
+.search-form-wrapper {
+  width: 50%;
+  margin: 10px auto;
+}
+
+.glyphicon-ok.success {
+  color: #32CD32;
+}
+
+.glyphicon-ok.muted {
+  color: #DFDFDF;
+}
