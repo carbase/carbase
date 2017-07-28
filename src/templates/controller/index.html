@@ -5,6 +5,7 @@
   <link href="{% static 'css/controller.css' %}" rel="stylesheet">
 {% endblock %}
 {% block scripts %}
+  <script src="{% static 'js/bootstrap/bootbox.min.js' %}"></script>
   <script src="{% static 'js/controller.js' %}"></script>
 {% endblock %}
 
@@ -75,7 +76,7 @@
 
             {% if inspection.revision_result %}
               <p> Результат осмотра ТС: {{ inspection.revision_result }} </p>
-            {% elif inspection.prelimenary_result and is_revisor %}
+            {% elif inspection.is_prelimenary_success and is_revisor %}
               <button class="btn btn-danger" data-toggle="modal" data-target="#declineRevision{{inspection.id}}Modal">Отказать в регистрации ТС</button>
               <div class="modal fade" id="declineRevision{{inspection.id}}Modal" tabindex="-1" role="dialog">
                 <div class="modal-dialog" role="document">
@@ -94,13 +95,13 @@
                 </div>
               </div>
               <button class="btn btn-success pull-right accept-revision-submit" data-inspectionid="{{ inspection.id }}">Подтвердить осмотр ТС</button>
-            {% elif inspection.prelimenary_result and is_allower %}
+            {% elif inspection.is_prelimenary_success and is_allower %}
               <p>Ожидается осмотр ТС</p>
             {% endif %}
 
             {% if inspection.result %}
               <p> Результат заключения: {{ inspection.result }} </p>
-            {% elif inspection.prelimenary_result and inspection.revision_result and is_allower %}
+            {% elif inspection.is_prelimenary_success and inspection.is_revision_success and is_allower %}
               <button class="btn btn-danger" data-toggle="modal" data-target="#declineFinal{{inspection.id}}Modal">Отказать в регистрации ТС</button>
               <div class="modal fade" id="declineFinal{{inspection.id}}Modal" tabindex="-1" role="dialog">
                 <div class="modal-dialog" role="document">
@@ -119,7 +120,7 @@
                 </div>
               </div>
               <button class="btn btn-success pull-right accept-final-submit" data-inspectionid="{{ inspection.id }}">Подтвердить перерегистрацию</button>
-            {% elif inspection.prelimenary_result and inspection.revision_result and is_allower %}
+            {% elif inspection.is_prelimenary_success and inspection.is_revision_success and is_allower %}
               <p>Ожидается заключение</p>
             {% endif %}
           </div>

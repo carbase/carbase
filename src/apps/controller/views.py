@@ -33,7 +33,9 @@ class IndexView(View):
                     Q(deregistration__car__model__icontains=q)
                 )
             else:
-                inspections = Inspection.objects.filter(center=inspector.center).exclude(is_success=True)
+                inspections = Inspection.objects.filter(center=inspector.center)
+                if inspector.role != 'admin':
+                    inspections.exclude(is_success=True)
         template_data['inspections'] = inspections
         return render(request, 'controller/index.html', template_data)
 
@@ -57,16 +59,16 @@ class InspectionView(View):
     def put(self, request):
         request.PUT = QueryDict(request.body)
         inspection = Inspection.objects.get(id=request.PUT.get('id'))
-        if request.PUT.get('is_prelimenary_success'):
-            inspection.is_prelimenary_success = bool(int(request.PUT.get('is_prelimenary_success')))
-            inspection.allower = request.user.inspector
         if request.PUT.get('prelimenary_result'):
             inspection.prelimenary_result = request.PUT.get('prelimenary_result')
-        if request.PUT.get('is_revision_success'):
-            inspection.is_revision_success = bool(int(request.PUT.get('is_revision_success')))
-            inspection.revisor = request.user.inspector
+            inspection.is_prelimenary_success = bool(int(request.PUT.get('is_prelimenary_success')))
+            inspection.prelimenary_sign = request.PUT.get('sign')
+            inspection.allower = request.user.inspector
         if request.PUT.get('revision_result'):
+            inspection.is_revision_success = bool(int(request.PUT.get('is_revision_success')))
             inspection.revision_result = request.PUT.get('revision_result')
+            inspection.revision_sign = request.PUT.get('sign')
+            inspection.revisor = request.user.inspector
         if request.PUT.get('is_success'):
             if inspection.reregistration:
                 inspection.reregistration.car.user = inspection.reregistration.buyer
@@ -83,6 +85,7 @@ class InspectionView(View):
             inspection.is_success = bool(int(request.PUT.get('is_success')))
         if request.PUT.get('result'):
             inspection.result = request.PUT.get('result')
+            inspection.sign = request.PUT.get('sign')
 
         inspection.save()
         return JsonResponse({'result': 'success'})
