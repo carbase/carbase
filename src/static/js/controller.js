@@ -140,3 +140,11 @@ $('.decline-final-submit').on('click', function() {
   }
   sign_result(data)
 })
+
+$('.logout-button').on('click', function() {
+  $.post("/pki/logout/", function(data) {
+    if (data.status === 'success') {
+      location.reload()
+    }
+  });
+})
