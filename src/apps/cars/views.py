@@ -99,7 +99,7 @@ class ReregistrationView(View):
         car_id = request.GET.get('car')
 
         try:
-            reregistration = Reregistration.objects.get(car=car_id)
+            reregistration = Reregistration.objects.get(car=car_id, is_number_received=False)
         except Reregistration.DoesNotExist:
             reregistration = None
 
