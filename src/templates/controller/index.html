@@ -18,12 +18,12 @@
   <div class="panel-group col-md-8 col-md-offset-2" role="tablist">
     {% for inspection in inspections %}
     {% if inspection.reregistration %}{% with car=inspection.reregistration.car %}
-      <div class="panel panel-default">
+      <div class="panel panel-default panel-inspection">
         <div class="panel-heading" role="tab" id="headingOne" data-toggle="collapse" data-target="#car{{car.id}}">
           <span class="panel-title">
             {{ car.manufacturer }} {{ car.model }} {{ car.number }} {{ car.user }}</span>
           <span class="pull-right">
-            <i>
+            <i class="inspection-status">
             {% if inspection.is_success %}
               Инспекция завершена
             {% elif inspection.result %}

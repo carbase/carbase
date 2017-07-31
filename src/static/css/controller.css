@@ -4,7 +4,7 @@
 }
 
 .search-form-wrapper {
-  width: 50%;
+  width: 66.66666667%;
   margin: 10px auto;
 }
 
@@ -14,4 +14,8 @@
 
 .glyphicon-ok.muted {
   color: #DFDFDF;
+}
+
+.filter-group {
+  padding-left: 15px;
 }

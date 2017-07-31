@@ -148,3 +148,47 @@ $('.logout-button').on('click', function() {
     }
   });
 })
+
+$('.filter-group button').on('click', function() {
+  $('.filter-group button').removeClass('btn-primary')
+  $(this).addClass('btn-primary')
+  var filter_type = $(this).data('filter')
+  if (filter_type === 'all') {
+    $('.panel-inspection').show()
+  } else if (filter_type === 'wait-prelimenary') {
+    $('.panel-inspection').hide()
+    $('.panel-inspection').each(function(index, inspection) {
+      if ($(inspection).find('.inspection-status').text().trim() == 'Ожидается предварительная проверка') {
+        $(inspection).show()
+      }
+    })
+  } else if (filter_type === 'wait-revision') {
+    $('.panel-inspection').hide()
+    $('.panel-inspection').each(function(index, inspection) {
+      if ($(inspection).find('.inspection-status').text().trim() == 'Ожидается результат осмотра ТС') {
+        $(inspection).show()
+      }
+    })
+  } else if (filter_type === 'wait-final') {
+    $('.panel-inspection').hide()
+    $('.panel-inspection').each(function(index, inspection) {
+      if ($(inspection).find('.inspection-status').text().trim() == 'Ожидается заключение') {
+        $(inspection).show()
+      }
+    })
+  } else if (filter_type === 'ended') {
+    $('.panel-inspection').hide()
+    $('.panel-inspection').each(function(index, inspection) {
+      if ($(inspection).find('.inspection-status').text().trim() == 'Инспекция завершена') {
+        $(inspection).show()
+      }
+    })
+  } else if (filter_type === 'canceled') {
+    $('.panel-inspection').hide()
+    $('.panel-inspection').each(function(index, inspection) {
+      if ($(inspection).find('.inspection-status').text().trim().indexOf('тказано') > -1) {
+        $(inspection).show()
+      }
+    })
+  }
+})
