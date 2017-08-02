@@ -40,7 +40,6 @@ class Agreement(models.Model):
     def render(self, content_type='html'):
         template = Template(self.template.template)
         context = Context(self.context)
-        print({'template':self.template.template, 'context':self.context})
         context['reregistration'] = Reregistration.objects.get(agreement=self)
         return template.render(context)
 

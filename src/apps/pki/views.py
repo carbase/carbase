@@ -4,13 +4,14 @@ from cryptography.x509 import NameOID
 
 from datetime import datetime
 import urllib
+import xml.etree.cElementTree as ET
 
 from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 
-import xml.etree.cElementTree as ET
+from .models import RevokedCertificate
 
 
 class LoginView(View):
@@ -23,11 +24,12 @@ class LoginView(View):
             pem += '\n-----END CERTIFICATE-----'
             cert = x509.load_pem_x509_certificate(pem.encode('utf-8'), default_backend())
             certIssuerCN = cert.issuer.get_attributes_for_oid(NameOID.COMMON_NAME)[0].value
-            crl = urllib.request.urlopen('http://crl.pki.gov.kz/rsa.crl')
-            cert_crl = x509.load_der_x509_crl(crl.read(), default_backend())
-            for r in cert_crl:
-                if (cert.serial_number == r.serial_number):
-                    raise ValueError('Сертификат отозван центром сертификации')
+            # crl = urllib.request.urlopen('http://crl.pki.gov.kz/rsa.crl')
+            # cert_crl = x509.load_der_x509_crl(crl.read(), default_backend())
+            # for r in cert_crl:
+            revocked_cert_count = RevokedCertificate.objects.filter(serial_number=cert.serial_number).count()
+            if (revocked_cert_count):
+                raise ValueError('Сертификат отозван центром сертификации')
             if certIssuerCN != 'ҰЛТТЫҚ КУӘЛАНДЫРУШЫ ОРТАЛЫҚ (RSA)':
                 raise ValueError('Ошибка проверки центра сертификации')
             if not (datetime.now() > cert.not_valid_before and datetime.now() < cert.not_valid_after):
