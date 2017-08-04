@@ -7,3 +7,5 @@ django-wkhtmltopdf==3.1.0
 django-qrcode==0.3
 uWSGI==2.0.15
 selenium==3.4.3
+django-celery-results==1.0.1
+django-celery-beat==1.0.1

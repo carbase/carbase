@@ -56,6 +56,8 @@ INSTALLED_APPS = [
     'debug_toolbar',
     'wkhtmltopdf',
     'qrcode',
+    'django_celery_results',
+    'django_celery_beat',
 
     'cars.apps.CarsConfig',
     'controller.apps.ControllerConfig',
@@ -192,3 +194,7 @@ EMAIL_USE_TLS = True
 
 
 WKHTMLTOPDF_CMD = get_secret('WKHTMLTOPDF_CMD')
+
+
+CELERY_RESULT_BACKEND = 'django-db'
+CELERY_BROKER_URL = 'amqp://guest:guest@localhost//'
