@@ -10,15 +10,18 @@ from .models import Inspector, Inspection
 
 class IndexView(View):
     def get(self, request):
+        ''' Главная страница со списком всех проверок '''
         template_data = {
             'is_allower': request.user.username.startswith('all'),
             'is_revisor': request.user.username.startswith('rev'),
+            'is_admin': request.user.username.startswith('adm'),
         }
         inspections = []
         if request.user.is_authenticated:
             inspector = Inspector.objects.get(user=request.user)
             q = request.GET.get('q')
             if q:
+                # Если страницу запросили с поисковым запросом
                 inspections = Inspection.objects.filter(
                     Q(reregistration__buyer__icontains=q) |
                     Q(reregistration__seller__icontains=q) |
@@ -33,14 +36,17 @@ class IndexView(View):
                     Q(deregistration__car__model__icontains=q)
                 )
             else:
+                # Иначе все заявки для этого спеццона
                 inspections = Inspection.objects.filter(center=inspector.center)
                 if inspector.role != 'admin':
+                    # Если это не админ исключить завершенные заявки
                     inspections.exclude(is_success=True)
         template_data['inspections'] = inspections
         return render(request, 'controller/index.html', template_data)
 
 
 def login(request):
+    ''' Авторизация по логину паролю '''
     username = request.POST.get('username')
     password = request.POST.get('password')
     user = auth.authenticate(request, username=username, password=password)
@@ -57,19 +63,23 @@ def logout(request):
 @method_decorator(csrf_exempt, name='dispatch')
 class InspectionView(View):
     def put(self, request):
+        ''' Сюда приходят подтверждения или отказы в ходе проверки'''
         request.PUT = QueryDict(request.body)
         inspection = Inspection.objects.get(id=request.PUT.get('id'))
         if request.PUT.get('prelimenary_result'):
+            # Предварительная проверка
             inspection.prelimenary_result = request.PUT.get('prelimenary_result')
             inspection.is_prelimenary_success = bool(int(request.PUT.get('is_prelimenary_success')))
             inspection.prelimenary_sign = request.PUT.get('sign')
             inspection.allower = request.user.inspector
         if request.PUT.get('revision_result'):
+            # Сверка номеров
             inspection.is_revision_success = bool(int(request.PUT.get('is_revision_success')))
             inspection.revision_result = request.PUT.get('revision_result')
             inspection.revision_sign = request.PUT.get('sign')
             inspection.revisor = request.user.inspector
         if request.PUT.get('is_success'):
+            # Заключительная проверка
             if inspection.reregistration:
                 inspection.reregistration.car.user = inspection.reregistration.buyer
                 inspection.reregistration.car.number = inspection.reregistration.number
@@ -86,6 +96,5 @@ class InspectionView(View):
         if request.PUT.get('result'):
             inspection.result = request.PUT.get('result')
             inspection.sign = request.PUT.get('sign')
-
         inspection.save()
         return JsonResponse({'result': 'success'})

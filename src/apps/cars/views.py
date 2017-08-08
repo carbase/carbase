@@ -19,11 +19,13 @@ from numberplates.views import get_number_plates
 @method_decorator(login_required, name='dispatch')
 @method_decorator(csrf_exempt, name='dispatch')
 class CarsView(View):
+    ''' Возвращает список машин физ лица, или, если есть БИН, то организации '''
     def get(self, request):
         user = request.session.get('user_organizationalUnitName')
         if not user:
             user = request.session.get('user_serialNumber')
         cars = Car.objects.filter(user=user)
+        ''' Незаконченные перерегистрации где пользователь выступает в качестве покупателя '''
         reregistrations = Reregistration.objects.filter(buyer=user, is_number_received=False)
 
         template_data = {
@@ -43,7 +45,6 @@ class DeregistrationView(View):
         if not user:
             user = request.session.get('user_serialNumber')
         car_id = request.GET.get('car')
-
         try:
             deregistration = Deregistration.objects.get(car=car_id)
         except Deregistration.DoesNotExist:
@@ -117,6 +118,7 @@ class ReregistrationView(View):
             return render(request, 'cars/reregistration_buyer.html', context)
 
     def post(self, request):
+        ''' Создания нового процесса перерегистрации '''
         car_id = request.POST.get('car_id')
         car = Car.objects.get(id=car_id)
         if request.session.get('user_organizationalUnitName'):
@@ -142,6 +144,7 @@ class ReregistrationView(View):
         return JsonResponse({'reregistration_id': reregistration.id, 'agreement': agreement.render()})
 
     def delete(self, request):
+        ''' Отказ от перерегистрации на этапе подписания договоров '''
         reregistration_id = QueryDict(request.body).get('reregistrationId')
         reregistration = Reregistration.objects.get(id=reregistration_id)
         user_sn = request.session.get('user_serialNumber')

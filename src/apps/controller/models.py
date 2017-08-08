@@ -4,6 +4,7 @@ from cars.models import Reregistration, Deregistration
 
 
 class Center(models.Model):
+    ''' Спеццоны '''
     city = models.CharField(max_length=128)
     address = models.CharField(max_length=128)
 
@@ -19,6 +20,7 @@ INSPECTOR_ROLE_CHOISES = (
 
 
 class Inspector(models.Model):
+    ''' Инспектора '''
     user = models.OneToOneField(User)
     center = models.ForeignKey(Center)
     role = models.CharField(max_length=3, choices=INSPECTOR_ROLE_CHOISES, default='rev')
@@ -28,8 +30,17 @@ class Inspector(models.Model):
 
 
 class Inspection(models.Model):
-    reregistration = models.OneToOneField(Reregistration, null=True)
-    deregistration = models.OneToOneField(Deregistration, null=True)
+    ''' Проверки.
+        Инстанс модели создается пользователем во время бронирования на последнем шаге
+        перерегистрации или снятия учета
+        Затем в три этапа (предварительная проверка, сверка и заключение) заполняется сотрудниками спецЦона
+        Каждый этап содержит три поля
+            is_..._success - успешность проверки
+            ..._result - результат проверки (время проверки, причины отказа и тд)
+            ..._sign - подписанный ЭЦП xml-результат проверки
+    '''
+    reregistration = models.OneToOneField(Reregistration, null=True)  # Либо это перерегистрация
+    deregistration = models.OneToOneField(Deregistration, null=True)  # Либо снятие с учета
     center = models.ForeignKey(Center, null=True)
     date = models.DateField(null=True)
     time_range = models.CharField(max_length=11, null=True)

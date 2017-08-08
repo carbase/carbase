@@ -68,12 +68,22 @@ class LoginTestCase(StaticLiveServerTestCase):
         time.sleep(1)
         self.assertTrue(login_modal.is_displayed())
 
+    def test_revoked_cert_login(self):
+        signed_xml = open(os.path.join(self.test_xml_dir, 'revoked.xml'), 'r').read()
+        c = Client()
+        response = c.post('/pki/login/', {'signedXml': signed_xml})
+        self.assertEqual(response.json()['status'], 'error')
+
     def test_forbidden_if_not_logined(self):
         c = Client()
         response = c.get("/cars/")
         self.assertEqual(response.status_code, 403)
         self.assertEqual(response.templates[0].name, "403.html")
-
-        response = c.get("/cars/agreement")
-        self.assertEqual(response.status_code, 403)
-        self.assertEqual(response.templates[0].name, "403.html")
+        self.selenium.get('%s%s' % (self.live_server_url, '/cars/'))
+        find_by_css = self.selenium.find_element_by_css_selector
+        login_modal = find_by_css("#loginModal")
+        header_start_login_button = find_by_css('nav [data-target="#loginModal"]')
+        self.assertFalse(login_modal.is_displayed())
+        header_start_login_button.click()
+        time.sleep(1)
+        self.assertTrue(login_modal.is_displayed())

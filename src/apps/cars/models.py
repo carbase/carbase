@@ -19,6 +19,7 @@ def pay_by_id(product_id):
 
 
 class AgreementTemplate(models.Model):
+    ''' Шаблон договора '''
     template = models.TextField()
     owner = models.CharField(max_length=22, null=True, blank=True)
     is_selected = models.BooleanField()
@@ -32,6 +33,7 @@ class AgreementTemplate(models.Model):
 
 
 class Agreement(models.Model):
+    ''' Каждый конкретный экземпляр договора '''
     template = models.ForeignKey(AgreementTemplate)
     context = JSONField()
     created = models.DateTimeField(auto_now_add=True)
@@ -45,6 +47,7 @@ class Agreement(models.Model):
 
 
 class Sign(models.Model):
+    ''' Подписи договора. '''
     key_info = models.TextField()
     signed_info = models.TextField()
     signature_value = models.TextField()
@@ -52,11 +55,9 @@ class Sign(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
-    def qr(self):
-        pass
-
 
 class Car(models.Model):
+    ''' ТС. Временная модель для хранения авто (в будущем возможно использования его как временного кэша) '''
     manufacturer = models.CharField(max_length=256, default='')
     model = models.CharField(max_length=256, default='')
     user = models.CharField(max_length=20, default='')
@@ -73,15 +74,18 @@ class Car(models.Model):
         return self.manufacturer + ' ' + self.model
 
     def reregistration(self):
+        ''' Получение текущего процесса перерегистрации ТС '''
         reregistrations = self.reregistration_set.exclude(is_number_received=True)
         return (reregistrations[0] if len(reregistrations) else None)
 
     def deregistration(self):
+        ''' Получение текущего процесса снятия с учета ТС '''
         deregistrations = self.deregistration_set.exclude(is_success=True)
         return (deregistrations[0] if len(deregistrations) else None)
 
 
 class Deregistration(models.Model):
+    ''' Снятие с учета '''
     is_paid = models.BooleanField()
     is_transit_number = models.BooleanField()
     car = models.ForeignKey(Car)
@@ -91,6 +95,7 @@ class Deregistration(models.Model):
 
 
 class Tax(models.Model):
+    ''' Налоги '''
     amount = models.DecimalField(max_digits=19, decimal_places=2)
     info = models.TextField()
     is_paid = models.BooleanField()
@@ -101,6 +106,7 @@ class Tax(models.Model):
 
 
 class Fine(models.Model):
+    ''' Штрафы '''
     amount = models.DecimalField(max_digits=19, decimal_places=2)
     info = models.TextField()
     is_paid = models.BooleanField()
@@ -108,6 +114,7 @@ class Fine(models.Model):
 
 
 class Reregistration(models.Model):
+    ''' Перерегистрация '''
     seller = models.CharField(max_length=20, default='', blank=True)
     buyer = models.CharField(max_length=20, default='', blank=True)
     car = models.ForeignKey(Car)
@@ -115,8 +122,7 @@ class Reregistration(models.Model):
     amount_text = models.CharField(max_length=256, blank=True)
     number = models.CharField(max_length=8, blank=True, default='')
     agreement = models.ForeignKey(Agreement, null=True, blank=True)
-    agreement_text = models.TextField(blank=True, default='')
-    seller_sign = models.TextField(blank=True)
+    seller_sign = models.TextField(blank=True)  # Что бы не делать лишние joinы подписи дублируются
     buyer_sign = models.TextField(blank=True)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
