@@ -1,29 +1,41 @@
 import os
 import time
+from urllib.parse import urlencode
 
-from django.test import Client
+# from django.core.serializers import serialize
+from django.conf import settings
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
+from django.http.cookie import SimpleCookie
+from django.test import Client
 from selenium.webdriver.firefox.webdriver import WebDriver
-from cars.models import Car, Fine, Tax
+from selenium.webdriver.support.ui import Select
+from selenium.webdriver.common.keys import Keys
+from cars.models import Car, Fine, Tax, Reregistration
 
 
 class CarsTestCase(StaticLiveServerTestCase):
+    fixtures = [
+        os.path.join(settings.BASE_DIR, 'fixtures', 'AgreementTemplate.json'),
+        os.path.join(settings.BASE_DIR, 'fixtures', 'NumberPlate.json'),
+        os.path.join(settings.BASE_DIR, 'fixtures', 'Center.json'),
+    ]
+
     @classmethod
     def setUpClass(cls):
         car1 = {'user': 'IIN123456789011', 'manufacturer': 'Toyota', 'model': 'Camry', 'number': 'A166BDA'}
         car2 = {'user': 'IIN123456789011', 'manufacturer': 'BMW', 'model': 'X1', 'number': '156ASM01'}
         super(CarsTestCase, cls).setUpClass()
-        cls.test_xml_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'test_xmls')
-        signed_xml = open(os.path.join(cls.test_xml_dir, 'login.xml'), 'r').read()
-        c = Client()
-        response = c.post('/pki/login/', {'signedXml': signed_xml})
-        sessionid = response.client.cookies["sessionid"].value
         cls.selenium = WebDriver()
-        cls.selenium.get('%s%s' % (cls.live_server_url, '/'))
         cls.selenium.implicitly_wait(10)
-        cls.selenium.add_cookie({'name': 'sessionid', 'value': sessionid, 'path': '/'})
         cls.car1 = Car.objects.create(**car1)
         cls.car2 = Car.objects.create(**car2)
+
+    def get_seller_sessionid(self):
+        test_xml_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'test_xmls')
+        signed_xml = open(os.path.join(test_xml_dir, 'login.xml'), 'r').read()
+        c = Client()
+        response = c.post('/pki/login/', {'signedXml': signed_xml})
+        return response.client.cookies["sessionid"].value
 
     @classmethod
     def tearDownClass(cls):
@@ -31,12 +43,18 @@ class CarsTestCase(StaticLiveServerTestCase):
         super(CarsTestCase, cls).tearDownClass()
 
     def test_car_page(self):
+        self.selenium.get('%s%s' % (self.live_server_url, '/'))
+        self.selenium.add_cookie({'name': 'sessionid', 'value': self.get_seller_sessionid(), 'path': '/'})
         self.selenium.get('%s%s' % (self.live_server_url, '/cars/'))
         find_by_css = self.selenium.find_element_by_css_selector
         navbar_right_username = find_by_css('.navbar-right .dropdown-toggle')
         self.assertEqual(navbar_right_username.text, 'ТЕСТОВ ТЕСТ')
         car1_panel = find_by_css('#carPanel' + str(self.car1.id))
         car2_panel = find_by_css('#carPanel' + str(self.car2.id))
+        car1_rereg_modal = find_by_css('#reregistrationModal' + str(self.car1.id))
+        car2_rereg_modal = find_by_css('#reregistrationModal' + str(self.car2.id))
+        car1_dereg_modal = find_by_css('#deregistrationModal' + str(self.car1.id))
+        car2_dereg_modal = find_by_css('#deregistrationModal' + str(self.car2.id))
         car1_title = '{} {}\n{}'.format(self.car1.manufacturer, self.car1.model, self.car1.number)
         car2_title = '{} {}\n{}'.format(self.car2.manufacturer, self.car2.model, self.car2.number)
         self.assertEqual(car1_panel.find_elements_by_class_name('panel-heading')[0].text, car1_title)
@@ -65,6 +83,38 @@ class CarsTestCase(StaticLiveServerTestCase):
         self.assertNotIn('disabled', car1_rereg_button.get_attribute('class'))
         self.assertNotIn('disabled', car2_rereg_button.get_attribute('class'))
 
+        self.assertFalse(car1_rereg_modal.is_displayed())
+        self.assertFalse(car2_rereg_modal.is_displayed())
+        car1_rereg_button.click()
+        self.assertTrue(car1_rereg_modal.is_displayed())
+        self.assertFalse(car2_rereg_modal.is_displayed())
+        car1_rereg_modal.send_keys(Keys.ESCAPE)
+        time.sleep(1)
+        self.assertFalse(car1_rereg_modal.is_displayed())
+        self.assertFalse(car2_rereg_modal.is_displayed())
+        car2_rereg_button.click()
+        self.assertFalse(car1_rereg_modal.is_displayed())
+        self.assertTrue(car2_rereg_modal.is_displayed())
+        car2_rereg_modal.send_keys(Keys.ESCAPE)
+        time.sleep(1)
+
+        self.assertFalse(car1_dereg_modal.is_displayed())
+        self.assertFalse(car2_dereg_modal.is_displayed())
+        car1_dereg_button.click()
+        time.sleep(1)
+        self.assertTrue(car1_dereg_modal.is_displayed())
+        self.assertFalse(car2_dereg_modal.is_displayed())
+        car1_dereg_modal.send_keys(Keys.ESCAPE)
+        time.sleep(1)
+        self.assertFalse(car1_dereg_modal.is_displayed())
+        self.assertFalse(car2_dereg_modal.is_displayed())
+        car2_dereg_button.click()
+        time.sleep(1)
+        self.assertFalse(car1_dereg_modal.is_displayed())
+        self.assertTrue(car2_dereg_modal.is_displayed())
+        car2_dereg_modal.send_keys(Keys.ESCAPE)
+        time.sleep(1)
+
         car1Fine = Fine.objects.create(car=self.car1, amount=10000, info="ASDF", is_paid=False)
         car2Tax = Tax.objects.create(car=self.car2, amount=10000, info="ASDF ASDF", is_paid=False)
 
@@ -86,6 +136,10 @@ class CarsTestCase(StaticLiveServerTestCase):
 
         car1_panel = find_by_css('#carPanel' + str(self.car1.id))
         car2_panel = find_by_css('#carPanel' + str(self.car2.id))
+        car1_rereg_modal = find_by_css('#reregistrationModal' + str(self.car1.id))
+        car2_rereg_modal = find_by_css('#reregistrationModal' + str(self.car2.id))
+        car1_dereg_modal = find_by_css('#deregistrationModal' + str(self.car1.id))
+        car2_dereg_modal = find_by_css('#deregistrationModal' + str(self.car2.id))
         car1_dereg_button = car1_panel.find_elements_by_class_name('deregistration-button')[0]
         car1_rereg_button = car1_panel.find_elements_by_class_name('reregistration-button')[0]
         car2_dereg_button = car2_panel.find_elements_by_class_name('deregistration-button')[0]
@@ -94,6 +148,28 @@ class CarsTestCase(StaticLiveServerTestCase):
         self.assertIn('disabled', car2_dereg_button.get_attribute('class'))
         self.assertIn('disabled', car1_rereg_button.get_attribute('class'))
         self.assertIn('disabled', car2_rereg_button.get_attribute('class'))
+
+        self.assertFalse(car1_rereg_modal.is_displayed())
+        self.assertFalse(car2_rereg_modal.is_displayed())
+        car1_rereg_button.click()
+        time.sleep(1)
+        self.assertFalse(car1_rereg_modal.is_displayed())
+        self.assertFalse(car2_rereg_modal.is_displayed())
+        car2_rereg_button.click()
+        time.sleep(1)
+        self.assertFalse(car1_rereg_modal.is_displayed())
+        self.assertFalse(car2_rereg_modal.is_displayed())
+
+        self.assertFalse(car1_dereg_modal.is_displayed())
+        self.assertFalse(car2_dereg_modal.is_displayed())
+        car1_dereg_button.click()
+        time.sleep(1)
+        self.assertFalse(car1_dereg_modal.is_displayed())
+        self.assertFalse(car2_dereg_modal.is_displayed())
+        car2_dereg_button.click()
+        time.sleep(1)
+        self.assertFalse(car1_dereg_modal.is_displayed())
+        self.assertFalse(car2_dereg_modal.is_displayed())
 
         car1Fine.is_paid = True
         car1Fine.save()
@@ -118,6 +194,10 @@ class CarsTestCase(StaticLiveServerTestCase):
 
         car1_panel = find_by_css('#carPanel' + str(self.car1.id))
         car2_panel = find_by_css('#carPanel' + str(self.car2.id))
+        car1_rereg_modal = find_by_css('#reregistrationModal' + str(self.car1.id))
+        car2_rereg_modal = find_by_css('#reregistrationModal' + str(self.car2.id))
+        car1_dereg_modal = find_by_css('#deregistrationModal' + str(self.car1.id))
+        car2_dereg_modal = find_by_css('#deregistrationModal' + str(self.car2.id))
         car1_dereg_button = car1_panel.find_elements_by_class_name('deregistration-button')[0]
         car1_rereg_button = car1_panel.find_elements_by_class_name('reregistration-button')[0]
         car2_dereg_button = car2_panel.find_elements_by_class_name('deregistration-button')[0]
@@ -127,8 +207,95 @@ class CarsTestCase(StaticLiveServerTestCase):
         self.assertNotIn('disabled', car1_rereg_button.get_attribute('class'))
         self.assertNotIn('disabled', car2_rereg_button.get_attribute('class'))
 
+        self.assertFalse(car1_rereg_modal.is_displayed())
+        self.assertFalse(car2_rereg_modal.is_displayed())
+        car1_rereg_button.click()
+        time.sleep(1)
+        self.assertTrue(car1_rereg_modal.is_displayed())
+        self.assertFalse(car2_rereg_modal.is_displayed())
+        car1_rereg_modal.send_keys(Keys.ESCAPE)
+        time.sleep(1)
+        self.assertFalse(car1_rereg_modal.is_displayed())
+        self.assertFalse(car2_rereg_modal.is_displayed())
+        car2_rereg_button.click()
+        time.sleep(1)
+        self.assertFalse(car1_rereg_modal.is_displayed())
+        self.assertTrue(car2_rereg_modal.is_displayed())
+        car2_rereg_modal.send_keys(Keys.ESCAPE)
+        time.sleep(1)
+
+        self.assertFalse(car1_dereg_modal.is_displayed())
+        self.assertFalse(car2_dereg_modal.is_displayed())
+        car1_dereg_button.click()
+        time.sleep(1)
+        self.assertTrue(car1_dereg_modal.is_displayed())
+        self.assertFalse(car2_dereg_modal.is_displayed())
+        car1_dereg_modal.send_keys(Keys.ESCAPE)
+        time.sleep(1)
+        self.assertFalse(car1_dereg_modal.is_displayed())
+        self.assertFalse(car2_dereg_modal.is_displayed())
+        car2_dereg_button.click()
+        time.sleep(1)
+        self.assertFalse(car1_dereg_modal.is_displayed())
+        self.assertTrue(car2_dereg_modal.is_displayed())
+        car2_dereg_modal.send_keys(Keys.ESCAPE)
+        time.sleep(1)
+
     def test_reregistration_page(self):
-        pass
+        self.car1.save()
+        self.car2.save()
+        self.selenium.get('%s%s' % (self.live_server_url, '/'))
+        self.selenium.add_cookie({'name': 'sessionid', 'value': self.get_seller_sessionid(), 'path': '/'})
+        self.selenium.get('%s%s' % (self.live_server_url, '/cars/reregistration?side=seller&car=' + str(self.car1.id)))
+        find_by_id = self.selenium.find_element_by_id
+        find_by_css = self.selenium.find_element_by_css_selector
+
+        self.assertIn('active', find_by_css('.step_1').get_attribute('class'))
+        self.assertNotIn('disabled', find_by_css('.step_1').get_attribute('class'))
+        self.assertIn('disabled', find_by_css('.step_2').get_attribute('class'))
+        self.assertNotIn('active', find_by_css('.step_2').get_attribute('class'))
+        self.assertTrue(find_by_css('.step_1_body').is_displayed())
+        self.assertFalse(find_by_css('.step_2_body').is_displayed())
+
+        agreement_selector = Select(find_by_id('reregistration' + str(self.car1.id) + 'AgreementSelector'))
+        self.assertEqual(agreement_selector.first_selected_option.get_property('value'), '1')
+        find_by_id('reregistration' + str(self.car1.id) + 'BuyerIIN').send_keys('123456789011')
+        find_by_css('.submit-iin-button').click()
+        time.sleep(2)
+
+        self.assertIn('complete', find_by_css('.step_1').get_attribute('class'))
+        self.assertNotIn('active', find_by_css('.step_1').get_attribute('class'))
+        self.assertIn('active', find_by_css('.step_2').get_attribute('class'))
+        self.assertNotIn('disabled', find_by_css('.step_2').get_attribute('class'))
+        self.assertFalse(find_by_css('.step_1_body').is_displayed())
+        self.assertTrue(find_by_css('.step_2_body').is_displayed())
+        time.sleep(1)
+
+        reregistration = Reregistration.objects.get(car=self.car1.id)
+        test_xml_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'test_xmls')
+        signed_xml = open(os.path.join(test_xml_dir, 'seller_sign.xml'), 'r').read()
+
+        c = Client(HTTP_COOKIE=SimpleCookie({'sessionid': self.get_seller_sessionid()}).output(header='', sep='; '))
+        response = c.put(
+            '/cars/reregistration',
+            urlencode({'reregistrationId': reregistration.id, 'seller_sign': signed_xml, 'amount': 10000000}),
+            'application/x-www-form-urlencoded'
+        )
+        self.assertEqual(response.status_code, 200)
+
+        time.sleep(2)
+        self.selenium.get('%s%s' % (self.live_server_url, '/cars/reregistration?side=seller&car=' + str(self.car1.id)))
+
+        self.assertIn('complete', find_by_css('.step_1').get_attribute('class'))
+        self.assertNotIn('active', find_by_css('.step_1').get_attribute('class'))
+        self.assertIn('active', find_by_css('.step_2').get_attribute('class'))
+        self.assertNotIn('disabled', find_by_css('.step_2').get_attribute('class'))
+        self.assertFalse(find_by_css('.step_1_body').is_displayed())
+        self.assertTrue(find_by_css('.step_2_body').is_displayed())
+        self.assertTrue(find_by_css('#sellerSign' + str(self.car1.id) + ' img').is_displayed())
+
+        self.selenium.get('%s%s' % (self.live_server_url, '/cars/reregistration?side=buyer&car=' + str(self.car1.id)))
+        time.sleep(2)
 
     def test_deregistration_page(self):
         pass

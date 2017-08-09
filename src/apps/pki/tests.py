@@ -1,9 +1,12 @@
 import os
 import time
+import datetime
 
 from django.test import Client
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from selenium.webdriver.firefox.webdriver import WebDriver
+from pki.models import RevokedCertificate
+from django.utils.timezone import make_aware
 
 
 class LoginTestCase(StaticLiveServerTestCase):
@@ -70,6 +73,10 @@ class LoginTestCase(StaticLiveServerTestCase):
 
     def test_revoked_cert_login(self):
         signed_xml = open(os.path.join(self.test_xml_dir, 'revoked.xml'), 'r').read()
+        RevokedCertificate.objects.create(
+            serial_number='232246770346734382260783361829888060015272895260',
+            revocation_date=make_aware(datetime.datetime.now())
+        )
         c = Client()
         response = c.post('/pki/login/', {'signedXml': signed_xml})
         self.assertEqual(response.json()['status'], 'error')
