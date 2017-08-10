@@ -42,7 +42,7 @@ class CarsTestCase(StaticLiveServerTestCase):
         cls.selenium.quit()
         super(CarsTestCase, cls).tearDownClass()
 
-    def test_car_page(self):
+    def car_page(self):
         self.selenium.get('%s%s' % (self.live_server_url, '/'))
         self.selenium.add_cookie({'name': 'sessionid', 'value': self.get_seller_sessionid(), 'path': '/'})
         self.selenium.get('%s%s' % (self.live_server_url, '/cars/'))
@@ -296,6 +296,93 @@ class CarsTestCase(StaticLiveServerTestCase):
 
         self.selenium.get('%s%s' % (self.live_server_url, '/cars/reregistration?side=buyer&car=' + str(self.car1.id)))
         time.sleep(2)
+
+        self.assertIn('active', find_by_css('.step_1').get_attribute('class'))
+        self.assertNotIn('complete', find_by_css('.step_1').get_attribute('class'))
+        self.assertIn('disabled', find_by_css('.step_2').get_attribute('class'))
+        self.assertIn('disabled', find_by_css('.step_3').get_attribute('class'))
+        self.assertIn('disabled', find_by_css('.step_4').get_attribute('class'))
+        self.assertTrue(find_by_css('.step_1_body').is_displayed())
+        self.assertFalse(find_by_css('.step_2_body').is_displayed())
+        self.assertFalse(find_by_css('.step_3_body').is_displayed())
+        self.assertFalse(find_by_css('.step_4_body').is_displayed())
+        self.assertTrue(find_by_css('#sellerSign' + str(self.car1.id) + ' img').is_displayed())
+
+        c = Client(HTTP_COOKIE=SimpleCookie({'sessionid': self.get_seller_sessionid()}).output(header='', sep='; '))
+        response = c.put(
+            '/cars/reregistration',
+            urlencode({'reregistrationId': reregistration.id, 'buyer_sign': signed_xml, 'amount': 10000000}),
+            'application/x-www-form-urlencoded'
+        )
+        self.assertEqual(response.status_code, 200)
+
+        self.selenium.get('%s%s' % (self.live_server_url, '/cars/reregistration?side=buyer&car=' + str(self.car1.id)))
+        time.sleep(2)
+
+        self.assertIn('complete', find_by_css('.step_1').get_attribute('class'))
+        self.assertIn('active', find_by_css('.step_2').get_attribute('class'))
+        self.assertIn('disabled', find_by_css('.step_3').get_attribute('class'))
+        self.assertIn('disabled', find_by_css('.step_4').get_attribute('class'))
+        self.assertFalse(find_by_css('.step_1_body').is_displayed())
+        self.assertTrue(find_by_css('.step_2_body').is_displayed())
+        self.assertFalse(find_by_css('.step_3_body').is_displayed())
+        self.assertFalse(find_by_css('.step_4_body').is_displayed())
+
+        find_by_css('#reregistrationStep2SubmitButton').click()
+        time.sleep(2)
+
+        self.assertIn('complete', find_by_css('.step_1').get_attribute('class'))
+        self.assertIn('complete', find_by_css('.step_2').get_attribute('class'))
+        self.assertIn('active', find_by_css('.step_3').get_attribute('class'))
+        self.assertIn('disabled', find_by_css('.step_4').get_attribute('class'))
+        self.assertFalse(find_by_css('.step_1_body').is_displayed())
+        self.assertFalse(find_by_css('.step_2_body').is_displayed())
+        self.assertTrue(find_by_css('.step_3_body').is_displayed())
+        self.assertFalse(find_by_css('.step_4_body').is_displayed())
+
+        self.selenium.get('%s%s' % (self.live_server_url, '/cars/reregistration?side=buyer&car=' + str(self.car1.id)))
+        time.sleep(2)
+
+        self.assertIn('complete', find_by_css('.step_1').get_attribute('class'))
+        self.assertIn('complete', find_by_css('.step_2').get_attribute('class'))
+        self.assertIn('active', find_by_css('.step_3').get_attribute('class'))
+        self.assertIn('disabled', find_by_css('.step_4').get_attribute('class'))
+        self.assertFalse(find_by_css('.step_1_body').is_displayed())
+        self.assertFalse(find_by_css('.step_2_body').is_displayed())
+        self.assertTrue(find_by_css('.step_3_body').is_displayed())
+        self.assertTrue(find_by_css('.step_3_body iframe').is_displayed())
+        self.assertFalse(find_by_css('.step_4_body').is_displayed())
+
+        reregistration = Reregistration.objects.get(car=self.car1.id)
+        reregistration.is_tax_paid = True
+        reregistration.save()
+
+        self.selenium.get('%s%s' % (self.live_server_url, '/cars/reregistration?side=buyer&car=' + str(self.car1.id)))
+        time.sleep(2)
+
+        self.assertIn('complete', find_by_css('.step_1').get_attribute('class'))
+        self.assertIn('complete', find_by_css('.step_2').get_attribute('class'))
+        self.assertIn('complete', find_by_css('.step_3').get_attribute('class'))
+        self.assertIn('active', find_by_css('.step_4').get_attribute('class'))
+        self.assertFalse(find_by_css('.step_1_body').is_displayed())
+        self.assertFalse(find_by_css('.step_2_body').is_displayed())
+        self.assertFalse(find_by_css('.step_3_body').is_displayed())
+        self.assertTrue(find_by_css('.step_4_body').is_displayed())
+
+        self.assertEqual(
+            find_by_css('.step_4_body p').text,
+            'Забронируйте удобное для вас время осмотра ТС на территории спецЦОНа:'
+        )
+
+        self.selenium.execute_script('$(".datepicker").val("10 Август 2017")')
+        self.selenium.execute_script('$("#inspectionDateInput' + str(self.car1.id) + '").val("2017-08-10")')
+        find_by_css('.reserve-time-button').click()
+        time.sleep(1)
+
+        self.assertNotEqual(
+            find_by_css('.step_4_body p').text,
+            'Забронируйте удобное для вас время осмотра ТС на территории спецЦОНа:'
+        )
 
     def test_deregistration_page(self):
         pass
