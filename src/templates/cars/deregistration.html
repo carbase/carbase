@@ -34,7 +34,7 @@
       <div class="text-center bs-wizard-stepnum">Шаг 2</div>
       <div class="progress"><div class="progress-bar"></div></div>
       <label class="bs-wizard-dot"></label>
-      <div class="bs-wizard-info text-center">Сверка номеров</div>
+      <div class="bs-wizard-info text-center">Бронирование времени</div>
     </div>
   </div>
   <div class="step_1_body {% if deregistration.is_paid %}hidden{% endif%}">
@@ -67,6 +67,16 @@
             <div id="dereg{{ car_id }}TransitNumbersPayFrame"></div>
           </div>
         </div>
+      </div>
+      <div class="attention-note alert alert-warning">
+        <p>
+          <strong>В случае утилизации (выбраковки, списания)</strong>
+        </p>
+        <p>
+          При отсутствии свидетельства о регистрации и (или) номерных знаков на утилизируемое транспортное средство 
+          владельцем в письменной форме указываются обстоятельства их утраты.
+          При этом осуществляются проверки по информационным ресурсам ОВД.
+        </p>
       </div>
     </div>
   </div>
@@ -105,7 +115,7 @@
           <option>12:00-15:00</option>
           <option>15:00-18:00</option>
         </select>
-        <button class="btn btn-default deregistration-time-button"  data-deregistrationid="{{ deregistration.id }}">Забронировать</button>
+        <button class="btn btn-default deregistration-time-button"  data-carid="{{car_id}}" data-deregistrationid="{{ deregistration.id }}">Забронировать</button>
       </p>
     {% endif %}
   </div>

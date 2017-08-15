@@ -260,7 +260,6 @@ var enable_wizard_dot = function() {
   $('.reregistration-frame-buyer .complete .bs-wizard-dot, .reregistration-frame-buyer .active .bs-wizard-dot').unbind('click')
   $('.reregistration-frame-buyer .complete .bs-wizard-dot, .reregistration-frame-buyer .active .bs-wizard-dot').on('click', function() {
     var dot = $(this)
-    console.log(dot)
     var step = dot.parent('.bs-wizard-step')
     var modal = dot.closest('.reregistration-frame-buyer')
     if (step.hasClass('step_1')) {
