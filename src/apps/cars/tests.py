@@ -42,7 +42,7 @@ class CarsTestCase(StaticLiveServerTestCase):
         cls.selenium.quit()
         super(CarsTestCase, cls).tearDownClass()
 
-    def car_page(self):
+    def test_car_page(self):
         self.selenium.get('%s%s' % (self.live_server_url, '/'))
         self.selenium.add_cookie({'name': 'sessionid', 'value': self.get_seller_sessionid(), 'path': '/'})
         self.selenium.get('%s%s' % (self.live_server_url, '/cars/'))
@@ -383,6 +383,59 @@ class CarsTestCase(StaticLiveServerTestCase):
             find_by_css('.step_4_body p').text,
             'Забронируйте удобное для вас время осмотра ТС на территории спецЦОНа:'
         )
+
+    def test_all_payments(self):
+        self.car1.save()
+        self.car2.save()
+
+        find_by_id = self.selenium.find_element_by_id
+        find_by_css = self.selenium.find_element_by_css_selector
+
+        car1Fine1 = Fine.objects.create(car=self.car1, amount=10000, info="Штраф 1", is_paid=False)
+        car1Fine2 = Fine.objects.create(car=self.car1, amount=10000, info="Штраф 2", is_paid=False)
+        car1Fine3 = Fine.objects.create(car=self.car1, amount=10000, info="Штраф 3", is_paid=False)
+        car1Tax1 = Tax.objects.create(car=self.car1, amount=10000, info="Налог 1", is_paid=False)
+
+        self.selenium.get('%s%s' % (self.live_server_url, '/'))
+        self.selenium.add_cookie({'name': 'sessionid', 'value': self.get_seller_sessionid(), 'path': '/'})
+        self.selenium.get('%s%s' % (self.live_server_url, '/cars'))
+
+        car1_panel = find_by_id('carPanel' + str(self.car1.id))
+        car2_panel = find_by_id('carPanel' + str(self.car2.id))
+
+        self.assertIn('disabled', car2_panel.find_elements_by_class_name('pay-all-button')[0].get_attribute('class'))
+        self.assertNotIn('disabled', car1_panel.find_elements_by_class_name('pay-all-button')[0].get_attribute('class'))
+        car2_panel.find_elements_by_class_name('pay-all-button')[0].click()
+        time.sleep(1)
+        self.assertFalse(car2_panel.find_elements_by_class_name('payAllModal')[0].is_displayed())
+        car1_panel.find_elements_by_class_name('pay-all-button')[0].click()
+        time.sleep(1)
+        self.assertTrue(car1_panel.find_elements_by_class_name('payAllModal')[0].is_displayed())
+
+        car1_modal = car1_panel.find_elements_by_class_name('payAllModal')[0]
+        self.assertTrue(car1_modal.find_elements_by_class_name('step_1')[0].is_displayed())
+        self.assertFalse(car1_modal.find_elements_by_class_name('step_2')[0].is_displayed())
+        self.assertIn(car1Fine1.info, car1_modal.find_elements_by_class_name('col-xs-9')[0].text)
+        self.assertIn(car1Fine2.info, car1_modal.find_elements_by_class_name('col-xs-9')[1].text)
+        self.assertIn(car1Fine3.info, car1_modal.find_elements_by_class_name('col-xs-9')[2].text)
+        self.assertIn(car1Tax1.info, car1_modal.find_elements_by_class_name('col-xs-9')[3].text)
+        self.assertEqual(4, len(car1_modal.find_elements_by_class_name('list-group-item-info')))
+        self.assertEqual(40000, int(car1_modal.find_elements_by_class_name('payAllModalAmount')[0].text))
+
+        car1_modal.find_elements_by_class_name('col-xs-9')[3].click()
+        time.sleep(1)
+        self.assertEqual(3, len(car1_modal.find_elements_by_class_name('list-group-item-info')))
+        self.assertEqual(30000, int(car1_modal.find_elements_by_class_name('payAllModalAmount')[0].text))
+
+        car1_modal.find_elements_by_class_name('col-xs-9')[3].click()
+        time.sleep(1)
+        self.assertEqual(4, len(car1_modal.find_elements_by_class_name('list-group-item-info')))
+        self.assertEqual(40000, int(car1_modal.find_elements_by_class_name('payAllModalAmount')[0].text))
+
+        car1_modal.find_elements_by_class_name('payAllModalButton')[0].click()
+        time.sleep(1)
+        self.assertFalse(car1_modal.find_elements_by_class_name('step_1')[0].is_displayed())
+        self.assertTrue(car1_modal.find_elements_by_class_name('step_2')[0].is_displayed())
 
     def test_deregistration_page(self):
         pass

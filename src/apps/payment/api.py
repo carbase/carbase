@@ -46,7 +46,7 @@ def get_checkout_url(parameters):
 
     amount = parameters.get('amount', 0)
     description = parameters.get('order_desc', '')
-    order_id = '{}:{}'.format(parameters.get('product_id', ''), create_guid())
+    order_id = '{}:{}'.format(parameters.get('product_id', ''), create_guid())[0:49]
     merchant_id = settings.PAYBOX['MERCHANT_ID']
     secret_key = settings.PAYBOX['SECRET_KEY']
     payment_url = settings.PAYBOX['PAYMENT_URL']

@@ -25,8 +25,22 @@ def callback(request):
 @login_required
 def checkout(request):
     product_id = request.GET.get('product_id')
-
-    if product_id.startswith('reg'):
+    if ',' in product_id:
+        parameters = {
+            'product_id': product_id,
+            'amount': 0,
+            'order_desc': ''
+        }
+        for prod_id in product_id.split(','):
+            if prod_id.startswith('fine'):
+                fine = Fine.objects.get(id=prod_id[4:])
+                parameters['amount'] += floor(fine.amount)
+                parameters['order_desc'] += fine.info + '. '
+            elif prod_id.startswith('tax'):
+                tax = Tax.objects.get(id=prod_id[3:])
+                parameters['amount'] += floor(tax.amount)
+                parameters['order_desc'] += tax.info + '. '
+    elif product_id.startswith('reg'):
         reregistration = Reregistration.objects.get(id=product_id[3:])
         reg_amount = 11458.45
         if reregistration.number and reregistration.number != 'RANDOM':
@@ -47,7 +61,7 @@ def checkout(request):
             'order_desc': 'Покупка номера ' + str(number)
         }
     elif product_id.startswith('fine'):
-        fine = Tax.objects.get(id=product_id[4:])
+        fine = Fine.objects.get(id=product_id[4:])
         parameters = {
             'product_id': product_id,
             'amount': floor(fine.amount),
