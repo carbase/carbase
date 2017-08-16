@@ -28,6 +28,7 @@ $('.no-transit-numbers-button').on('click', function() {
       });
       step_1_elem.removeClass('active')
       step_1_elem.addClass('complete')
+      console.log("step1-no-transit")
     }
   });
 })
@@ -87,6 +88,7 @@ $('.deregistration-time-button').on('click', function() {
     'inspectionDate': $('#deregistrationFrame' + car_id + ' .datepicker').val(),
     'inspectionTimeRange': $('#deregistrationFrame' + car_id + ' .inspection-time-input').val(),
   };
+  console.log(car_id);
   $.put('/cars/deregistration', data, function(resp) {
     if (resp.deregistration_id) {
       var inspection_place = $('#deregistrationFrame' + car_id + ' .inspection-place-input option:selected').text();
@@ -100,3 +102,26 @@ $('.deregistration-time-button').on('click', function() {
     }
   })
 })
+
+var enable_wizard_dot = function() {
+  $('.deregistration-frame .complete .bs-wizard-dot, .deregistration-frame .active .bs-wizard-dot').unbind('click')
+  $('.deregistration-frame .complete .bs-wizard-dot, .deregistration-frame .active .bs-wizard-dot').on('click', function() {
+    var dot = $(this)
+    var step = dot.parent('.bs-wizard-step')
+    var modal = dot.closest('.deregistration-frame')
+    if (step.hasClass('step_1')) {
+      hide_step_bodies(modal)
+      modal.find('.step_1_body').removeClass('hidden')
+    }
+    if (step.hasClass('step_2')) {
+      hide_step_bodies(modal)
+      modal.find('.step_2_body').removeClass('hidden')
+    }
+  })
+}
+
+var hide_step_bodies = function(modal) {
+  modal.find('.step_1_body').addClass('hidden')
+  modal.find('.step_2_body').addClass('hidden')
+}
+enable_wizard_dot();

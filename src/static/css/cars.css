@@ -182,6 +182,7 @@ h2 {
   margin-bottom: 10px;
 }
 
+<<<<<<< HEAD
 .payAllModal label {
   width: 100%;
   font-weight: normal;
@@ -201,3 +202,8 @@ h2 {
 .payAllModal .modal-dialog {
   width: 660px;
 }
+=======
+.attention-note {
+  margin-top: 10px;
+}
+>>>>>>> f928b4310ec1dd7d8bf1bdc80e0261c6401d1fe9
