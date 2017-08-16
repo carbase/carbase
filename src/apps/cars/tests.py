@@ -42,7 +42,7 @@ class CarsTestCase(StaticLiveServerTestCase):
         cls.selenium.quit()
         super(CarsTestCase, cls).tearDownClass()
 
-    def test_car_page(self):
+    def car_page(self):
         self.selenium.get('%s%s' % (self.live_server_url, '/'))
         self.selenium.add_cookie({'name': 'sessionid', 'value': self.get_seller_sessionid(), 'path': '/'})
         self.selenium.get('%s%s' % (self.live_server_url, '/cars/'))
@@ -241,7 +241,7 @@ class CarsTestCase(StaticLiveServerTestCase):
         car2_dereg_modal.send_keys(Keys.ESCAPE)
         time.sleep(1)
 
-    def test_reregistration_page(self):
+    def reregistration_page(self):
         self.car1.save()
         self.car2.save()
         self.selenium.get('%s%s' % (self.live_server_url, '/'))
@@ -389,7 +389,6 @@ class CarsTestCase(StaticLiveServerTestCase):
         self.car2.save()
 
         find_by_id = self.selenium.find_element_by_id
-        find_by_css = self.selenium.find_element_by_css_selector
 
         car1Fine1 = Fine.objects.create(car=self.car1, amount=10000, info="Штраф 1", is_paid=False)
         car1Fine2 = Fine.objects.create(car=self.car1, amount=10000, info="Штраф 2", is_paid=False)

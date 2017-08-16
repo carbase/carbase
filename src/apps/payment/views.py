@@ -25,13 +25,13 @@ def callback(request):
 @login_required
 def checkout(request):
     product_id = request.GET.get('product_id')
-    if ',' in product_id:
+    if '|' in product_id:
         parameters = {
             'product_id': product_id,
             'amount': 0,
             'order_desc': ''
         }
-        for prod_id in product_id.split(','):
+        for prod_id in product_id.split('|'):
             if prod_id.startswith('fine'):
                 fine = Fine.objects.get(id=prod_id[4:])
                 parameters['amount'] += floor(fine.amount)
@@ -90,27 +90,37 @@ def checkout(request):
 def payment_status(request):
     order_id = request.GET.get('order_id')
     order_info = get_order_status(order_id)
-    if order_info['response']['pg_transaction_status'] == 'ok':
+    response = order_info['response']
+    if 'pg_transaction_status' in response and response['pg_transaction_status'] == 'ok':
         product_id = order_id.split(':')[0]
-        if product_id.startswith('tax'):
-            model = Tax
-            entity_id = product_id[3:]
-        elif product_id.startswith('fine'):
-            model = Fine
-            entity_id = product_id[4:]
+        if '|' in product_id:
+            for prod_id in product_id.split('|'):
+                if prod_id.startswith('fine'):
+                    fine = Fine.objects.get(id=prod_id[4:])
+                    fine.is_paid = True
+                    fine.save()
+                elif prod_id.startswith('tax'):
+                    tax = Tax.objects.get(id=prod_id[3:])
+                    tax.is_paid = True
+                    tax.save()
+        elif product_id.startswith('reg'):
+            reregistration = Reregistration.objects.get(id=product_id[3:])
+            reregistration.is_tax_paid = True
+            reregistration.save()
         elif product_id.startswith('num'):
-            model = NumberPlate
-            entity_id = product_id[3:]
+            number = NumberPlate.objects.get(id=product_id[3:])
+            number.set_owner(request.session.get('user_serialNumber')[3:])
+            number.save()
+        elif product_id.startswith('fine'):
+            fine = Fine.objects.get(id=product_id[4:])
+            fine.is_paid = True
+            fine.save()
+        elif product_id.startswith('tax'):
+            tax = Tax.objects.get(id=product_id[3:])
+            tax.is_paid = True
+            tax.save()
         elif product_id.startswith('tran'):
-            model = Deregistration
-            entity_id = product_id[4:]
-        else:
-            model = Reregistration
-            entity_id = product_id[3:]
-        entity = model.objects.get(id=entity_id)
-        if product_id.startswith('num'):
-            entity.set_owner(request.session.get('user_serialNumber')[3:])
-        entity.is_paid = True
-        entity.is_tax_paid = True
-        entity.save()
+            deregistration = Deregistration.objects.get(id=product_id[4:])
+            deregistration.is_paid = True
+            deregistration.save()
     return JsonResponse(order_info)

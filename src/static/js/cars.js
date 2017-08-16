@@ -80,7 +80,7 @@ $('.payAllModalButton').on('click', function() {
     amountSum += parseFloat($(this).find('.pay-amount').text())
   })
   $(this).closest('.payAllModal').find('.step_1').hide()
-  var product_id = paymentIds.join(',')
+  var product_id = paymentIds.join('|')
   var step_2_div = $(this).closest('.payAllModal').find('.step_2')
   $.get('/payment/checkout?product_id=' + product_id, function(resp) {
     var orderId = resp.response.pg_order_id
