@@ -400,13 +400,8 @@ class CarsTestCase(StaticLiveServerTestCase):
         self.selenium.get('%s%s' % (self.live_server_url, '/cars'))
 
         car1_panel = find_by_id('carPanel' + str(self.car1.id))
-        car2_panel = find_by_id('carPanel' + str(self.car2.id))
 
-        self.assertIn('disabled', car2_panel.find_elements_by_class_name('pay-all-button')[0].get_attribute('class'))
         self.assertNotIn('disabled', car1_panel.find_elements_by_class_name('pay-all-button')[0].get_attribute('class'))
-        car2_panel.find_elements_by_class_name('pay-all-button')[0].click()
-        time.sleep(1)
-        self.assertFalse(car2_panel.find_elements_by_class_name('payAllModal')[0].is_displayed())
         car1_panel.find_elements_by_class_name('pay-all-button')[0].click()
         time.sleep(1)
         self.assertTrue(car1_panel.find_elements_by_class_name('payAllModal')[0].is_displayed())

@@ -55,24 +55,15 @@
                 <li class="list-group-item car-action">
                   <div class="panel panel-default {% if car|is_all_fines_paid %}panel-success{% else %}panel-danger{% endif %}">
                     <div class="collapsed panel-heading" data-target="#carFine{{car.number}}" data-toggle="collapse" aria-expanded="false">
-                      <div class="car-action-text">Штрафы</div>
+                      <div class="car-action-text">{% if car_fines|length %}Штрафы{% else %}Штрафов нет{% endif %}</div>
                     </div>
                     <div id="carFine{{car.number}}" class="panel-body panel-collapse collapse">
                       <table class="table car-fines">
                         <tbody class="table-striped table-hover">
                           {% for fine in car_fines %}
                           <tr id="fine{{fine.id}}Row" class="{% if fine.is_paid %}text-success{% else %}text-danger{% endif %}">
-                            <td class='col-xs-3 col-sm-3 col-md-3 col-lg-3'>{{fine.amount}} ₸</td>
-                            <td class='col-xs-7 col-sm-7 col-md-7 col-lg-7'>{{fine.info}}</td>
-                            <td class='col-xs-2 col-sm-2 col-md-2 col-lg-2' id="fine{{fine.id}}PaidResult">
-                              {% if fine.is_paid %}
-                                <span>Оплачено</span>
-                              {% else %}
-                                <button class='btn btn-default pay-button' data-productId="fine{{fine.id}}" data-toggle="modal" data-target="#fine{{fine.id}}PayModal">
-                                  Оплатить
-                                </button>
-                              {% endif %}
-                            </td>
+                            <td class='col-xs-3'>{{fine.amount}} ₸</td>
+                            <td class='col-xs-9'>{{fine.info}}</td>
                           </tr>
                           {% endfor %}
                         </tbody>
@@ -90,17 +81,8 @@
                         <tbody class="table-striped table-hover">
                           {% for tax in car_taxes %}
                           <tr id="tax{{tax.id}}Row" class="{% if tax.is_paid %}text-success{% else %}text-danger{% endif %}">
-                            <td class='col-xs-3 col-sm-3 col-md-3 col-lg-3'>{{tax.amount}} ₸</td>
-                            <td class='col-xs-7 col-sm-7 col-md-7 col-lg-7'>{{tax.info}}</td>
-                            <td class='col-xs-2 col-sm-2 col-md-2 col-lg-2' id="tax{{tax.id}}PaidResult">
-                              {% if tax.is_paid%}
-                                <span>Оплачено</span>
-                              {% else %}
-                                <button class='btn btn-default pay-button' data-productId="tax{{tax.id}}" data-toggle="modal" data-target="#tax{{tax.id}}PayModal">
-                                  Оплатить
-                                </button>
-                              {% endif %}
-                            </td>
+                            <td class='col-xs-3'>{{tax.amount}} ₸</td>
+                            <td class='col-xs-9'>{{tax.info}}</td>
                           </tr>
                           {% endfor %}
                         </tbody>
@@ -108,55 +90,57 @@
                     </div>
                   </div>
                 </li>
-                <li class="list-group-item car-action">
-                  <label type="button" class="btn btn-default btn-block pay-all-button {% if car|is_all_fines_paid or car|is_all_taxes_paid %}disabled{% endif %}" {% if not car|is_all_fines_paid and not car|is_all_taxes_paid %}data-toggle="modal" data-target="#payAllModal{{car.id}}"{% endif %}>
-                    Оплатить все задолжности
-                  </label>
-                  <div id="payAllModal{{car.id}}" class="modal fade payAllModal" tabindex="-1" role="dialog">
-                    <div class="modal-dialog modal-lg" role="document">
-                      <div class="modal-content">
-                        <div class="modal-header">
-                          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                          <h4 class="modal-title">Оплата штрафов и налогов</h4>
-                        </div>
-                        <div class="modal-body">
-                          <div class="step_1">
-                            <ul class="list-group">
-                              {% for fine in car_fines %}
-                                {% if not fine.is_paid %}
-                                <li class="list-group-item list-group-item-info">
-                                  <label>
-                                    <div class="col-xs-1"><input type=checkbox value="fine{{ fine.id }}" checked></div>
-                                    <div class="col-xs-9">{{ fine.info }}</div>
-                                    <div class="col-xs-2 pay-amount">{{ fine.amount }}&nbsp;₸</div>
-                                  </label>
-                                </li>
-                                {% endif %}
-                              {% endfor %}
-                              {% for tax in car_taxes %}
-                                {% if not tax.is_paid %}
-                                <li class="list-group-item list-group-item-info">
-                                  <label>
-                                    <div class="col-xs-1"><input type=checkbox value="tax{{ tax.id }}" checked></div>
-                                    <div class="col-xs-9">{{ tax.info }}</div>
-                                    <div class="col-xs-2 pay-amount">{{ tax.amount }}&nbsp;₸</div>
-                                  </label>
-                                </li>
-                                {% endif %}
-                              {% endfor %}
-                              <button class="btn btn-primary btn-lg btn-block payAllModalButton">
-                                Оплатить <span class="payAllModalAmount">0</span> ₸
-                              </button>
-                            </ul>
+                {% if not car|is_all_taxes_paid and not car|is_all_fines_paid %}
+                  <li class="list-group-item car-action">
+                    <label type="button" class="btn btn-default btn-block pay-all-button {% if car|is_all_fines_paid or car|is_all_taxes_paid %}disabled{% endif %}" {% if not car|is_all_fines_paid and not car|is_all_taxes_paid %}data-toggle="modal" data-target="#payAllModal{{car.id}}"{% endif %}>
+                      Оплатить задолжность
+                    </label>
+                    <div id="payAllModal{{car.id}}" class="modal fade payAllModal" tabindex="-1" role="dialog">
+                      <div class="modal-dialog modal-lg" role="document">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title">Оплата штрафов и налогов</h4>
                           </div>
-                          <div class="step_2" style="display:none;"></div>
+                          <div class="modal-body">
+                            <div class="step_1">
+                              <ul class="list-group">
+                                {% for fine in car_fines %}
+                                  {% if not fine.is_paid %}
+                                  <li class="list-group-item list-group-item-info">
+                                    <label>
+                                      <div class="col-xs-1"><input type=checkbox value="fine{{ fine.id }}" checked></div>
+                                      <div class="col-xs-9">{{ fine.info }}</div>
+                                      <div class="col-xs-2 pay-amount">{{ fine.amount }}&nbsp;₸</div>
+                                    </label>
+                                  </li>
+                                  {% endif %}
+                                {% endfor %}
+                                {% for tax in car_taxes %}
+                                  {% if not tax.is_paid %}
+                                  <li class="list-group-item list-group-item-info">
+                                    <label>
+                                      <div class="col-xs-1"><input type=checkbox value="tax{{ tax.id }}" checked></div>
+                                      <div class="col-xs-9">{{ tax.info }}</div>
+                                      <div class="col-xs-2 pay-amount">{{ tax.amount }}&nbsp;₸</div>
+                                    </label>
+                                  </li>
+                                  {% endif %}
+                                {% endfor %}
+                                <button class="btn btn-primary btn-lg btn-block payAllModalButton">
+                                  Оплатить <span class="payAllModalAmount">0</span> ₸
+                                </button>
+                              </ul>
+                            </div>
+                            <div class="step_2" style="display:none;"></div>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                </li>
+                  </li>
+                {% endif %}
                 <li class="list-group-item car-action">
-                  <label type="button" class="btn btn-default btn-block reregistration-button {% if not car|is_all_fines_paid or not car|is_all_taxes_paid %}disabled{% endif %}" {% if car|is_all_fines_paid and car|is_all_taxes_paid %}data-toggle="modal" data-target="#reregistrationModal{{car.id}}"{% endif %}>
+                  <label type="button" class="btn btn-default btn-block reregistration-button {% if not car|is_all_fines_paid or not car|is_all_taxes_paid %}disabled{% endif %}" {% if car|is_all_fines_paid and car|is_all_taxes_paid %}data-toggle="modal" data-target="#reregistrationModal{{car.id}}"{% else %}data-toggle="tooltip" data-placement="bottom" title="Необходимо сначала оплатить задолжность"{% endif %}>
                     Перерегистрация авто
                   </label>
                   <div class="modal fade reregistrationModal" id="reregistrationModal{{car.id}}" tabindex="-1" role="dialog">
@@ -171,7 +155,7 @@
                 </li>
                 {% if car.is_registred %}
                 <li class="list-group-item car-action">
-                  <label type="button" class="btn btn-default btn-block deregistration-button {% if not car|is_all_fines_paid or not car|is_all_taxes_paid %}disabled{% endif %}" {% if car|is_all_fines_paid and car|is_all_taxes_paid %}data-toggle="modal" data-target="#deregistrationModal{{car.id}}"{% endif %}>
+                  <label type="button" class="btn btn-default btn-block deregistration-button {% if not car|is_all_fines_paid or not car|is_all_taxes_paid %}disabled{% endif %}" {% if car|is_all_fines_paid and car|is_all_taxes_paid %}data-toggle="modal" data-target="#deregistrationModal{{car.id}}"{% else %}data-toggle="tooltip" data-placement="bottom" title="Необходимо сначала оплатить задолжность"{% endif %}>
                     Снятие с учета
                   </label>
                   <div class="modal fade deregistrationModal" id="deregistrationModal{{car.id}}" tabindex="-1" role="dialog">

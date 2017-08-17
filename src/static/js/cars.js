@@ -30,6 +30,8 @@ $.delete = function(url, data, callback, type){
   });
 }
 
+$("body").tooltip({ selector: '[data-toggle=tooltip]' });
+
 $('.car-taxes .pay-button, .car-fines .pay-button').on('click', function() {
   var target = this;
   $.get('/payment/checkout?product_id=' + target.dataset.productid, function(resp) {
