@@ -21,28 +21,6 @@
   <div class="container cars">
     {% for car in cars %}
       {% with car_taxes=car.tax_set.all car_fines=car.fine_set.all %}
-        {% for tax in car_taxes %}
-          {% if not tax.is_paid %}
-            <div class="modal pay-modal fade" id="tax{{tax.id}}PayModal">
-              <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                  <div class="modal-body" id="tax{{tax.id}}PayFrameModal"></div>
-                </div>
-              </div>
-            </div>
-          {% endif %}
-        {% endfor %}
-        {% for fine in car_fines %}
-          {% if not fine.is_paid %}
-            <div class="modal pay-modal fade" id="fine{{fine.id}}PayModal">
-              <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                  <div class="modal-body" id="fine{{fine.id}}PayFrameModal"></div>
-                </div>
-              </div>
-            </div>
-          {% endif %}
-        {% endfor %}
         <div class="car col-xs-6" id="carPanel{{car.id}}">
           <div class="panel {% if car.is_registred %}panel-default{% else %}panel-warning{% endif %}">
             <div class="panel-heading">
@@ -90,7 +68,7 @@
                     </div>
                   </div>
                 </li>
-                {% if not car|is_all_taxes_paid and not car|is_all_fines_paid %}
+                {% if not car|is_all_taxes_paid or not car|is_all_fines_paid %}
                   <li class="list-group-item car-action">
                     <label type="button" class="btn btn-default btn-block pay-all-button {% if car|is_all_fines_paid or car|is_all_taxes_paid %}disabled{% endif %}" {% if not car|is_all_fines_paid and not car|is_all_taxes_paid %}data-toggle="modal" data-target="#payAllModal{{car.id}}"{% endif %}>
                       Оплатить задолжность
@@ -174,7 +152,14 @@
           </div>
         </div>
       {% endwith %}
+
     {% endfor %}
+    <div class="car new_reg_car col-xs-6">
+      <div class="new_reg_car_button">
+        <span class="glyphicon glyphicon-plus-sign"></span><br>
+        Зарегистрировать ТС
+      </div>
+    </div>
     {% for reregistration in reregistrations %}
       <div class="modal fade reregistrationModal reregistration-modal-buyer" id="reregistrationModalBuyer{{reregistration.id}}" tabindex="-1" role="dialog">
         <div class="modal-dialog modal-lg" role="document">

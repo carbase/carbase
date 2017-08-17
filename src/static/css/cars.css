@@ -205,3 +205,28 @@ h2 {
 .attention-note {
   margin-top: 10px;
 }
+
+.new_reg_car_button {
+  padding-top: 32px;
+  height: 128px;
+  border-radius: 5px;
+  border: 1px dashed #969696;
+  background-color: #f5f5f5;
+  text-align: center;
+  margin-bottom: 20px;
+  cursor: pointer;
+}
+
+.new_reg_car_button .glyphicon-plus-sign {
+  font-size: 48px;
+}
+
+.new_reg_car_button:hover {
+  border-color:#737373;
+  background-color: #f1f1f1;
+}
+
+.new_reg_car_button:active {
+  border-color: #636363;
+  background-color: #d5d5d5;
+}

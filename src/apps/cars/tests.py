@@ -431,5 +431,7 @@ class CarsTestCase(StaticLiveServerTestCase):
         self.assertFalse(car1_modal.find_elements_by_class_name('step_1')[0].is_displayed())
         self.assertTrue(car1_modal.find_elements_by_class_name('step_2')[0].is_displayed())
 
+        time.sleep(1000)
+
     def test_deregistration_page(self):
         pass
