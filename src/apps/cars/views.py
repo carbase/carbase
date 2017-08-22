@@ -1,14 +1,19 @@
 import xml.etree.ElementTree as ET
+import mimetypes
+
+from bson import ObjectId
+import gridfs
+from pymongo import MongoClient
 
 from django.db.models import Q
-from django.http import JsonResponse, QueryDict
+from django.http import JsonResponse, QueryDict, HttpResponse
 from django.shortcuts import render
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 
-from .models import Reregistration, Car, Deregistration, Sign
-from .models import Agreement, Email, AgreementTemplate
+from .models import Reregistration, Car, Deregistration, Registration
+from .models import Agreement, Email, AgreementTemplate, Sign
 
 from carbase.decorators import login_required
 from controller.models import Center, Inspection
@@ -35,6 +40,61 @@ class CarsView(View):
             'available_numbers': get_number_plates()
         }
         return render(request, 'cars/list.html', template_data)
+
+
+@method_decorator(login_required, name='dispatch')
+class DocumentView(View):
+    def get(self, request, doc_id):
+        mongo_client = MongoClient()
+        mongo_fs = gridfs.GridFS(mongo_client.documents)
+        doc = mongo_fs.get(ObjectId(doc_id))
+        response = HttpResponse(doc.read(), content_type=mimetypes.guess_type(doc.filename))
+        response['Content-Disposition'] = 'attachment; filename="' + doc_id + '.' + doc.filename.split('.')[-1] + '"'
+        return response
+
+
+@method_decorator(login_required, name='dispatch')
+@method_decorator(csrf_exempt, name='dispatch')
+class RegistrationView(View):
+    def get(self, request):
+        user = request.session.get('user_organizationalUnitName')
+        if not user:
+            user = request.session.get('user_serialNumber')
+        try:
+            registration = Registration.objects.get(user=user)
+        except Registration.DoesNotExist:
+            registration = None
+        return render(request, 'cars/registration.html', {'registration': registration})
+
+    def post(self, request):
+        vin_code = request.POST.get('vin_code')
+        if request.session.get('user_organizationalUnitName'):
+            user = request.session.get('user_organizationalUnitName')
+        else:
+            user = request.session.get('user_serialNumber')
+        try:
+            registration = Registration.objects.get(user=user, car_vin_code=vin_code)
+        except Registration.DoesNotExist:
+            registration = Registration.objects.create(user=user, car_vin_code=vin_code)
+        registration.upload_document(request.FILES.getlist('documents'))
+        document_urls = registration.get_document_urls()
+        return JsonResponse({'registration_id': registration.id, 'document_urls': document_urls})
+
+    def put(self, request):
+        request.PUT = QueryDict(request.body)
+        deregistration_id = request.PUT.get('deregistrationId')
+        deregistration = Deregistration.objects.get(id=deregistration_id)
+        if request.PUT.get('inspectionDate'):
+            inspections = Inspection.objects.filter(deregistration=deregistration)
+            if len(inspections):
+                inspection = inspections[0]
+            else:
+                inspection = Inspection.objects.create(deregistration=deregistration)
+            inspection.time_range = request.PUT.get('inspectionTimeRange')
+            inspection.center_id = request.PUT.get('inspectionCenterId')
+            inspection.date = request.PUT.get('inspectionDate')
+            inspection.save()
+        return JsonResponse({'deregistration_id': deregistration.id, 'car_id': deregistration.car.id})
 
 
 @method_decorator(login_required, name='dispatch')

@@ -87,7 +87,7 @@ h2 {
   text-align: center;
 }
 
-.reregistrationModal .modal-lg, .deregistrationModal .modal-lg {
+.reregistrationModal .modal-lg, .deregistrationModal .modal-lg, .registration-modal .modal-lg {
   width: 1048px;
 }
 
@@ -101,6 +101,12 @@ h2 {
 
 .agreement-pay-modal {
   text-align: center;
+}
+
+.registration-modal iframe {
+  width: 100%;
+  border-width: 0px;
+  height: 660px;
 }
 
 .reregistrationModal iframe {

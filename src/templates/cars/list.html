@@ -155,9 +155,18 @@
 
     {% endfor %}
     <div class="car new_reg_car col-xs-6">
-      <div class="new_reg_car_button">
+      <div class="new_reg_car_button"  data-toggle="modal" data-target="#registrationModal">
         <span class="glyphicon glyphicon-plus-sign"></span><br>
         Зарегистрировать ТС
+      </div>
+    </div>
+    <div class="modal fade registration-modal" id="registrationModal" tabindex="-1" role="dialog">
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-body">
+            <iframe src="/cars/registration"></iframe>
+          </div>
+        </div>
       </div>
     </div>
     {% for reregistration in reregistrations %}

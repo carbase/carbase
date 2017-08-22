@@ -2,6 +2,9 @@ from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.template import Context, Template
 
+import gridfs
+from pymongo import MongoClient
+
 
 def pay_by_id(product_id):
     if product_id.startswith('tax'):
@@ -128,6 +131,34 @@ class Reregistration(models.Model):
     updated = models.DateTimeField(auto_now=True)
     is_tax_paid = models.BooleanField(default=False)
     is_number_received = models.BooleanField(default=False)
+
+
+class Registration(models.Model):
+    ''' Регистрация '''
+    user = models.CharField(max_length=20)
+    car_vin_code = models.CharField(max_length=20)
+    document = models.CharField(max_length=512)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+    result = models.TextField()
+    is_result_success = models.BooleanField(default=False)
+
+    def upload_document(self, files):
+        for file in files:
+            mongo_client = MongoClient()
+            mongo_fs = gridfs.GridFS(mongo_client.documents)
+            file_id = mongo_fs.put(file.file, filename=self.user + file.name)
+            if self.document:
+                self.document += '||' + str(file_id)
+            else:
+                self.document = str(file_id)
+            self.save()
+
+    def get_document_urls(self):
+        urls = []
+        for doc in self.document.split('||'):
+            urls.append('/cars/document/' + doc)
+        return urls
 
 
 class Email(models.Model):

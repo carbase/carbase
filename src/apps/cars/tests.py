@@ -398,6 +398,7 @@ class CarsTestCase(StaticLiveServerTestCase):
         self.selenium.get('%s%s' % (self.live_server_url, '/'))
         self.selenium.add_cookie({'name': 'sessionid', 'value': self.get_seller_sessionid(), 'path': '/'})
         self.selenium.get('%s%s' % (self.live_server_url, '/cars'))
+        time.sleep(1000)
 
         car1_panel = find_by_id('carPanel' + str(self.car1.id))
 
@@ -430,8 +431,6 @@ class CarsTestCase(StaticLiveServerTestCase):
         time.sleep(1)
         self.assertFalse(car1_modal.find_elements_by_class_name('step_1')[0].is_displayed())
         self.assertTrue(car1_modal.find_elements_by_class_name('step_2')[0].is_displayed())
-
-        time.sleep(1000)
 
     def test_deregistration_page(self):
         pass
