@@ -23,21 +23,21 @@
 
 {% block content %}
 <div class="row bs-wizard" style="border-bottom:0;">
-  <div class="col-md-5ths bs-wizard-step step_1 {% if registration.car_vin_code %}completed{% else %}active{% endif %}">
+  <div class="col-md-5ths bs-wizard-step step_1 {% if registration %}complete{% else %}active{% endif %}">
     <div class="text-center bs-wizard-stepnum">Шаг 1</div>
     <div class="progress"><div class="progress-bar"></div></div>
     <label class="bs-wizard-dot"></label>
     <div class="bs-wizard-info text-center">Информация о ТС</div>
   </div>
 
-  <div class="col-md-5ths bs-wizard-step step_2 {% if not registration.car_vin_code %}disabled{% elif registration.document %}completed{% else %}active{% endif %}">
+  <div class="col-md-5ths bs-wizard-step step_2 {% if registration %}complete{% else %}disabled{% endif %}">
     <div class="text-center bs-wizard-stepnum">Шаг 2</div>
     <div class="progress"><div class="progress-bar"></div></div>
     <label class="bs-wizard-dot"></label>
     <div class="bs-wizard-info text-center">Правоустанавливающие документы</div>
   </div>
 
-  <div class="col-md-5ths bs-wizard-step step_3 disabled">
+  <div class="col-md-5ths bs-wizard-step step_3 {% if registration.is_paid %}complete{% elif registration %}active{% else %}disabled{% endif %}">
     <div class="text-center bs-wizard-stepnum">Шаг 3</div>
     <div class="progress"><div class="progress-bar"></div></div>
     <label class="bs-wizard-dot"></label>
@@ -58,12 +58,18 @@
     <div class="bs-wizard-info text-center">Запись на сверку</div>
   </div>
 </div>
-<div class="step_1_body {% if reregistration.buyer_sign and reregistration.seller_sign %}hidden{% endif%}">
+<div class="step_1_body {% if registration %}hidden{% endif %}">
+  <div class="input-group">
+    <span class="input-group-addon">VIN-код ТС</span>
+    <input type="text" class="form-control" id="newRegistrationVinCode">
+    <span class="input-group-btn">
+      <button class="btn btn-default" id="NewRegistrationVinCodeButton">Отправить</button>
+    </span>
+  </div>
+</div>
+<div class="step_2_body hidden">
   <form id="newRegistrationForm">
-    <label>
-      <h3>Введите vin-код транспортного средства:</h3>
-      <input class="form-control" name="vin_code" type="text">
-    </label>
+    <input type="hidden" class="form-control" name="vin_code" type="text">
     <label>
       <h3>
         Выберете документ подтверждающий право владения транспортным средством<br>
@@ -72,6 +78,9 @@
       <input type="file" multiple="multiple" name="documents">
     </label>
   </form>
-  <button class="btn btn-primary btn-lg send-documents-button">Отправить</button>
+  <button class="btn btn-primary btn-lg send-documents-button">Загрузить</button>
+</div>
+<div class="step_3_body {% if not registration or registration.is_paid %}hidden{% endif %}">
+  Третий степ
 </div>
 {% endblock %}
