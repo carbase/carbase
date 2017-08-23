@@ -64,6 +64,7 @@ INSTALLED_APPS = [
     'pki.apps.PkiConfig',
     'payment.apps.PaymentConfig',
     'numberplates.apps.NumberPlatesConfig',
+    'req_log.apps.ReqLogConfig',
 ]
 
 
@@ -76,7 +77,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 
-    'debug_toolbar.middleware.DebugToolbarMiddleware'
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'req_log.middleware.log_middleware'
 ]
 
 
