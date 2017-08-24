@@ -37,21 +37,21 @@
     <div class="bs-wizard-info text-center">Правоустанавливающие документы</div>
   </div>
 
-  <div class="col-md-5ths bs-wizard-step step_3 {% if registration.is_paid %}complete{% elif registration %}active{% else %}disabled{% endif %}">
+  <div class="col-md-5ths bs-wizard-step step_3 {% if registration.number %}complete{% elif registration %}active{% else %}disabled{% endif %}">
     <div class="text-center bs-wizard-stepnum">Шаг 3</div>
     <div class="progress"><div class="progress-bar"></div></div>
     <label class="bs-wizard-dot"></label>
     <div class="bs-wizard-info text-center">Выбор номера</div>
   </div>
 
-  <div class="col-md-5ths bs-wizard-step step_4 disabled">
+  <div class="col-md-5ths bs-wizard-step step_4 {% if registration.is_paid %}complete{% elif registration.number %}active{% else %}disabled{% endif %}">
     <div class="text-center bs-wizard-stepnum">Шаг 4</div>
     <div class="progress"><div class="progress-bar"></div></div>
     <label class="bs-wizard-dot"></label>
     <div class="bs-wizard-info text-center">Оплата</div>
   </div>
 
-  <div class="col-md-5ths bs-wizard-step step_5 disabled">
+  <div class="col-md-5ths bs-wizard-step step_5 {% if registration.is_paid %}active{% else %}disabled{% endif %}">
     <div class="text-center bs-wizard-stepnum">Шаг 5</div>
     <div class="progress"><div class="progress-bar"></div></div>
     <label class="bs-wizard-dot"></label>
@@ -80,7 +80,7 @@
   </form>
   <button class="btn btn-primary btn-lg send-documents-button">Загрузить</button>
 </div>
-<div class="step_3_body {% if not registration or registration.is_paid %}hidden{% endif %}">
+<div class="step_3_body {% if not registration or registration.number %}hidden{% endif %}">
   <div class="panel-group" id="reg{{registration.id}}NumberSelector" role="tablist" aria-multiselectable="true">
     <div class="panel panel-default">
       <div class="panel-heading" role="tab">
@@ -107,7 +107,7 @@
           </a>
         </h4>
       </div>
-      <div id="reg{{reregistration.id}}NumberPanel2" class="panel-collapse collapse" data-parent="#reg{{registration.id}}NumberSelector" role="tabpanel">
+      <div id="reg{{registration.id}}NumberPanel2" class="panel-collapse collapse" data-parent="#reg{{registration.id}}NumberSelector" role="tabpanel">
         <div class="panel-body">
           {% if owned_numbers %}
             {% for number in owned_numbers %}
@@ -138,13 +138,13 @@
       </div>
       <div id="reg{{registration.id}}NumberPanel3" class="panel-collapse collapse" data-parent="#reg{{registration.id}}NumberSelector" role="tabpanel">
         <div class="panel-body">
-          <div class="input-group" id="numberPlatesReregistrationSearchGroup">
+          <div class="input-group" id="numberPlatesregistrationSearchGroup">
             <input type="text" class="form-control" placeholder="Поиск номеров...">
             <span class="input-group-btn">
               <button class="btn btn-default" type="button">Найти</button>
             </span>
           </div>
-          <div id="numberPlatesReregistrationNumbers">
+          <div id="numberPlatesregistrationNumbers">
             {% for number in available_numbers %}
             <label>
               <input type="radio" name="registrationNumber" value="{{ number.pk }}">
@@ -166,5 +166,54 @@
     </div>
   </div>
   <button class="btn btn-primary" data-regid="{{ registration.id }}" id="registrationStep3SubmitButton">Далее</button>
+</div>
+<div class="step_4_body {% if not registration.number or registration.is_paid %}hidden{% endif %}">
+  <div class="modal-body pay-modal" id="newRegPayFrameModal"></div>
+  {% if registration.number %}
+    {% if not registration.is_tax_paid %}
+      <script>window.onload = function() { loadRegPaymentPage({{ registration.id }}) }</script>
+    {% else %}
+      <div class="tax_is_paid_text">Оплата произведена</div>
+    {% endif %}
+  {% endif %}
+</div>
+<div class="step_5_body {% if not registration or not registration.is_paid %}hidden{% endif %}">
+  {% if registration.inspection %}
+    <p>
+      Ваша бронь: г. {{registration.inspection.center.city}} {{registration.inspection.center.address}},
+      {{registration.inspection.date}},
+      {{registration.inspection.time_range}}
+    </p>
+    <p>Вы можете изменить бронь:
+      <select id="inspectionPlaceInput{{registration.id}}">
+      {% for center in centers %}
+        <option value="{{ center.pk }}">г. {{ center.city }}, {{ center.address }}</option>
+      {% endfor %}
+      </select>
+      <input type="date" id="inspectionDateInput{{registration.id}}" class="datepicker"></input>
+      <select id="inspectionTimeInput{{registration.id}}">
+        <option>9:00-12:00</option>
+        <option>12:00-15:00</option>
+        <option>15:00-18:00</option>
+      </select>
+      <button class="btn btn-default reserve-time-button" data-registrationid="{{ registration.id }}">Изменить бронь</button>
+    </p>
+  {% else %}
+    <p>Забронируйте удобное для вас время осмотра ТС на территории спецЦОНа:</p>
+    <p>
+      <select id="inspectionPlaceInput{{registration.id}}">
+        {% for center in centers %}
+          <option value="{{ center.pk }}">г. {{ center.city }}, {{ center.address }}</option>
+        {% endfor %}
+      </select>
+      <input type="date" id="inspectionDateInput{{registration.id}}" class="datepicker"></input>
+      <select id="inspectionTimeInput{{registration.id}}">
+        <option>9:00-12:00</option>
+        <option>12:00-15:00</option>
+        <option>15:00-18:00</option>
+      </select>
+      <button class="btn btn-default reserve-time-button"  data-registrationid="{{ registration.id }}">Забронировать</button>
+    </p>
+  {% endif %}
 </div>
 {% endblock %}

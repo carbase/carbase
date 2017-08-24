@@ -384,7 +384,7 @@ class CarsTestCase(StaticLiveServerTestCase):
             'Забронируйте удобное для вас время осмотра ТС на территории спецЦОНа:'
         )
 
-    def test_all_payments(self):
+    def all_payments(self):
         self.car1.save()
         self.car2.save()
 
@@ -432,5 +432,38 @@ class CarsTestCase(StaticLiveServerTestCase):
         self.assertFalse(car1_modal.find_elements_by_class_name('step_1')[0].is_displayed())
         self.assertTrue(car1_modal.find_elements_by_class_name('step_2')[0].is_displayed())
 
-    def test_deregistration_page(self):
+    def deregistration_page(self):
         pass
+
+    def test_registration_page(self):
+        self.car1.save()
+
+        find_by_css = self.selenium.find_element_by_css_selector
+
+        self.selenium.get('%s%s' % (self.live_server_url, '/'))
+        self.selenium.add_cookie({'name': 'sessionid', 'value': self.get_seller_sessionid(), 'path': '/'})
+        self.selenium.add_cookie({'name': 'enjoyhint_cars', 'value': '1', 'path': '/'})
+        self.selenium.get('%s%s' % (self.live_server_url, '/cars'))
+        find_by_css('.new_reg_car_button').click()
+        time.sleep(1)
+        self.assertTrue(find_by_css('#registrationModal').is_displayed())
+        self.selenium.get('%s%s' % (self.live_server_url, '/cars/registration'))
+
+        self.assertIn('active', find_by_css('.step_1').get_attribute('class'))
+        self.assertIn('disabled', find_by_css('.step_2').get_attribute('class'))
+        self.assertTrue(find_by_css('.step_1_body').is_displayed())
+        self.assertFalse(find_by_css('.step_2_body').is_displayed())
+
+        find_by_css('#newRegistrationVinCode').send_keys('1234567891011')
+        find_by_css('#NewRegistrationVinCodeButton').click()
+        time.sleep(1)
+
+        self.assertIn('complete', find_by_css('.step_1').get_attribute('class'))
+        self.assertIn('active', find_by_css('.step_2').get_attribute('class'))
+        self.assertFalse(find_by_css('.step_1_body').is_displayed())
+        self.assertTrue(find_by_css('.step_2_body').is_displayed())
+
+        # test_path = os.path.join(settings.BASE_DIR, 'apps', 'cars', 'test_xmls', 'login.xml')
+        # find_by_css('input[type="file"]').send_keys(test_path)
+
+        time.sleep(1000)
