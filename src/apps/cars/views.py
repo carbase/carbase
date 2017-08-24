@@ -29,7 +29,7 @@ class CarsView(View):
         user = request.session.get('user_organizationalUnitName')
         if not user:
             user = request.session.get('user_serialNumber')
-        cars = Car.objects.filter(user=user)
+        cars = Car.objects.filter(user=user).order_by('id')
         ''' Незаконченные перерегистрации где пользователь выступает в качестве покупателя '''
         reregistrations = Reregistration.objects.filter(buyer=user, is_number_received=False)
 
