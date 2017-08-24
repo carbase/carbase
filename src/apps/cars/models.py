@@ -67,7 +67,7 @@ class Car(models.Model):
     color_code = models.CharField(max_length=16, default='', blank=True)
     year = models.CharField(max_length=5, default='', blank=True)
     passport_number = models.CharField(max_length=64, default='', blank=True)
-    engine_capacity = models.IntegerField(default=0, blank=True)
+    engine_capacity = models.DecimalField(default=0, max_digits=5, decimal_places=3, blank=True)
     is_registred = models.BooleanField(default=True)
 
     def __str__(self):

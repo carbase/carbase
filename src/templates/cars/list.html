@@ -13,6 +13,68 @@
   <script src="{% static 'js/pki.js' %}"></script>
   <script src="{% static 'js/cars.js' %}"></script>
   <script src="{% static 'js/numbers.js' %}"></script>
+  <script>
+    // Название куки
+    var cookie = 'enjoyhint_cars';
+    // Селектор панели - по умолчанию панель 1
+    // Если панель есть, то продолжаем
+    if ( $('#carPanel1').length > 0 ) {
+      // Проверяем есть ли кука, если нет запускаем hint
+      if (!getCookie(cookie)) {
+        // Создаем куку
+        setCookie(cookie, 1, 60, 'cars');
+        // Проверим регистрацию ТС
+        var is_reg = false;
+        if( $('#hintdereg1').length > 0 ) { is_reg = true; }
+        // Работа с enjoyhint
+        var enjoyhint_instance = new EnjoyHint({});
+        var enjoyhint_script_steps = [
+          {
+            selector: '#carPanel1',
+            event: 'click',
+            description: 'Начало работы',
+            showNext: true,
+            nextButton: { text: 'Далее' },
+            skipButton: { text: 'ОК' }
+          },
+          {
+            selector: '#hintfine1',
+            event: 'click',
+            description: 'Проверьте и оплатите штрафы',
+            showNext: true,
+            nextButton: { text: 'Далее' },
+            skipButton: { text: 'ОК' }
+          },
+          {
+            selector: '#hinttax1',
+            event: 'click',
+            description: 'Проверьте и оплатите налоги',
+            showNext: true,
+            nextButton: { text: 'Далее' },
+            skipButton: { text: 'ОК' }
+          },
+          {
+            selector: '#hintrereg1',
+            event: 'click',
+            description: 'Пройдите перерегистрация авто',
+            showNext: (is_reg) ? true : false,
+            nextButton: { text: 'Или' },
+            skipButton: { text: 'ОК' }
+          }
+        ];
+        if(is_reg) {
+          enjoyhint_script_steps.push({
+            selector: '#hintdereg1',
+            event: 'click',
+            description: 'Снимите с учета',
+            skipButton: { text: 'ОК' }
+          });
+        }
+        enjoyhint_instance.set(enjoyhint_script_steps);
+        enjoyhint_instance.run();
+      }
+    }
+  </script>
 {% endblock %}
 
 
@@ -52,7 +114,8 @@
             <div class="panel-body"><i>Инфо о машине</i></div>
             <div class='panel-footer'>
               <ul class="list-group">
-                <li class="list-group-item car-action">
+                <!-- id для enjoyhint - 'hintfine{{car.id}}' -->
+                <li id="hintfine{{car.id}}" class="list-group-item car-action">
                   <div class="panel panel-default {% if car|is_all_fines_paid %}panel-success{% else %}panel-danger{% endif %}">
                     <div class="collapsed panel-heading" data-target="#carFine{{car.number}}" data-toggle="collapse" aria-expanded="false">
                       <div class="car-action-text">{% if car_fines|length %}Штрафы{% else %}Штрафов нет{% endif %}</div>
@@ -71,7 +134,8 @@
                     </div>
                   </div>
                 </li>
-                <li class="list-group-item car-action">
+                <!-- id для enjoyhint - 'hinttax{{car.id}}' -->
+                <li id="hinttax{{car.id}}" class="list-group-item car-action">
                   <div class="panel panel-default {% if car|is_all_taxes_paid %}panel-success{% else %}panel-danger{% endif %}">
                     <div class="collapsed panel-heading" data-target="#carTax{{car.number}}" data-toggle="collapse" aria-expanded="false">
                       <div class="car-action-text">Налоги</div>
@@ -139,7 +203,8 @@
                     </div>
                   </li>
                 {% endif %}
-                <li class="list-group-item car-action">
+                <!-- id для enjoyhint - 'hintrereg{{car.id}}' -->
+                <li id="hintrereg{{car.id}}" class="list-group-item car-action">
                   <label type="button" class="btn btn-default btn-block reregistration-button {% if not car|is_all_fines_paid or not car|is_all_taxes_paid %}disabled{% endif %}" {% if car|is_all_fines_paid and car|is_all_taxes_paid %}data-toggle="modal" data-target="#reregistrationModal{{car.id}}"{% else %}data-toggle="tooltip" data-placement="bottom" title="Необходимо сначала оплатить задолжность"{% endif %}>
                     Перерегистрация авто
                   </label>
@@ -154,7 +219,8 @@
                   </div>
                 </li>
                 {% if car.is_registred %}
-                <li class="list-group-item car-action">
+                <!-- id для enjoyhint - 'hintdereg{{car.id}}' -->
+                <li id="hintdereg{{car.id}}" class="list-group-item car-action">
                   <label type="button" class="btn btn-default btn-block deregistration-button {% if not car|is_all_fines_paid or not car|is_all_taxes_paid %}disabled{% endif %}" {% if car|is_all_fines_paid and car|is_all_taxes_paid %}data-toggle="modal" data-target="#deregistrationModal{{car.id}}"{% else %}data-toggle="tooltip" data-placement="bottom" title="Необходимо сначала оплатить задолжность"{% endif %}>
                     Снятие с учета
                   </label>

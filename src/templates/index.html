@@ -7,6 +7,27 @@
 {% endblock %}
 {% block scripts %}
   <script src="{% static 'js/pki.js' %}"></script>
+  <script>
+    // Название куки
+    var cookie = 'enjoyhint_index';
+    // Проверяем есть ли кука, если нет запускаем hint
+    if (!getCookie(cookie)) {
+      // Создаем куку
+      setCookie(cookie, 1, 60, '/');
+      // Работа с enjoyhint
+      var enjoyhint_instance = new EnjoyHint({});
+      var enjoyhint_script_steps = [
+        {
+          selector: '.btn-lg',
+          event: 'click',
+          description: 'Нажмите здесь для начала процесса перерегистрации',
+          skipButton: { text: 'ОК' }
+        }
+      ];
+      enjoyhint_instance.set(enjoyhint_script_steps);
+      enjoyhint_instance.run();
+    }
+  </script>
 {% endblock %}
 
 </script> %}
