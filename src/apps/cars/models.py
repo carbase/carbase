@@ -140,6 +140,8 @@ class Registration(models.Model):
     document = models.CharField(max_length=512)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
+    is_paid = models.BooleanField(default=False)
+    number = models.CharField(max_length=8, blank=True, default='')
     result = models.TextField()
     is_result_success = models.BooleanField(default=False)
 

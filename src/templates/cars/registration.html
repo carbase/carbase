@@ -81,6 +81,90 @@
   <button class="btn btn-primary btn-lg send-documents-button">Загрузить</button>
 </div>
 <div class="step_3_body {% if not registration or registration.is_paid %}hidden{% endif %}">
-  Третий степ
+  <div class="panel-group" id="reg{{registration.id}}NumberSelector" role="tablist" aria-multiselectable="true">
+    <div class="panel panel-default">
+      <div class="panel-heading" role="tab">
+        <h4 class="panel-title">
+          <a role="button" data-toggle="collapse" href="#reg{{registration.id}}NumberPanel1">
+            Случайно сгенерированная последовательность
+          </a>
+        </h4>
+      </div>
+      <div id="reg{{registration.id}}NumberPanel1" class="panel-collapse collapse in" data-parent="#reg{{registration.id}}NumberSelector" role="tabpanel">
+        <div class="panel-body">
+          <label>
+          <input type="radio" name="registrationNumber" value="RANDOM" checked>
+            Получить случайно сгенерированную последовательность
+          </label>
+        </div>
+      </div>
+    </div>
+    <div class="panel panel-default">
+      <div class="panel-heading" role="tab">
+        <h4 class="panel-title">
+          <a class="collapsed" role="button" data-toggle="collapse" href="#reg{{registration.id}}NumberPanel2">
+            Выбрать из ранее купленных номеров
+          </a>
+        </h4>
+      </div>
+      <div id="reg{{reregistration.id}}NumberPanel2" class="panel-collapse collapse" data-parent="#reg{{registration.id}}NumberSelector" role="tabpanel">
+        <div class="panel-body">
+          {% if owned_numbers %}
+            {% for number in owned_numbers %}
+            <label>
+              <input type="radio" name="registrationNumber" value="{{ number.id }}">
+              <div class="number">
+                <div class="row">
+                  <span class="digits">{{ number.digits }}</span>
+                  <span class="chars">{{ number.characters }}</span>
+                  <span class="region">{{ number.region }}</span>
+                </div>
+              </div>
+            </label>
+            {% endfor %}
+          {% else %}
+            У вас нету номеров
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    <div class="panel panel-default">
+      <div class="panel-heading" role="tab">
+        <h4 class="panel-title">
+          <a class="collapsed" role="button" data-toggle="collapse" href="#reg{{registration.id}}NumberPanel3">
+            Купить номер
+          </a>
+        </h4>
+      </div>
+      <div id="reg{{registration.id}}NumberPanel3" class="panel-collapse collapse" data-parent="#reg{{registration.id}}NumberSelector" role="tabpanel">
+        <div class="panel-body">
+          <div class="input-group" id="numberPlatesReregistrationSearchGroup">
+            <input type="text" class="form-control" placeholder="Поиск номеров...">
+            <span class="input-group-btn">
+              <button class="btn btn-default" type="button">Найти</button>
+            </span>
+          </div>
+          <div id="numberPlatesReregistrationNumbers">
+            {% for number in available_numbers %}
+            <label>
+              <input type="radio" name="registrationNumber" value="{{ number.pk }}">
+              <div class="number">
+                <div class="row">
+                  <span class="digits">{{ number.digits }}</span>
+                  <span class="chars">{{ number.characters }}</span>
+                  <span class="region">{{ number.region }}</span>
+                </div>
+                <div class="btn btn-default btn-success">
+                  Цена {{ number.get_price|intcomma }}₸
+                </div>
+              </div>
+            </label>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <button class="btn btn-primary" data-regid="{{ registration.id }}" id="registrationStep3SubmitButton">Далее</button>
 </div>
 {% endblock %}

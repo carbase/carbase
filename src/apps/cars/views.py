@@ -64,7 +64,12 @@ class RegistrationView(View):
             registration = Registration.objects.get(user=user)
         except Registration.DoesNotExist:
             registration = None
-        return render(request, 'cars/registration.html', {'registration': registration})
+        template_data = {
+            'registration': registration,
+            'owned_numbers': get_number_plates(owner_id=request.session.get('user_serialNumber')[3:]),
+            'available_numbers': get_number_plates()
+        }
+        return render(request, 'cars/registration.html', template_data)
 
     def post(self, request):
         vin_code = request.POST.get('vin_code')
@@ -82,19 +87,29 @@ class RegistrationView(View):
 
     def put(self, request):
         request.PUT = QueryDict(request.body)
-        deregistration_id = request.PUT.get('deregistrationId')
-        deregistration = Deregistration.objects.get(id=deregistration_id)
+        registration_id = request.PUT.get('registrationId')
+        registration = Registration.objects.get(id=registration_id)
+        if request.PUT.get('is_tax_paid'):
+            registration.is_tax_paid = True
         if request.PUT.get('inspectionDate'):
-            inspections = Inspection.objects.filter(deregistration=deregistration)
+            inspections = Inspection.objects.filter(registration=registration)
             if len(inspections):
                 inspection = inspections[0]
             else:
-                inspection = Inspection.objects.create(deregistration=deregistration)
+                inspection = Inspection.objects.create(registration=registration)
             inspection.time_range = request.PUT.get('inspectionTimeRange')
             inspection.center_id = request.PUT.get('inspectionCenterId')
             inspection.date = request.PUT.get('inspectionDate')
             inspection.save()
-        return JsonResponse({'deregistration_id': deregistration.id, 'car_id': deregistration.car.id})
+        if request.PUT.get('number'):
+            number = request.PUT.get('number')
+            if number != 'RANDOM':
+                number = NumberPlate.objects.get(id=number)
+            registration.number = str(number)
+        registration.save()
+        return JsonResponse({
+            'reregistration_id': registration.id,
+        })
 
 
 @method_decorator(login_required, name='dispatch')
