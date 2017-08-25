@@ -67,7 +67,8 @@ class RegistrationView(View):
         template_data = {
             'registration': registration,
             'owned_numbers': get_number_plates(owner_id=request.session.get('user_serialNumber')[3:]),
-            'available_numbers': get_number_plates()
+            'available_numbers': get_number_plates(),
+            'centers': Center.objects.all(),
         }
         return render(request, 'cars/registration.html', template_data)
 
@@ -108,7 +109,7 @@ class RegistrationView(View):
             registration.number = str(number)
         registration.save()
         return JsonResponse({
-            'reregistration_id': registration.id,
+            'registration_id': registration.id,
         })
 
 

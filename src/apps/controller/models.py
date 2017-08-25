@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-from cars.models import Reregistration, Deregistration
+from cars.models import Reregistration, Deregistration, Registration
 
 
 class Center(models.Model):
@@ -41,6 +41,7 @@ class Inspection(models.Model):
     '''
     reregistration = models.OneToOneField(Reregistration, null=True)  # Либо это перерегистрация
     deregistration = models.OneToOneField(Deregistration, null=True)  # Либо снятие с учета
+    registration = models.OneToOneField(Registration, null=True)      # Либо постановка на учет
     center = models.ForeignKey(Center, null=True)
     date = models.DateField(null=True)
     time_range = models.CharField(max_length=11, null=True)

@@ -122,7 +122,7 @@ def payment_status(request):
             reregistration.save()
         elif product_id.startswith('new'):
             registration = Registration.objects.get(id=product_id[3:])
-            registration.is_tax_paid = True
+            registration.is_paid = True
             registration.save()
         elif product_id.startswith('num'):
             number = NumberPlate.objects.get(id=product_id[3:])

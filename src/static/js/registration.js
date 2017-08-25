@@ -1,3 +1,10 @@
+$(".datepicker").flatpickr({
+  'locale': 'ru',
+  'altFormat': 'j F Y',
+  'minDate': 'today',
+  'altInput': true,
+  'dateFormat': 'Y-m-j'
+});
 $('#NewRegistrationVinCodeButton').on('click', function() {
   var step_1_elem = $('.step_1')
   var step_1_progress = $('.step_1 .progress-bar')
@@ -102,15 +109,38 @@ function loadRegPaymentPage(reg_id) {
             step_5_elem.addClass('active')
             step_5_progress.one('transitionend', function() {
               step_5_elem.removeClass('disabled')
-              $('.step_4_body').removeClass('hidden')
+              $('.step_4_body').addClass('hidden')
+              $('.reserve-time-button').attr('data-registrationid', reg_id)
               $('.step_5_body').removeClass('hidden')
             })
-            step_4_elem.removeClass('active')
-            step_4_elem.addClass('complete')
           })
+          step_4_elem.removeClass('active')
+          step_4_elem.addClass('complete')
         }
       })
     }, 10000)
     paymentStatusIntervals[product_id] = checkStatusInterval
   })
 }
+
+$('.reserve-time-button').on('click', function() {
+  var target = $(this)
+  var registrationId = target.data('registrationid')
+  var data = {
+    'registrationId': registrationId,
+    'inspectionCenterId': $('#inspectionPlaceInput').val(),
+    'inspectionDate': $('#inspectionDateInput').val(),
+    'inspectionTimeRange': $('#inspectionTimeInput').val(),
+  };
+  console.log(registrationId);
+  $.put('/cars/registration', data, function(resp) {
+    var inspection_place = $('#inspectionPlaceInput option:selected').text();
+    var inspection_date = $('.datepicker.form-control').val()
+    var inspection_time = $('#inspectionTimeInput').val()
+    $('.step_5_body p:first-child').text('Ваша бронь: ' + inspection_place + ', ' + inspection_date + ', ' + inspection_time )
+    if (!$('.step_5_body p:nth-child(2)').text().trim().startsWith('Вы можете изменить бронь:')) {
+      $('.step_5_body p:nth-child(2)').prepend('Вы можете изменить бронь: ')
+    }
+    target.innerText = 'Изменить бронь'
+  })
+})

@@ -185,13 +185,13 @@
       {{registration.inspection.time_range}}
     </p>
     <p>Вы можете изменить бронь:
-      <select id="inspectionPlaceInput{{registration.id}}">
+      <select id="inspectionPlaceInput">
       {% for center in centers %}
         <option value="{{ center.pk }}">г. {{ center.city }}, {{ center.address }}</option>
       {% endfor %}
       </select>
-      <input type="date" id="inspectionDateInput{{registration.id}}" class="datepicker"></input>
-      <select id="inspectionTimeInput{{registration.id}}">
+      <input type="date" id="inspectionDateInput" class="datepicker"></input>
+      <select id="inspectionTimeInput">
         <option>9:00-12:00</option>
         <option>12:00-15:00</option>
         <option>15:00-18:00</option>
@@ -201,13 +201,13 @@
   {% else %}
     <p>Забронируйте удобное для вас время осмотра ТС на территории спецЦОНа:</p>
     <p>
-      <select id="inspectionPlaceInput{{registration.id}}">
+      <select id="inspectionPlaceInput">
         {% for center in centers %}
           <option value="{{ center.pk }}">г. {{ center.city }}, {{ center.address }}</option>
         {% endfor %}
       </select>
-      <input type="date" id="inspectionDateInput{{registration.id}}" class="datepicker"></input>
-      <select id="inspectionTimeInput{{registration.id}}">
+      <input type="date" id="inspectionDateInput" class="datepicker"></input>
+      <select id="inspectionTimeInput">
         <option>9:00-12:00</option>
         <option>12:00-15:00</option>
         <option>15:00-18:00</option>
