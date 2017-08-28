@@ -1,6 +1,7 @@
 from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.template import Context, Template
+from django.conf import settings
 
 import gridfs
 from pymongo import MongoClient
@@ -147,7 +148,7 @@ class Registration(models.Model):
 
     def upload_document(self, files):
         for file in files:
-            mongo_client = MongoClient()
+            mongo_client = MongoClient(settings.MONGO_URL)
             mongo_fs = gridfs.GridFS(mongo_client.documents)
             file_id = mongo_fs.put(file.file, filename=self.user + file.name)
             if self.document:

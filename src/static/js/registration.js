@@ -132,7 +132,6 @@ $('.reserve-time-button').on('click', function() {
     'inspectionDate': $('#inspectionDateInput').val(),
     'inspectionTimeRange': $('#inspectionTimeInput').val(),
   };
-  console.log(registrationId);
   $.put('/cars/registration', data, function(resp) {
     var inspection_place = $('#inspectionPlaceInput option:selected').text();
     var inspection_date = $('.datepicker.form-control').val()

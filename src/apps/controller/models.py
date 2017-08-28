@@ -56,3 +56,11 @@ class Inspection(models.Model):
     is_success = models.BooleanField(default=False)
     result = models.TextField(null=True, blank=True)
     sign = models.TextField(null=True, blank=True)
+
+    def get_process(self):
+        if self.reregistration:
+            return self.reregistration
+        elif self.registration:
+            return self.reregistration
+        elif self.deregistration:
+            return self.reregistration

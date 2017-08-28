@@ -55,6 +55,8 @@ class LoginTestCase(StaticLiveServerTestCase):
 
     def test_login_form(self):
         self.selenium.get('%s%s' % (self.live_server_url, '/'))
+        self.selenium.add_cookie({'name': 'sessionid', 'value': '', 'path': '/'})
+        self.selenium.get('%s%s' % (self.live_server_url, '/'))
         find_by_css = self.selenium.find_element_by_css_selector
         login_modal = find_by_css("#loginModal")
         login_modal_close_button = find_by_css("#loginModal .close")

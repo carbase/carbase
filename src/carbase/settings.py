@@ -200,3 +200,5 @@ WKHTMLTOPDF_CMD = get_secret('WKHTMLTOPDF_CMD')
 
 CELERY_RESULT_BACKEND = 'django-db'
 CELERY_BROKER_URL = 'amqp://guest:guest@localhost//'
+
+MONGO_URL = get_secret('MONGO_URL')

@@ -10,7 +10,11 @@ from django.test import Client
 from selenium.webdriver.firefox.webdriver import WebDriver
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.common.keys import Keys
-from cars.models import Car, Fine, Tax, Reregistration
+from cars.models import Car, Fine, Tax, Reregistration, Registration
+from controller.models import Center, Inspector
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 
 class CarsTestCase(StaticLiveServerTestCase):
@@ -42,7 +46,9 @@ class CarsTestCase(StaticLiveServerTestCase):
         cls.selenium.quit()
         super(CarsTestCase, cls).tearDownClass()
 
-    def car_page(self):
+    def test_car_page(self):
+        self.car1.save()
+        self.car2.save()
         self.selenium.get('%s%s' % (self.live_server_url, '/'))
         self.selenium.add_cookie({'name': 'sessionid', 'value': self.get_seller_sessionid(), 'path': '/'})
         self.selenium.get('%s%s' % (self.live_server_url, '/cars/'))
@@ -241,7 +247,7 @@ class CarsTestCase(StaticLiveServerTestCase):
         car2_dereg_modal.send_keys(Keys.ESCAPE)
         time.sleep(1)
 
-    def reregistration_page(self):
+    def test_reregistration_page(self):
         self.car1.save()
         self.car2.save()
         self.selenium.get('%s%s' % (self.live_server_url, '/'))
@@ -329,7 +335,7 @@ class CarsTestCase(StaticLiveServerTestCase):
         self.assertFalse(find_by_css('.step_4_body').is_displayed())
 
         find_by_css('#reregistrationStep2SubmitButton').click()
-        time.sleep(2)
+        time.sleep(3)
 
         self.assertIn('complete', find_by_css('.step_1').get_attribute('class'))
         self.assertIn('complete', find_by_css('.step_2').get_attribute('class'))
@@ -384,7 +390,28 @@ class CarsTestCase(StaticLiveServerTestCase):
             'Забронируйте удобное для вас время осмотра ТС на территории спецЦОНа:'
         )
 
-    def all_payments(self):
+        center = Center.objects.get(id=1)
+        user_allower = User.objects.create(username='all123456')
+        user_allower.set_password('password123')
+        user_allower.save()
+        user_revisor = User.objects.create(username='rev123456')
+        user_revisor.set_password('password123')
+        user_revisor.save()
+        user_admin = User.objects.create(username='adm123456')
+        user_admin.set_password('password123')
+        user_admin.save()
+        controller_allower = Inspector.objects.create(user=user_allower, center=center)
+        controller_revisor = Inspector.objects.create(user=user_revisor, center=center)
+        controller_admin = Inspector.objects.create(user=user_admin, center=center)
+        time.sleep(1)
+
+        self.selenium.get('%s%s' % (self.live_server_url, '/controller'))
+        find_by_css('#loginUsername').send_keys(controller_allower.user.username)
+        find_by_css('#loginPassword').send_keys('password123')
+        find_by_css('[value="Войти"]').click()
+        time.sleep(1)
+
+    def test_all_payments(self):
         self.car1.save()
         self.car2.save()
 
@@ -398,7 +425,6 @@ class CarsTestCase(StaticLiveServerTestCase):
         self.selenium.get('%s%s' % (self.live_server_url, '/'))
         self.selenium.add_cookie({'name': 'sessionid', 'value': self.get_seller_sessionid(), 'path': '/'})
         self.selenium.get('%s%s' % (self.live_server_url, '/cars'))
-        time.sleep(1000)
 
         car1_panel = find_by_id('carPanel' + str(self.car1.id))
 
@@ -432,7 +458,7 @@ class CarsTestCase(StaticLiveServerTestCase):
         self.assertFalse(car1_modal.find_elements_by_class_name('step_1')[0].is_displayed())
         self.assertTrue(car1_modal.find_elements_by_class_name('step_2')[0].is_displayed())
 
-    def deregistration_page(self):
+    def test_deregistration_page(self):
         pass
 
     def test_registration_page(self):
@@ -444,26 +470,122 @@ class CarsTestCase(StaticLiveServerTestCase):
         self.selenium.add_cookie({'name': 'sessionid', 'value': self.get_seller_sessionid(), 'path': '/'})
         self.selenium.add_cookie({'name': 'enjoyhint_cars', 'value': '1', 'path': '/'})
         self.selenium.get('%s%s' % (self.live_server_url, '/cars'))
+
         find_by_css('.new_reg_car_button').click()
-        time.sleep(1)
+        time.sleep(2)
         self.assertTrue(find_by_css('#registrationModal').is_displayed())
         self.selenium.get('%s%s' % (self.live_server_url, '/cars/registration'))
 
         self.assertIn('active', find_by_css('.step_1').get_attribute('class'))
         self.assertIn('disabled', find_by_css('.step_2').get_attribute('class'))
+        self.assertIn('disabled', find_by_css('.step_3').get_attribute('class'))
+        self.assertIn('disabled', find_by_css('.step_4').get_attribute('class'))
+        self.assertIn('disabled', find_by_css('.step_5').get_attribute('class'))
         self.assertTrue(find_by_css('.step_1_body').is_displayed())
         self.assertFalse(find_by_css('.step_2_body').is_displayed())
+        self.assertFalse(find_by_css('.step_3_body').is_displayed())
+        self.assertFalse(find_by_css('.step_4_body').is_displayed())
+        self.assertFalse(find_by_css('.step_5_body').is_displayed())
 
         find_by_css('#newRegistrationVinCode').send_keys('1234567891011')
         find_by_css('#NewRegistrationVinCodeButton').click()
-        time.sleep(1)
+        time.sleep(2)
 
         self.assertIn('complete', find_by_css('.step_1').get_attribute('class'))
         self.assertIn('active', find_by_css('.step_2').get_attribute('class'))
+        self.assertIn('disabled', find_by_css('.step_3').get_attribute('class'))
+        self.assertIn('disabled', find_by_css('.step_4').get_attribute('class'))
+        self.assertIn('disabled', find_by_css('.step_5').get_attribute('class'))
         self.assertFalse(find_by_css('.step_1_body').is_displayed())
         self.assertTrue(find_by_css('.step_2_body').is_displayed())
+        self.assertFalse(find_by_css('.step_3_body').is_displayed())
+        self.assertFalse(find_by_css('.step_4_body').is_displayed())
+        self.assertFalse(find_by_css('.step_5_body').is_displayed())
 
         # test_path = os.path.join(settings.BASE_DIR, 'apps', 'cars', 'test_xmls', 'login.xml')
         # find_by_css('input[type="file"]').send_keys(test_path)
+        find_by_css('.send-documents-button').click()
+        time.sleep(2)
 
-        time.sleep(1000)
+        self.assertIn('complete', find_by_css('.step_1').get_attribute('class'))
+        self.assertIn('complete', find_by_css('.step_2').get_attribute('class'))
+        self.assertIn('active', find_by_css('.step_3').get_attribute('class'))
+        self.assertIn('disabled', find_by_css('.step_4').get_attribute('class'))
+        self.assertIn('disabled', find_by_css('.step_5').get_attribute('class'))
+        self.assertFalse(find_by_css('.step_1_body').is_displayed())
+        self.assertFalse(find_by_css('.step_2_body').is_displayed())
+        self.assertTrue(find_by_css('.step_3_body').is_displayed())
+        self.assertFalse(find_by_css('.step_4_body').is_displayed())
+        self.assertFalse(find_by_css('.step_5_body').is_displayed())
+
+        reg_id = find_by_css('#registrationStep3SubmitButton').get_attribute("data-regid")
+
+        find_by_css('#registrationStep3SubmitButton').click()
+        time.sleep(4)
+
+        self.assertIn('complete', find_by_css('.step_1').get_attribute('class'))
+        self.assertIn('complete', find_by_css('.step_2').get_attribute('class'))
+        self.assertIn('complete', find_by_css('.step_3').get_attribute('class'))
+        self.assertIn('active', find_by_css('.step_4').get_attribute('class'))
+        self.assertIn('disabled', find_by_css('.step_5').get_attribute('class'))
+        self.assertFalse(find_by_css('.step_1_body').is_displayed())
+        self.assertFalse(find_by_css('.step_2_body').is_displayed())
+        self.assertFalse(find_by_css('.step_3_body').is_displayed())
+        self.assertTrue(find_by_css('.step_4_body').is_displayed())
+        self.assertFalse(find_by_css('.step_5_body').is_displayed())
+
+        registration = Registration.objects.get(id=reg_id)
+        self.assertEqual(registration.car_vin_code, '1234567891011')
+        registration.is_paid = True
+        registration.save()
+        time.sleep(1)
+
+        self.selenium.get('%s%s' % (self.live_server_url, '/cars/registration'))
+        time.sleep(1)
+
+        self.assertIn('complete', find_by_css('.step_1').get_attribute('class'))
+        self.assertIn('complete', find_by_css('.step_2').get_attribute('class'))
+        self.assertIn('complete', find_by_css('.step_3').get_attribute('class'))
+        self.assertIn('complete', find_by_css('.step_4').get_attribute('class'))
+        self.assertIn('active', find_by_css('.step_5').get_attribute('class'))
+        self.assertFalse(find_by_css('.step_1_body').is_displayed())
+        self.assertFalse(find_by_css('.step_2_body').is_displayed())
+        self.assertFalse(find_by_css('.step_3_body').is_displayed())
+        self.assertFalse(find_by_css('.step_4_body').is_displayed())
+        self.assertTrue(find_by_css('.step_5_body').is_displayed())
+
+        self.assertEqual(
+            find_by_css('.step_5_body p').text,
+            'Забронируйте удобное для вас время осмотра ТС на территории спецЦОНа:'
+        )
+
+        self.selenium.execute_script('$(".datepicker").val("10 Август 2017")')
+        self.selenium.execute_script('$("#inspectionDateInput").val("2017-08-10")')
+        find_by_css('.reserve-time-button').click()
+        time.sleep(1)
+
+        self.assertNotEqual(
+            find_by_css('.step_5_body p').text,
+            'Забронируйте удобное для вас время осмотра ТС на территории спецЦОНа:'
+        )
+
+        center = Center.objects.get(id=1)
+        user_allower = User.objects.create(username='all123456')
+        user_allower.set_password('password123')
+        user_allower.save()
+        user_revisor = User.objects.create(username='rev123456')
+        user_revisor.set_password('password123')
+        user_revisor.save()
+        user_admin = User.objects.create(username='adm123456')
+        user_admin.set_password('password123')
+        user_admin.save()
+        controller_allower = Inspector.objects.create(user=user_allower, center=center)
+        controller_revisor = Inspector.objects.create(user=user_revisor, center=center)
+        controller_admin = Inspector.objects.create(user=user_admin, center=center)
+        time.sleep(1)
+
+        self.selenium.get('%s%s' % (self.live_server_url, '/controller'))
+        find_by_css('#loginUsername').send_keys(controller_allower.user.username)
+        find_by_css('#loginPassword').send_keys('password123')
+        find_by_css('[value="Войти"]').click()
+        time.sleep(1)

@@ -5,6 +5,7 @@ from bson import ObjectId
 import gridfs
 from pymongo import MongoClient
 
+from django.conf import settings
 from django.db.models import Q
 from django.http import JsonResponse, QueryDict, HttpResponse
 from django.shortcuts import render
@@ -45,7 +46,7 @@ class CarsView(View):
 @method_decorator(login_required, name='dispatch')
 class DocumentView(View):
     def get(self, request, doc_id):
-        mongo_client = MongoClient()
+        mongo_client = MongoClient(settings.MONGO_URL)
         mongo_fs = gridfs.GridFS(mongo_client.documents)
         doc = mongo_fs.get(ObjectId(doc_id))
         response = HttpResponse(doc.read(), content_type=mimetypes.guess_type(doc.filename))
