@@ -1,3 +1,5 @@
+import datetime
+
 from django.db import models
 from django.contrib.auth.models import User
 from cars.models import Reregistration, Deregistration, Registration
@@ -45,6 +47,7 @@ class Inspection(models.Model):
     center = models.ForeignKey(Center, null=True)
     date = models.DateField(null=True)
     time_range = models.CharField(max_length=11, null=True)
+    time = models.CharField(max_length=6, null=True)
     allower = models.ForeignKey(Inspector, null=True, related_name='allower')
     is_prelimenary_success = models.NullBooleanField(null=True)
     prelimenary_result = models.TextField(null=True, blank=True)
@@ -64,3 +67,21 @@ class Inspection(models.Model):
             return self.reregistration
         elif self.deregistration:
             return self.reregistration
+
+    def save(self, *args, **kwargs):
+        if self.time_range:
+            times_by_range = {
+                '9:00-12:00': ['9:00', '9:20', '9:40', '10:00', '10:20', '10:40', '11:00', '11:20', '11:40'],
+                '12:00-15:00': ['12:00', '12:20', '12:40', '13:00', '13:20', '13:40', '14:00', '14:20', '14:40'],
+                '15:00-18:00': ['15:00', '15:20', '15:40', '16:00', '16:20', '16:40', '17:00', '17:20', '17:40'],
+            }
+            ins_date = datetime.datetime.strptime(self.date, "%Y-%m-%d")
+            other_inspections = Inspection.objects.filter(center=self.center).exclude(pk=self.pk)
+            other_inspections.filter(date__year=ins_date.year, date__month=ins_date.month, date__day=ins_date.day)
+            for other_ins in other_inspections:
+                times_by_range[other_ins.time_range].remove(other_ins.time)
+            if len(times_by_range[self.time_range]):
+                self.time = times_by_range[self.time_range][0]
+            else:
+                raise ValueError('Нет свободного времени')
+        super(Inspection, self).save(*args, **kwargs)

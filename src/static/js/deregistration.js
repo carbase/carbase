@@ -94,7 +94,7 @@ $('.deregistration-time-button').on('click', function() {
       var inspection_place = $('#deregistrationFrame' + car_id + ' .inspection-place-input option:selected').text();
       var inspection_date = $('#deregistrationFrame' + car_id + ' .datepicker.form-control').val()
       var inspection_time = $('#deregistrationFrame' + car_id + ' .inspection-time-input').val()
-      $('#deregistrationFrame' + car_id + ' .step_2_body p:first-child').text('Ваша бронь: ' + inspection_place + ', ' + inspection_date + ', ' + inspection_time )
+      $('#deregistrationFrame' + car_id + ' .step_2_body p:first-child').text('Ваша бронь: ' + inspection_place + ', ' + inspection_date + ', ' + resp.time )
       if (!$('#deregistrationFrame' + car_id + '  .step_2_body p:nth-child(2)').text().trim().startsWith('Вы можете изменить бронь:')) {
         $('#deregistrationModal' + resp.car_id + ' .step_2_body p:nth-child(2)').prepend('Вы можете изменить бронь: ')
       }

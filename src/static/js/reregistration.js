@@ -247,7 +247,7 @@ $('.reserve-time-button').on('click', function() {
       var inspection_place = $('#inspectionPlaceInput'+ resp.reregistration_id + ' option:selected').text();
       var inspection_date = $('#reregistrationFrameBuyer' + resp.reregistration_id + ' .datepicker.form-control').val()
       var inspection_time = $('#inspectionTimeInput'+ resp.reregistration_id).val()
-      $('#reregistrationFrameBuyer' + resp.reregistration_id + ' .step_4_body p:first-child').text('Ваша бронь: ' + inspection_place + ', ' + inspection_date + ', ' + inspection_time )
+      $('#reregistrationFrameBuyer' + resp.reregistration_id + ' .step_4_body p:first-child').text('Ваша бронь: ' + inspection_place + ', ' + inspection_date + ', ' + resp.time )
       if (!$('#reregistrationFrameBuyer' + resp.reregistration_id + ' .step_4_body p:nth-child(2)').text().trim().startsWith('Вы можете изменить бронь:')) {
         $('#reregistrationFrameBuyer' + resp.reregistration_id + ' .step_4_body p:nth-child(2)').prepend('Вы можете изменить бронь: ')
       }

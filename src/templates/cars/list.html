@@ -134,7 +134,7 @@
                 </li>
                 {% if not car|is_all_taxes_paid or not car|is_all_fines_paid %}
                   <li class="list-group-item car-action">
-                    <label type="button" class="btn btn-default btn-block pay-all-button {% if car|is_all_fines_paid or car|is_all_taxes_paid %}disabled{% endif %}" {% if not car|is_all_fines_paid and not car|is_all_taxes_paid %}data-toggle="modal" data-target="#payAllModal{{car.id}}"{% endif %}>
+                    <label type="button" class="btn btn-default btn-block pay-all-button {% if car|is_all_fines_paid and car|is_all_taxes_paid %}disabled{% endif %}" {% if not car|is_all_fines_paid or not car|is_all_taxes_paid %}data-toggle="modal" data-target="#payAllModal{{car.id}}"{% endif %}>
                       Оплатить задолжность
                     </label>
                     <div id="payAllModal{{car.id}}" class="modal fade payAllModal" tabindex="-1" role="dialog">

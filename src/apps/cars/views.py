@@ -103,6 +103,10 @@ class RegistrationView(View):
             inspection.center_id = request.PUT.get('inspectionCenterId')
             inspection.date = request.PUT.get('inspectionDate')
             inspection.save()
+            return JsonResponse({
+                'registration_id': registration.id,
+                'time': inspection.time
+            })
         if request.PUT.get('number'):
             number = request.PUT.get('number')
             if number != 'RANDOM':
@@ -164,6 +168,10 @@ class DeregistrationView(View):
             inspection.center_id = request.PUT.get('inspectionCenterId')
             inspection.date = request.PUT.get('inspectionDate')
             inspection.save()
+            return JsonResponse({
+                'deregistration_id': deregistration.id,
+                'time': inspection.time
+            })
         return JsonResponse({'deregistration_id': deregistration.id, 'car_id': deregistration.car.id})
 
 
@@ -256,6 +264,10 @@ class ReregistrationView(View):
             inspection.center_id = request.PUT.get('inspectionCenterId')
             inspection.date = request.PUT.get('inspectionDate')
             inspection.save()
+            return JsonResponse({
+                'reregistration_id': reregistration.id,
+                'time': inspection.time
+            })
         if request.PUT.get('number'):
             number = request.PUT.get('number')
             if number != 'RANDOM':
