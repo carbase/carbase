@@ -1,9 +1,15 @@
 import xml.etree.ElementTree as ET
 import mimetypes
+import xml.etree.cElementTree as ET
+from datetime import datetime
 
 from bson import ObjectId
 import gridfs
 from pymongo import MongoClient
+
+from cryptography import x509
+from cryptography.hazmat.backends import default_backend
+from cryptography.x509 import NameOID
 
 from django.conf import settings
 from django.db.models import Q
@@ -12,6 +18,9 @@ from django.shortcuts import render
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
+
+
+from pki.models import RevokedCertificate
 
 from .models import Reregistration, Car, Deregistration, Registration
 from .models import Agreement, Email, AgreementTemplate, Sign
@@ -237,11 +246,25 @@ class ReregistrationView(View):
         request.PUT = QueryDict(request.body)
         reregistration_id = request.PUT.get('reregistrationId')
         reregistration = Reregistration.objects.get(id=reregistration_id)
+        user_sn = request.session.get('user_serialNumber')
+        if request.session.get('user_organizationalUnitName'):
+            user_sn = request.session.get('user_organizationalUnitName')
+        if not (user_sn == reregistration.buyer or user_sn == reregistration.seller):
+            return JsonResponse({'result': 'error'})
+
         if request.PUT.get('seller_sign'):
+            try:
+                verify_sign(request)
+            except ZeroDivisionError:
+                return JsonResponse({'result': 'error'})
             reregistration.seller_sign = self.get_sign(request.PUT.get('seller_sign'))
             reregistration.amount = request.PUT.get('amount')
             self.save_sign(reregistration.agreement, request.PUT.get('seller_sign'))
         if request.PUT.get('buyer_sign'):
+            try:
+                verify_sign(request)
+            except ValueError:
+                return JsonResponse({'result': 'error'})
             reregistration.buyer_sign = self.get_sign(request.PUT.get('buyer_sign'))
             self.save_sign(reregistration.agreement, request.PUT.get('buyer_sign'))
         if request.PUT.get('is_tax_paid'):
@@ -293,3 +316,33 @@ class ReregistrationView(View):
             return email_obj.email
         except Email.DoesNotExist:
             pass
+
+def verify_sign(request):
+    sign = request.PUT.get('seller_sign', request.PUT.get('buyer_sign'))
+    if not sign:
+        raise ValueError('Invalid certificate')
+    user_sn = request.session.get('user_serialNumber')
+    if request.session.get('user_organizationalUnitName'):
+        user_sn = request.session.get('user_organizationalUnitName')
+    try:
+        root = ET.fromstring(sign)
+    except ET.ParseError as err:
+        raise ValueError()
+    pem = '-----BEGIN CERTIFICATE-----\n'
+    pem += list(root.iter('{http://www.w3.org/2000/09/xmldsig#}X509Certificate'))[0].text.strip()
+    pem += '\n-----END CERTIFICATE-----'
+
+    cert = x509.load_pem_x509_certificate(pem.encode('utf-8'), default_backend())
+    certIssuerCN = cert.issuer.get_attributes_for_oid(NameOID.COMMON_NAME)[0].value
+    revocked_cert_count = RevokedCertificate.objects.filter(serial_number=cert.serial_number).count()
+    if (revocked_cert_count):
+        raise ValueError('Сертификат отозван центром сертификации')
+    if certIssuerCN != 'ҰЛТТЫҚ КУӘЛАНДЫРУШЫ ОРТАЛЫҚ (RSA)':
+        raise ValueError('Ошибка проверки центра сертификации')
+    if not (datetime.now() > cert.not_valid_before and datetime.now() < cert.not_valid_after):
+        raise ValueError('Время действия сертификата истекло')
+    for cert_attr in cert.subject:
+        if cert_attr.value == user_sn:
+            break
+    else:
+        raise ValueError()
