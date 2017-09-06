@@ -79,8 +79,8 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 
     'debug_toolbar.middleware.DebugToolbarMiddleware',
-    'req_log.middleware.log_middleware',
     'req_log.middleware.anti_brut_middleware',
+    'req_log.middleware.log_middleware',
 ]
 
 
