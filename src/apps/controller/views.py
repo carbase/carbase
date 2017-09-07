@@ -1,3 +1,10 @@
+from cryptography import x509
+from cryptography.hazmat.backends import default_backend
+from cryptography.x509 import NameOID
+
+from datetime import datetime
+import xml.etree.cElementTree as ET
+
 from django.contrib import auth
 from django.db.models import Q
 from django.http import JsonResponse, QueryDict
@@ -5,7 +12,8 @@ from django.shortcuts import render, redirect
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
-from .models import Inspector, Inspection
+from .models import Inspector, Inspection, Center
+from pki.models import RevokedCertificate
 
 
 class IndexView(View):
@@ -46,13 +54,39 @@ class IndexView(View):
 
 
 def login(request):
-    ''' Авторизация по логину паролю '''
-    username = request.POST.get('username')
-    password = request.POST.get('password')
-    user = auth.authenticate(request, username=username, password=password)
-    if user is not None:
+    ''' Авторизация по ЭЦП '''
+    signed_xml = request.POST.get('sign', '')
+    try:
+        # Парсим блок с информации о сертификате
+        root = ET.fromstring(signed_xml)
+        pem = '-----BEGIN CERTIFICATE-----\n'
+        pem += list(root.iter('{http://www.w3.org/2000/09/xmldsig#}X509Certificate'))[0].text.strip()
+        pem += '\n-----END CERTIFICATE-----'
+        cert = x509.load_pem_x509_certificate(pem.encode('utf-8'), default_backend())
+        certIssuerCN = cert.issuer.get_attributes_for_oid(NameOID.COMMON_NAME)[0].value
+        # Проверяем не отозван ли сертификат, кто выдал сертификат и время действия сертификата
+        revocked_cert_count = RevokedCertificate.objects.filter(serial_number=cert.serial_number).count()
+        if (revocked_cert_count):
+            raise ValueError('Сертификат отозван центром сертификации')
+        if certIssuerCN != 'ҰЛТТЫҚ КУӘЛАНДЫРУШЫ ОРТАЛЫҚ (RSA)':
+            raise ValueError('Ошибка проверки центра сертификации')
+        if not (datetime.now() > cert.not_valid_before and datetime.now() < cert.not_valid_after):
+            raise ValueError('Время действия сертификата истекло')
+        user = None
+        for cert_attr in cert.subject:
+            if cert_attr.oid._name == 'serialNumber':
+                user = auth.models.User.objects.get_or_create(username=cert_attr.value)[0]
+                break
+        else:
+            raise ValueError('Ошибка проверки сертификата')
+        center = Center.objects.get(id=1)
+        Inspector.objects.get_or_create(user=user, center=center, role='all')
         auth.login(request, user)
-    return redirect('/controller')
+    except ET.ParseError as err:
+        return JsonResponse({'status': 'error', 'error_text': 'Ошибка проверки сертификата'})
+    except ValueError as err:
+        return JsonResponse({'status': 'error', 'error_text': err.args[0]})
+    return JsonResponse({'status': 'success'})
 
 
 def logout(request):

@@ -1,5 +1,6 @@
 import os
 import time
+import json
 from urllib.parse import urlencode
 
 # from django.core.serializers import serialize
@@ -46,11 +47,12 @@ class CarsTestCase(StaticLiveServerTestCase):
         cls.selenium.quit()
         super(CarsTestCase, cls).tearDownClass()
 
-    def test_car_page(self):
+    def car_page(self):
         self.car1.save()
         self.car2.save()
         self.selenium.get('%s%s' % (self.live_server_url, '/'))
         self.selenium.add_cookie({'name': 'sessionid', 'value': self.get_seller_sessionid(), 'path': '/'})
+        self.selenium.add_cookie({'name': 'djdt', 'value': 'hide', 'path': '/'})
         self.selenium.get('%s%s' % (self.live_server_url, '/cars/'))
         find_by_css = self.selenium.find_element_by_css_selector
         navbar_right_username = find_by_css('.navbar-right .dropdown-toggle')
@@ -252,7 +254,9 @@ class CarsTestCase(StaticLiveServerTestCase):
         self.car2.save()
         self.selenium.get('%s%s' % (self.live_server_url, '/'))
         self.selenium.add_cookie({'name': 'sessionid', 'value': self.get_seller_sessionid(), 'path': '/'})
+        self.selenium.add_cookie({'name': 'djdt', 'value': 'hide', 'path': '/'})
         self.selenium.get('%s%s' % (self.live_server_url, '/cars/reregistration?side=seller&car=' + str(self.car1.id)))
+
         find_by_id = self.selenium.find_element_by_id
         find_by_css = self.selenium.find_element_by_css_selector
 
@@ -288,8 +292,8 @@ class CarsTestCase(StaticLiveServerTestCase):
             'application/x-www-form-urlencoded'
         )
         self.assertEqual(response.status_code, 200)
+        self.assertNotEqual(json.loads(response.content.decode()).get('result'), 'error')
 
-        time.sleep(2)
         self.selenium.get('%s%s' % (self.live_server_url, '/cars/reregistration?side=seller&car=' + str(self.car1.id)))
 
         self.assertIn('complete', find_by_css('.step_1').get_attribute('class'))
@@ -424,6 +428,7 @@ class CarsTestCase(StaticLiveServerTestCase):
 
         self.selenium.get('%s%s' % (self.live_server_url, '/'))
         self.selenium.add_cookie({'name': 'sessionid', 'value': self.get_seller_sessionid(), 'path': '/'})
+        self.selenium.add_cookie({'name': 'djdt', 'value': 'hide', 'path': '/'})
         self.selenium.get('%s%s' % (self.live_server_url, '/cars'))
 
         car1_panel = find_by_id('carPanel' + str(self.car1.id))
@@ -469,6 +474,7 @@ class CarsTestCase(StaticLiveServerTestCase):
         self.selenium.get('%s%s' % (self.live_server_url, '/'))
         self.selenium.add_cookie({'name': 'sessionid', 'value': self.get_seller_sessionid(), 'path': '/'})
         self.selenium.add_cookie({'name': 'enjoyhint_cars', 'value': '1', 'path': '/'})
+        self.selenium.add_cookie({'name': 'djdt', 'value': 'hide', 'path': '/'})
         self.selenium.get('%s%s' % (self.live_server_url, '/cars'))
 
         find_by_css('.new_reg_car_button').click()

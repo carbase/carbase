@@ -19,3 +19,8 @@
 .filter-group {
   padding-left: 15px;
 }
+
+#pkiLoginError {
+  margin-bottom: 20px;
+  display: none;
+}

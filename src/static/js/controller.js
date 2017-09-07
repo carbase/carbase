@@ -192,3 +192,70 @@ $('.filter-group button').on('click', function() {
     })
   }
 })
+
+$('#pkiLoginButton').on('click', function() {
+  var storagePath = ''
+  var password = ''
+  var keyAlias = ''
+  var webSocket = new WebSocket('wss://127.0.0.1:13579/')
+  var xmlToSign = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><login>' + Date.now() + '</login>'
+
+  webSocket.onopen = function () {
+    webSocket.send('{"method":"browseKeyStore","args":["PKCS12","P12",""]}')
+  }
+
+  webSocket.onmessage = function (event) {
+    var eventData = JSON.parse(event.data)
+    if (eventData.result.endsWith && eventData.result.endsWith('.p12')) {
+      storagePath = eventData.result
+      var passwordPrompt = bootbox.prompt({
+        title: "Введите пароль",
+        inputType: 'password',
+        buttons: {
+          confirm: {
+            label: 'Ok',
+            className: 'btn-success'
+          },
+          cancel: {
+            label: 'Cancel',
+            className: 'hidden',
+          }
+        },
+        callback: function (result) {
+          password = result
+          webSocket.send(JSON.stringify({
+            'method': 'getKeys', 'args': ['PKCS12', storagePath, password, 'AUTH']
+          }))
+        }
+      });
+    }
+    if (eventData.result.startsWith && eventData.result.startsWith('RSA|')) {
+      keyAlias = eventData.result.split('|')[3]
+      webSocket.send(JSON.stringify({
+        'method': 'signXml',
+        'args': [
+          'PKCS12',
+          storagePath,
+          keyAlias,
+          password,
+          xmlToSign
+        ]
+      }))
+    }
+    if (eventData.result.startsWith && eventData.result.startsWith('<?xml version="1.0"')) {
+      data = {
+        'sign': eventData.result,
+        'csrfmiddlewaretoken': $('[name="csrfmiddlewaretoken"]').val(),
+      }
+      $.post('/controller/login/', data, function(resp) {
+        console.log(resp)
+        if (resp.status == 'success') {
+          location.reload()
+        } else if (resp.status == 'error') {
+          $('#pkiLoginError').text(resp.error_text)
+          $('#pkiLoginError').show()
+        }
+      })
+    }
+  }
+})

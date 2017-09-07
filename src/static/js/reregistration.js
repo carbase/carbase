@@ -109,6 +109,7 @@ $('.agreementSign .sign-button').on('click', function() {
     if (eventData.result.startsWith && eventData.result.startsWith('<?xml version="1.0"')) {
       if (side == 'seller') {
         data['seller_sign'] = eventData.result
+        console.log(eventData.result)
         data['amount'] = $('#reregistrationAgreement' + data.reregistrationId + 'amount').val()
       }
       if (side == 'buyer') {

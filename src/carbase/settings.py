@@ -31,6 +31,7 @@ SECRET_KEY = get_secret('SECRET_KEY')
 CSRF_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_SECURE = not DEBUG
+SESSION_COOKIE_AGE = 24 * 60 * 60
 
 
 ALLOWED_HOSTS = get_secret('ALLOWED_HOSTS').split()
@@ -78,7 +79,8 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 
     'debug_toolbar.middleware.DebugToolbarMiddleware',
-    'req_log.middleware.log_middleware'
+    'req_log.middleware.anti_brut_middleware',
+    'req_log.middleware.log_middleware',
 ]
 
 
@@ -120,6 +122,9 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
+    {
+        'NAME': 'carbase.password_validators.SpecCharValidator',
+    }
 ]
 
 
