@@ -47,11 +47,12 @@ class CarsTestCase(StaticLiveServerTestCase):
         cls.selenium.quit()
         super(CarsTestCase, cls).tearDownClass()
 
-    def car_page(self):
+    def test_car_page(self):
         self.car1.save()
         self.car2.save()
         self.selenium.get('%s%s' % (self.live_server_url, '/'))
         self.selenium.add_cookie({'name': 'sessionid', 'value': self.get_seller_sessionid(), 'path': '/'})
+        self.selenium.add_cookie({'name': 'enjoyhint_cars', 'value': '1', 'path': '/'})
         self.selenium.add_cookie({'name': 'djdt', 'value': 'hide', 'path': '/'})
         self.selenium.get('%s%s' % (self.live_server_url, '/cars/'))
         find_by_css = self.selenium.find_element_by_css_selector
@@ -254,6 +255,7 @@ class CarsTestCase(StaticLiveServerTestCase):
         self.car2.save()
         self.selenium.get('%s%s' % (self.live_server_url, '/'))
         self.selenium.add_cookie({'name': 'sessionid', 'value': self.get_seller_sessionid(), 'path': '/'})
+        self.selenium.add_cookie({'name': 'enjoyhint_cars', 'value': '1', 'path': '/'})
         self.selenium.add_cookie({'name': 'djdt', 'value': 'hide', 'path': '/'})
         self.selenium.get('%s%s' % (self.live_server_url, '/cars/reregistration?side=seller&car=' + str(self.car1.id)))
 
@@ -428,6 +430,7 @@ class CarsTestCase(StaticLiveServerTestCase):
 
         self.selenium.get('%s%s' % (self.live_server_url, '/'))
         self.selenium.add_cookie({'name': 'sessionid', 'value': self.get_seller_sessionid(), 'path': '/'})
+        self.selenium.add_cookie({'name': 'enjoyhint_cars', 'value': '1', 'path': '/'})
         self.selenium.add_cookie({'name': 'djdt', 'value': 'hide', 'path': '/'})
         self.selenium.get('%s%s' % (self.live_server_url, '/cars'))
 
@@ -493,9 +496,16 @@ class CarsTestCase(StaticLiveServerTestCase):
         self.assertFalse(find_by_css('.step_4_body').is_displayed())
         self.assertFalse(find_by_css('.step_5_body').is_displayed())
 
-        find_by_css('#newRegistrationVinCode').send_keys('1234567891011')
-        find_by_css('#NewRegistrationVinCodeButton').click()
-        time.sleep(2)
+        find_by_css('#newRegistrationVinCode').send_keys('1FADP3L95DL207700')
+        find_by_css('#getVinCodeInformation').click()
+        time.sleep(5)
+
+        self.assertEqual(find_by_css('#newRegistrationManufacturer').get_attribute("value"), 'FORD')
+        self.assertEqual(find_by_css('#newRegistrationModel').get_attribute("value"), 'Focus')
+        self.assertEqual(find_by_css('#newRegistrationYear').get_attribute("value"), '2013')
+
+        find_by_css('#newRegistrationVinCodeButton').click()
+        time.sleep(5)
 
         self.assertIn('complete', find_by_css('.step_1').get_attribute('class'))
         self.assertIn('active', find_by_css('.step_2').get_attribute('class'))
@@ -507,6 +517,11 @@ class CarsTestCase(StaticLiveServerTestCase):
         self.assertFalse(find_by_css('.step_3_body').is_displayed())
         self.assertFalse(find_by_css('.step_4_body').is_displayed())
         self.assertFalse(find_by_css('.step_5_body').is_displayed())
+
+        self.assertEqual(find_by_css('#newRegistrationForm input[name="manufacturer"]').get_attribute("value"), 'FORD')
+        self.assertEqual(find_by_css('#newRegistrationForm input[name="model"]').get_attribute("value"), 'Focus')
+        self.assertEqual(find_by_css('#newRegistrationForm input[name="year"]').get_attribute("value"), '2013')
+        self.assertEqual(find_by_css('#newRegistrationForm input[name="vin_code"]').get_attribute("value"), '1FADP3L95DL207700')
 
         # test_path = os.path.join(settings.BASE_DIR, 'apps', 'cars', 'test_xmls', 'login.xml')
         # find_by_css('input[type="file"]').send_keys(test_path)
@@ -541,7 +556,11 @@ class CarsTestCase(StaticLiveServerTestCase):
         self.assertFalse(find_by_css('.step_5_body').is_displayed())
 
         registration = Registration.objects.get(id=reg_id)
-        self.assertEqual(registration.car_vin_code, '1234567891011')
+        self.assertEqual(registration.car.manufacturer, 'FORD')
+        self.assertEqual(registration.car.model, 'Focus')
+        self.assertEqual(registration.car.year, '2013')
+        self.assertEqual(registration.car.vin_code, '1FADP3L95DL207700')
+        self.assertEqual(registration.car_vin_code, '1FADP3L95DL207700')
         registration.is_paid = True
         registration.save()
         time.sleep(1)

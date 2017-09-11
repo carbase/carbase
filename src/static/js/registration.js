@@ -5,7 +5,20 @@ $(".datepicker").flatpickr({
   'altInput': true,
   'dateFormat': 'Y-m-j'
 });
-$('#NewRegistrationVinCodeButton').on('click', function() {
+
+$('#getVinCodeInformation').on('click', function() {
+  var vin_code = $('#newRegistrationVinCode').val()
+  $.get('https://vpic.nhtsa.dot.gov/api/vehicles/decodevinvalues/' + vin_code + '?format=json', function(resp) {
+    var info = resp.Results[0]
+    console.log(info)
+    $('#newRegistrationManufacturer').val(info.Make)
+    $('#newRegistrationModel').val(info.Model)
+    $('#newRegistrationYear').val(info.ModelYear)
+    $('.car-info').show()
+  })
+})
+
+$('#newRegistrationVinCodeButton').on('click', function() {
   var step_1_elem = $('.step_1')
   var step_1_progress = $('.step_1 .progress-bar')
   step_1_progress.one('transitionend', function() {
@@ -16,6 +29,9 @@ $('#NewRegistrationVinCodeButton').on('click', function() {
       var step_2_elem = $('.step_2')
       step_2_elem.removeClass('disabled')
       $('#newRegistrationForm input[name="vin_code"]').val($('#newRegistrationVinCode').val())
+      $('#newRegistrationForm input[name="manufacturer"]').val($('#newRegistrationManufacturer').val())
+      $('#newRegistrationForm input[name="model"]').val($('#newRegistrationModel').val())
+      $('#newRegistrationForm input[name="year"]').val($('#newRegistrationYear').val())
       $('.step_1_body').addClass('hidden')
       $('.step_2_body').removeClass('hidden')
     })

@@ -63,13 +63,32 @@
     <span class="input-group-addon">VIN-код ТС</span>
     <input type="text" class="form-control" id="newRegistrationVinCode">
     <span class="input-group-btn">
-      <button class="btn btn-default" id="NewRegistrationVinCodeButton">Отправить</button>
+      <button class="btn btn-default" id="getVinCodeInformation">Получить информацию по VIN-коду</button>
     </span>
+  </div>
+  <div class="car-info">
+    <div class="alert alert-warning" role="alert">Проверьте правильность введенных данных</div>
+    <div class="input-group">
+      <span class="input-group-addon">Производитель</span>
+      <input type="text" class="form-control" id="newRegistrationManufacturer">
+    </div>
+    <div class="input-group">
+      <span class="input-group-addon">Модель</span>
+      <input type="text" class="form-control" id="newRegistrationModel">
+    </div>
+    <div class="input-group">
+      <span class="input-group-addon">Год выпуска</span>
+      <input type="text" class="form-control" id="newRegistrationYear">
+    </div>
+    <button class="btn btn-success" id="newRegistrationVinCodeButton">Отправить</button>
   </div>
 </div>
 <div class="step_2_body hidden">
   <form id="newRegistrationForm">
     <input type="hidden" class="form-control" name="vin_code" type="text">
+    <input type="hidden" class="form-control" name="manufacturer" type="text">
+    <input type="hidden" class="form-control" name="model" type="text">
+    <input type="hidden" class="form-control" name="year" type="text">
     <label>
       <h3>
         Выберете документ подтверждающий право владения транспортным средством<br>

@@ -84,14 +84,18 @@ class RegistrationView(View):
 
     def post(self, request):
         vin_code = request.POST.get('vin_code')
+        manufacturer = request.POST.get('manufacturer')
+        model = request.POST.get('model')
+        year = request.POST.get('year')
         if request.session.get('user_organizationalUnitName'):
             user = request.session.get('user_organizationalUnitName')
         else:
             user = request.session.get('user_serialNumber')
+        car = Car.objects.create(model=model, manufacturer=manufacturer, year=year, vin_code=vin_code, user=user)
         try:
-            registration = Registration.objects.get(user=user, car_vin_code=vin_code)
+            registration = Registration.objects.get(user=user, car_vin_code=vin_code, car=car)
         except Registration.DoesNotExist:
-            registration = Registration.objects.create(user=user, car_vin_code=vin_code)
+            registration = Registration.objects.create(user=user, car_vin_code=vin_code, car=car)
         registration.upload_document(request.FILES.getlist('documents'))
         document_urls = registration.get_document_urls()
         return JsonResponse({'registration_id': registration.id, 'document_urls': document_urls})

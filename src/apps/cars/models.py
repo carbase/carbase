@@ -145,6 +145,7 @@ class Registration(models.Model):
     number = models.CharField(max_length=8, blank=True, default='')
     result = models.TextField()
     is_result_success = models.BooleanField(default=False)
+    car = models.ForeignKey(Car, null=True)
 
     def upload_document(self, files):
         for file in files:
